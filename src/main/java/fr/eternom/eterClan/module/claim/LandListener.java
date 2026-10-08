@@ -26,12 +26,15 @@ public class LandListener implements Listener {
 
     private final ClanSync sync;
     private final Messages messages;
+    /** Pas de terrain sur ce serveur : pas d'annonce en se déplaçant. */
+    private final boolean landEnabled;
     /** Dernier endroit annoncé à chaque joueur (clan:parcelle), pour ne parler que quand il change. */
     private final Map<UUID, String> last = new ConcurrentHashMap<>();
 
-    public LandListener(ClanSync sync, Messages messages) {
+    public LandListener(ClanSync sync, Messages messages, boolean landEnabled) {
         this.sync = sync;
         this.messages = messages;
+        this.landEnabled = landEnabled;
     }
 
     @EventHandler
@@ -46,8 +49,9 @@ public class LandListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
-        if (event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockZ() == event.getTo().getBlockZ()
-                && event.getFrom().getWorld() == event.getTo().getWorld()) {
+        boolean sameBlock = event.getFrom().getBlockX() == event.getTo().getBlockX()
+                && event.getFrom().getBlockZ() == event.getTo().getBlockZ() && event.getFrom().getWorld() == event.getTo().getWorld();
+        if (!landEnabled || sameBlock) {
             return;
         }
         Player player = event.getPlayer();

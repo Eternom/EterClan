@@ -43,6 +43,8 @@ public class ClaimService {
     private final Messages messages;
     private final Pricing pricing;
     private final List<String> worlds;
+    /** Terrain possible sur ce serveur (land.enabled : la survie, pas les lobbys ni les mondes ressources). */
+    private final boolean enabled;
 
     public ClaimService(JavaPlugin plugin, ClaimRepository claims, ZoneRepository zones, ClanRepository clans, ClanSync sync,
                         ClanService clanService, Messages messages, Pricing pricing) {
@@ -55,11 +57,16 @@ public class ClaimService {
         this.messages = messages;
         this.pricing = pricing;
         this.worlds = plugin.getConfig().getStringList("land.worlds");
+        this.enabled = plugin.getConfig().getBoolean("land.enabled", false);
     }
 
     public void claim(Player player) {
         clanService.clanWith(player, ClanPermission.CLAIM).ifPresent(clan -> {
             ChunkKey chunk = ChunkKey.of(player.getLocation());
+            if (!enabled) {
+                messages.send(player, "claim.disabled-here");
+                return;
+            }
             if (!worlds.isEmpty() && !worlds.contains(chunk.world())) {
                 messages.send(player, "claim.world-forbidden");
                 return;
@@ -186,6 +193,10 @@ public class ClaimService {
                 player.spawnParticle(Particle.DUST, new Location(world, x0 + 16, y, z0 + i), 1, dust);
             }
         }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public Pricing pricing() {

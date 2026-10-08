@@ -4,8 +4,11 @@
 # Une clé absente reprend le texte intégré au plugin : tu peux ne garder que les lignes que tu modifies.
 # Le préfixe des messages (« Core ») est commun à tous les plugins : EterLib/config.yml > language.prefix.
 
+# Badge qui remplace le grade (Tab, chat, pseudo) pour les membres d'un clan : <tag> = le tag du clan.
+badge: "<accent>[<tag>]</accent> "
+
 clan:
-  usage: "<info>Commandes : <accent>/clan</accent> (menu), create, invite, accept, leave, kick, transfer, disband, claim, unclaim, here, deposit, withdraw, give, take, interest, zone."
+  usage: "<info>Commandes : <accent>/clan</accent> (menu), create, invite, accept, leave, kick, transfer, disband, claim, unclaim, here, deposit, withdraw, give, take, interest, display, zone."
   help-no-clan: "<info>Tu n'as pas de clan. Crée le tien avec <accent>/clan create \\<nom> \\<TAG></accent>, ou accepte une invitation avec <accent>/clan accept</accent>."
   none: "<error>Tu n'as pas de clan : <accent>/clan create \\<nom> \\<TAG>"
   create-usage: "<error>Utilisation : <accent>/clan create \\<nom> \\<TAG></accent> (nom de 3 à 24 caractères, tag de 2 à 5 lettres ou chiffres)."
@@ -33,6 +36,9 @@ clan:
   disbanded: "<info>Le clan <accent><clan></accent> est dissous."
   disbanded-notice: "<error>Le clan <accent><clan></accent> a été dissous.</error> <info>Ton compte t'a été rendu."
   owner-has-all: "<error>Le chef a toutes les permissions."
+  display-rank: "<info>Tu affiches maintenant ton <accent>grade</accent> (Tab, chat, pseudo)."
+  display-clan: "<info>Tu affiches maintenant le tag de ton clan <accent>[<tag>]</accent> (Tab, chat, pseudo)."
+  display-staff: "<info>Choix enregistré, mais en tant que staff tu gardes toujours ton <accent>grade</accent>."
 
 bank:
   amount-invalid: "<error>Montant invalide."
@@ -50,6 +56,7 @@ bank:
 claim:
   denied: "<error>Tu n'as pas la permission ici : <accent><permission>"
   world-forbidden: "<error>On ne peut pas prendre de terrain dans ce monde."
+  disabled-here: "<error>On ne prend pas de terrain sur ce serveur."
   already-yours: "<error>Ce chunk est déjà à ton clan."
   taken: "<error>Ce chunk appartient déjà à un clan."
   not-adjacent: "<error>Ce chunk doit toucher le terrain de ton clan."
@@ -142,6 +149,9 @@ menu:
     account: "<info>Ton compte : <accent><amount></accent> <dark_gray>(à l'abri de la mort)"
     owner: "<success>● <info>Chef du clan"
     member: "<info>● Membre"
+    display-rank: "<dark_gray>▸ <info>Affiché : ton <accent>grade"
+    display-clan: "<dark_gray>▸ <info>Affiché : <accent>[<tag>]"
+    display-click: "<accent>Clic</accent> <info>: afficher ton grade ou le tag du clan"
   info:
     name: "<accent><clan> <dark_gray>[<tag>]"
     members: "<dark_gray>▸ <info>Membres : <accent><count>"

@@ -46,6 +46,7 @@ public class ClanRepository {
                 Column.of("joined_at", Column.Type.LONG).notNull(),
                 Column.of("account", Column.Type.DOUBLE).notNull(),
                 Column.of("permissions", Column.Type.STRING).length(255).notNull());
+        database.addColumn(MEMBERS, Column.of("show_rank", Column.Type.BOOLEAN));
     }
 
     // ---------- Lecture ----------
@@ -110,6 +111,11 @@ public class ClanRepository {
         database.update(MEMBERS, Map.of("permissions", ClanPermission.format(permissions)), Map.of("uuid", player));
     }
 
+    /** Afficher son grade (true) ou le tag du clan (false) à la place du grade. */
+    public void setShowRank(UUID player, boolean showRank) {
+        database.update(MEMBERS, Map.of("show_rank", showRank), Map.of("uuid", player));
+    }
+
     public void setOwner(long clanId, UUID owner) {
         database.update(CLANS, Map.of("owner", owner), Map.of("id", clanId));
     }
@@ -166,7 +172,8 @@ public class ClanRepository {
         long id = row.getLong("id");
         List<Member> members = database.get(MEMBERS, Map.of("clan_id", id)).stream()
                 .map(member -> new Member(member.getUUID("uuid"), member.getString("name"), member.getLong("joined_at"),
-                        member.getDouble("account"), ClanPermission.parse(member.getString("permissions"))))
+                        member.getDouble("account"), ClanPermission.parse(member.getString("permissions")),
+                        member.getBoolean("show_rank")))
                 .toList();
         int chunks = database.query("SELECT COUNT(*) AS chunks FROM " + database.table(CLAIMS) + " WHERE clan_id = ?", id)
                 .stream().findFirst().map(count -> count.getInt("chunks")).orElse(0);

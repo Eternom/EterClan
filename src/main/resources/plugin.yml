@@ -12,13 +12,16 @@ softdepend: [Vault]
 commands:
   clan:
     description: Le menu de ton clan, et toutes ses commandes.
-    usage: /clan [create|invite|accept|leave|kick|transfer|disband|claim|unclaim|here|deposit|withdraw|give|take|interest|zone]
+    usage: /clan [create|invite|accept|leave|kick|transfer|disband|claim|unclaim|here|deposit|withdraw|give|take|interest|display|zone]
     aliases: [clans, guild]
     permission: eterclan.use
 
 permissions:
   eterclan.use:
     default: true
+  eter.display.staff:
+    description: 'Staff : son grade reste affiché à la place du tag de son clan (Tab, chat, pseudo).'
+    default: false
   eterclan.bypass.claims:
     description: Agir sur n'importe quel terrain ou parcelle (staff).
     default: op

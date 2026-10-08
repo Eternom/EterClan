@@ -5,7 +5,8 @@
 #  Un clan est une guilde : des membres avec chacun leurs permissions, une banque (un compte par membre,
 #  protégé de la perte d'argent à la mort, et une réserve commune), un terrain en chunks et des parcelles
 #  à louer. Le clan existe sur tout le réseau ; chaque chunk et chaque parcelle restent sur le serveur où
-#  ils ont été posés. À installer sur les survies seulement.
+#  ils ont été posés. À installer PARTOUT (lobbys, survies, mondes ressources) : le tag du clan remplace le
+#  grade partout (Tab, chat, pseudo) ; le terrain ne se prend que là où land.enabled est vrai (la survie).
 #  Les textes sont dans lang/. Toute modification nécessite un redémarrage du serveur.
 
 clan:
@@ -26,6 +27,9 @@ bank:
 # L'entretien hebdomadaire suit la même courbe à partir de upkeep (payé par la réserve, puis les comptes au
 # prorata ; sinon les chunks les plus récents sont perdus). Les chunks se comptent sur tout le réseau.
 land:
+  # Terrain possible sur CE serveur : true sur la survie. Faux par défaut, pour les lobbys et les mondes ressources
+  # (créés par l'orchestrateur avec la config du jar).
+  enabled: false
   free-chunks: 9
   price: 250
   upkeep: 20

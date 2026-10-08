@@ -22,12 +22,13 @@ import java.util.stream.Stream;
 
 /**
  * /clan : le menu. Sous-commandes : create, invite, accept, leave, kick, transfer, disband confirm, claim, unclaim, here,
- * deposit, withdraw, give, take, interest, et zone (pos1, pos2, create, delete, rent, take, end, trust, untrust, list).
+ * deposit, withdraw, give, take, interest, display (grade ou tag du clan), et zone (pos1, pos2, create, delete, rent,
+ * take, end, trust, untrust, list).
  */
 public class ClanCommand implements TabExecutor {
 
     private static final List<String> ACTIONS = List.of("create", "invite", "accept", "leave", "kick", "transfer", "disband",
-            "claim", "unclaim", "here", "deposit", "withdraw", "give", "take", "interest", "zone");
+            "claim", "unclaim", "here", "deposit", "withdraw", "give", "take", "interest", "display", "zone");
     private static final List<String> ZONE_ACTIONS = List.of("pos1", "pos2", "create", "delete", "rent", "take", "end",
             "trust", "untrust", "list");
 
@@ -93,6 +94,7 @@ public class ClanCommand implements TabExecutor {
             case "give" -> withAmount(player, args, 1, amount -> bank.giveToReserve(player, amount, nothing));
             case "take" -> withAmount(player, args, 1, amount -> bank.takeFromReserve(player, amount, nothing));
             case "interest" -> withAmount(player, args, 1, rate -> bank.setInterest(player, rate, nothing));
+            case "display" -> clans.toggleDisplay(player, nothing);
             case "zone" -> zone(player, args);
             default -> messages.send(player, "clan.usage");
         }

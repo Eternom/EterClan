@@ -252,6 +252,22 @@ public class ClanService {
         });
     }
 
+    /** Afficher son grade ou le tag du clan (Tab, chat, pseudo) ; le staff garde toujours son grade. */
+    public void toggleDisplay(Player player, Runnable after) {
+        clanOf(player).ifPresent(clan -> {
+            boolean showRank = !clan.member(player.getUniqueId()).map(Clan.Member::showRank).orElse(false);
+            Tasks.async(plugin, player, () -> {
+                clans.setShowRank(player.getUniqueId(), showRank);
+                sync.clanChanged(clan.id());
+                return showRank;
+            }, rank -> {
+                messages.send(player, player.hasPermission(ClanSync.STAFF) ? "clan.display-staff"
+                        : rank ? "clan.display-rank" : "clan.display-clan", "tag", clan.tag());
+                after.run();
+            }, () -> messages.send(player, "error.generic"));
+        });
+    }
+
     /** Joueur déjà venu sur le réseau, par son pseudo (annuaire d'EterLib). */
     public void findPlayer(Player asker, String name, Consumer<NetworkPlayer> then) {
         Tasks.async(plugin, asker, () -> EterLib.get().getPlayers().find(name),

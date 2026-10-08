@@ -14,8 +14,12 @@ import java.util.UUID;
 public record Clan(long id, String name, String tag, UUID owner, double reserve, double interest, long nextCycle,
                    int chunks, List<Member> members) {
 
-    /** Un membre : son compte en banque (protégé de la mort) et ses permissions. */
-    public record Member(UUID uuid, String name, long joinedAt, double account, Set<ClanPermission> permissions) {
+    /**
+     * Un membre : son compte en banque (protégé de la mort), ses permissions, et showRank : il affiche son grade plutôt
+     * que le tag du clan (Tab, chat, pseudo).
+     */
+    public record Member(UUID uuid, String name, long joinedAt, double account, Set<ClanPermission> permissions,
+                         boolean showRank) {
     }
 
     public Optional<Member> member(UUID player) {

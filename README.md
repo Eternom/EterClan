@@ -1,7 +1,9 @@
 # EterClan
 
 Les **clans** du réseau, côté Paper : des guildes avec leurs membres et permissions, une banque, un terrain en chunks
-et des parcelles à louer. Document développeur, à tenir à jour avec le code. À installer **sur les survies seulement**.
+et des parcelles à louer. Document développeur, à tenir à jour avec le code. À installer **partout** (lobbys, survies,
+mondes ressources) : le tag du clan remplace le grade sur tout le réseau ; le **terrain** ne se prend que là où
+`land.enabled: true` (la survie ; faux par défaut, donc sur les serveurs créés par l'orchestrateur).
 
 Le clan existe sur **tout le réseau** (comme un home) : ses chunks se comptent partout (gratuits, prix, entretien) ;
 chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont été posés.
@@ -18,7 +20,10 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   invitations gardées 5 min dans Redis, départ, exclusion, cession, dissolution (comptes rendus, réserve perdue).
   **Pas de rôles** : chaque membre a sa liste de permissions (`ClanPermission`, en base `build,doors,...`), réglée dans
   le menu par qui a `PERMISSIONS` ; le chef a tout. Défaut d'un nouveau membre : `clan.default-permissions`.
-  Étiquette `clan` (le tag) posée dans EterLib : `<tag_clan>` dans la sidebar et le Tab d'EterTab.
+  Étiquettes EterLib : `clan` (le tag, `<tag_clan>` dans EterTab) et **`badge`** (le tag mis en forme, lang/ > `badge`),
+  qui **remplace le grade** dans le Tab, le pseudo, la sidebar (EterTab) et le chat (EterChat). Pas de badge (donc le
+  grade) pour le staff (`eter.display.staff`) et pour qui préfère son grade (`/clan display`, ou clic sur sa tête dans
+  le menu ; colonne `show_rank`).
 - **`claim`** : chunks (`eterclan_claims`, clé serveur + monde + x + z : un seul clan par chunk). Le premier chunk
   d'un clan sur un serveur se pose n'importe où, les suivants doivent toucher son terrain. Payés au serveur par la
   **réserve** (`Pricing` : `free-chunks` gratuits, puis `price` × `growth`^(n-1), plafonné à `cap` fois ; l'entretien
@@ -46,12 +51,13 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
 ## Commandes et permissions
 
 `/clan` (alias `/clans`, `/guild`) : menu ; `create <nom> <TAG>`, `invite`, `accept`, `leave`, `kick`, `transfer`,
-`disband confirm`, `claim`, `unclaim`, `here`, `deposit`, `withdraw`, `give`, `take`, `interest <taux>`,
+`disband confirm`, `claim`, `unclaim`, `here`, `deposit`, `withdraw`, `give`, `take`, `interest <taux>`, `display`,
 `zone pos1|pos2|create|delete|rent|take|end|trust|untrust|list`.
 
 | Permission | Par défaut | Rôle |
 |---|---|---|
 | `eterclan.use` | tous | `/clan` |
+| `eter.display.staff` | non | Le grade reste affiché à la place du tag du clan (à donner aux grades staff) |
 | `eterclan.bypass.claims` | op | Agir partout (staff) |
 | `eterclan.admin` | op | Tout |
 

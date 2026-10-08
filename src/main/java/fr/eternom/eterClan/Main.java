@@ -22,8 +22,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 /**
  * Les clans du réseau : des guildes (membres et permissions, banque avec un compte par membre et une réserve), leur
  * terrain en chunks (payé au serveur, hors d'atteinte), et les parcelles qu'ils louent à leurs membres. Le clan existe
- * sur tout le réseau ; chaque chunk et chaque parcelle restent sur le serveur où ils ont été posés. À installer sur les
- * survies seulement.
+ * sur tout le réseau ; chaque chunk et chaque parcelle restent sur le serveur où ils ont été posés. À installer partout :
+ * le tag du clan remplace le grade partout (badge) ; le terrain ne se prend que là où land.enabled est vrai (la survie).
  */
 public final class Main extends JavaPlugin {
 
@@ -63,7 +63,7 @@ public final class Main extends JavaPlugin {
         ClanRepository clanRepository = new ClanRepository(database);
         Pricing pricing = Pricing.load(getConfig().getConfigurationSection("land"));
 
-        sync = new ClanSync(this, lib.network(this, "eterclan", messages), lib.getServerName(), clanRepository,
+        sync = new ClanSync(this, messages, lib.network(this, "eterclan", messages), lib.getServerName(), clanRepository,
                 claimRepository, zoneRepository);
         sync.start();
         clans = new ClanService(this, clanRepository, zoneRepository, sync, lib.getRedis(), messages);

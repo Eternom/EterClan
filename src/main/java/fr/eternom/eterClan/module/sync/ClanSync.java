@@ -10,7 +10,9 @@ import fr.eternom.eterClan.module.zone.ZoneIndex;
 import fr.eternom.eterClan.module.zone.ZoneRepository;
 import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.cache.NetworkBus;
+import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.task.Tasks;
+import fr.eternom.eterLib.module.tag.PlayerTags;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,8 +32,13 @@ public class ClanSync {
     private static final String ZONES = "zones";
     /** Étiquette du clan pour la sidebar et le Tab (EterTab : <tag_clan>). */
     private static final String TAG = "clan";
+    /** Étiquette qui remplace le grade (EterTab, EterChat) : le tag du clan mis en forme, ou rien. */
+    private static final String BADGE = "badge";
+    /** Le staff garde toujours son grade. */
+    public static final String STAFF = "eter.display.staff";
 
     private final JavaPlugin plugin;
+    private final Messages messages;
     private final NetworkBus bus;
     private final String server;
     private final ClanRepository clans;
@@ -41,9 +48,10 @@ public class ClanSync {
     private final ClaimIndex claimIndex = new ClaimIndex();
     private final ZoneIndex zoneIndex = new ZoneIndex();
 
-    public ClanSync(JavaPlugin plugin, NetworkBus bus, String server, ClanRepository clans, ClaimRepository claims,
-                    ZoneRepository zones) {
+    public ClanSync(JavaPlugin plugin, Messages messages, NetworkBus bus, String server, ClanRepository clans,
+                    ClaimRepository claims, ZoneRepository zones) {
         this.plugin = plugin;
+        this.messages = messages;
         this.bus = bus;
         this.server = server;
         this.clans = clans;
@@ -120,10 +128,27 @@ public class ClanSync {
         Tasks.async(plugin, () -> zoneIndex.load(zones.onServer(server)), "Parcelles non relues");
     }
 
-    private void showTag(Player player) {
-        cache.of(player.getUniqueId()).ifPresentOrElse(
-                clan -> EterLib.get().getPlayerTags().set(player, TAG, clan.tag()),
-                () -> EterLib.get().getPlayerTags().remove(player, TAG));
+    /**
+     * Étiquettes du joueur : clan (son tag) et badge (le tag mis en forme, qui remplace le grade), sauf pour le staff
+     * et pour qui préfère son grade.
+     */
+    public void showTag(Player player) {
+        PlayerTags tags = EterLib.get().getPlayerTags();
+        Optional<Clan> clan = cache.of(player.getUniqueId());
+        if (clan.isEmpty()) {
+            tags.remove(player, TAG);
+            tags.remove(player, BADGE);
+            return;
+        }
+        tags.set(player, TAG, clan.get().tag());
+        boolean showRank = player.hasPermission(STAFF)
+                || clan.get().member(player.getUniqueId()).map(Clan.Member::showRank).orElse(false);
+        String format = messages.raw(player, "badge");
+        if (showRank || format == null) {
+            tags.remove(player, BADGE);
+        } else {
+            tags.set(player, BADGE, format.replace("<tag>", clan.get().tag()));
+        }
     }
 
     // ---------- Accès ----------

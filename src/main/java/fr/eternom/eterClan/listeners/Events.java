@@ -9,7 +9,7 @@ public class Events {
 
     public Events(Main main) {
         register(main, new ProtectionListener(main.getAccess(), main.getMessages()));
-        register(main, new LandListener(main.getSync(), main.getMessages()));
+        register(main, new LandListener(main.getSync(), main.getMessages(), main.getLand().isEnabled()));
     }
 
     private static void register(Main main, Listener listener) {

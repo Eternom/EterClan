@@ -4,8 +4,11 @@
 # A missing key falls back to the text bundled in the plugin: keep only the lines you change.
 # The message prefix ("Core") is shared by all plugins: EterLib/config.yml > language.prefix.
 
+# Badge that replaces the rank (Tab, chat, name tag) for clan members: <tag> = the clan tag.
+badge: "<accent>[<tag>]</accent> "
+
 clan:
-  usage: "<info>Commands: <accent>/clan</accent> (menu), create, invite, accept, leave, kick, transfer, disband, claim, unclaim, here, deposit, withdraw, give, take, interest, zone."
+  usage: "<info>Commands: <accent>/clan</accent> (menu), create, invite, accept, leave, kick, transfer, disband, claim, unclaim, here, deposit, withdraw, give, take, interest, display, zone."
   help-no-clan: "<info>You have no clan. Create yours with <accent>/clan create \\<name> \\<TAG></accent>, or accept an invite with <accent>/clan accept</accent>."
   none: "<error>You have no clan: <accent>/clan create \\<name> \\<TAG>"
   create-usage: "<error>Usage: <accent>/clan create \\<name> \\<TAG></accent> (name of 3 to 24 characters, tag of 2 to 5 letters or digits)."
@@ -33,6 +36,9 @@ clan:
   disbanded: "<info>The clan <accent><clan></accent> is disbanded."
   disbanded-notice: "<error>The clan <accent><clan></accent> was disbanded.</error> <info>Your account was given back to you."
   owner-has-all: "<error>The leader has every permission."
+  display-rank: "<info>You now show your <accent>rank</accent> (Tab, chat, name tag)."
+  display-clan: "<info>You now show your clan tag <accent>[<tag>]</accent> (Tab, chat, name tag)."
+  display-staff: "<info>Choice saved, but as staff you always keep your <accent>rank</accent>."
 
 bank:
   amount-invalid: "<error>Invalid amount."
@@ -50,6 +56,7 @@ bank:
 claim:
   denied: "<error>You don't have permission here: <accent><permission>"
   world-forbidden: "<error>Land can't be taken in this world."
+  disabled-here: "<error>Land can't be taken on this server."
   already-yours: "<error>This chunk already belongs to your clan."
   taken: "<error>This chunk already belongs to a clan."
   not-adjacent: "<error>This chunk must touch your clan's land."
@@ -142,6 +149,9 @@ menu:
     account: "<info>Your account: <accent><amount></accent> <dark_gray>(safe from death)"
     owner: "<success>● <info>Clan leader"
     member: "<info>● Member"
+    display-rank: "<dark_gray>▸ <info>Shown: your <accent>rank"
+    display-clan: "<dark_gray>▸ <info>Shown: <accent>[<tag>]"
+    display-click: "<accent>Click</accent> <info>: show your rank or the clan tag"
   info:
     name: "<accent><clan> <dark_gray>[<tag>]"
     members: "<dark_gray>▸ <info>Members: <accent><count>"

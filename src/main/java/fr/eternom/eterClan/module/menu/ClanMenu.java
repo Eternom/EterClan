@@ -3,6 +3,7 @@ package fr.eternom.eterClan.module.menu;
 import fr.eternom.eterClan.module.bank.BankService;
 import fr.eternom.eterClan.module.clan.Clan;
 import fr.eternom.eterClan.module.clan.ClanPermission;
+import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.economy.Money;
 import fr.eternom.eterLib.helper.gui.Frame;
@@ -20,7 +21,7 @@ import org.bukkit.inventory.Inventory;
 import java.util.List;
 
 /**
- * Menu du clan, 5 lignes : le joueur (son compte), le clan (réserve, chunks, entretien, prochain passage), les membres ;
+ * Menu du clan, 5 lignes : le joueur (son compte ; clic = afficher son grade ou le tag du clan), le clan (réserve, chunks, entretien, prochain passage), les membres ;
  * la banque (verser, retirer, donner à la réserve, en prendre, taux d'intérêt) ; le terrain (poser, voir, rendre).
  * Un bouton dont on n'a pas la permission est grisé et le dit.
  */
@@ -58,6 +59,10 @@ class ClanMenu implements Menu {
     public void onClick(Player player, int slot, ClickType click) {
         Runnable reopen = () -> gui.open(player);
         switch (slot) {
+            case HEAD -> {
+                Sounds.click(player);
+                gui.clans().toggleDisplay(player, reopen);
+            }
             case MEMBERS -> {
                 Sounds.page(player);
                 gui.openMembers(player);
@@ -106,7 +111,9 @@ class ClanMenu implements Menu {
         double account = clan.member(viewer.getUniqueId()).map(Clan.Member::account).orElse(0.0);
         inventory.setItem(HEAD, Items.head(viewer.getPlayerProfile(), text("menu.head.name", "player", viewer.getName()), List.of(
                 text("menu.head.account", "amount", Money.format(account)),
-                text(clan.isOwner(viewer.getUniqueId()) ? "menu.head.owner" : "menu.head.member"))));
+                text(clan.isOwner(viewer.getUniqueId()) ? "menu.head.owner" : "menu.head.member"),
+                text(showsRank() ? "menu.head.display-rank" : "menu.head.display-clan", "tag", clan.tag()),
+                text("menu.head.display-click"))));
         long seconds = Math.max(0, (clan.nextCycle() - System.currentTimeMillis()) / 1000);
         int upkeepChunks = clan.chunks();
         inventory.setItem(INFO, Items.item(Material.WHITE_BANNER, text("menu.info.name", "clan", clan.name(), "tag", clan.tag()), List.of(
@@ -131,6 +138,12 @@ class ClanMenu implements Menu {
     }
 
     /** Bouton qui demande une permission : sa description, ou « tu n'as pas la permission ». */
+    /** Affiche son grade (préférence, ou staff) plutôt que le tag du clan. */
+    private boolean showsRank() {
+        return viewer.hasPermission(ClanSync.STAFF)
+                || clan.member(viewer.getUniqueId()).map(Clan.Member::showRank).orElse(false);
+    }
+
     private org.bukkit.inventory.ItemStack button(Material icon, String key, ClanPermission permission) {
         boolean can = clan.can(viewer.getUniqueId(), permission);
         return Items.item(can ? icon : Material.GRAY_DYE, text(key + ".name"),
