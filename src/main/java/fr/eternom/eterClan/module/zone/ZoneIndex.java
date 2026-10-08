@@ -22,6 +22,10 @@ public class ZoneIndex {
         return zones.stream().filter(zone -> zone.clanId() == clanId).toList();
     }
 
+    public Optional<Zone> byId(long id) {
+        return zones.stream().filter(zone -> zone.id() == id).findFirst();
+    }
+
     public Optional<Zone> byName(long clanId, String name) {
         return ofClan(clanId).stream().filter(zone -> zone.name().equalsIgnoreCase(name)).findFirst();
     }

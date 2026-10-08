@@ -22,8 +22,8 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   le menu par qui a `PERMISSIONS` ; le chef a tout. Défaut d'un nouveau membre : `clan.default-permissions`.
   Étiquettes EterLib : `clan` (le tag, `<tag_clan>` dans EterTab) et **`badge`** (le tag mis en forme, lang/ > `badge`),
   qui **remplace le grade** dans le Tab, le pseudo, la sidebar (EterTab) et le chat (EterChat). Pas de badge (donc le
-  grade) pour le staff (`eter.display.staff`) et pour qui préfère son grade (`/clan display`, ou clic sur sa tête dans
-  le menu ; colonne `show_rank`).
+  grade) pour le staff (`eter.display.staff`) et pour qui préfère son grade (clic sur sa tête dans le menu ; colonne
+  `show_rank`).
 - **`claim`** : chunks (`eterclan_claims`, clé serveur + monde + x + z : un seul clan par chunk). Le premier chunk
   d'un clan sur un serveur se pose n'importe où, les suivants doivent toucher son terrain. Payés au serveur par la
   **réserve** (`Pricing` : `free-chunks` gratuits, puis `price` × `growth`^(n-1), plafonné à `cap` fois ; l'entretien
@@ -40,19 +40,21 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   l'**entretien** est payé par la réserve, puis les comptes au prorata ; sinon les chunks les plus récents sont perdus
   (et leurs parcelles). Les **loyers** sont encaissés à leur date, sur le porte-monnaie du locataire, dans la réserve.
 - **`zone`** : parcelles (`eterclan_zones`) = rectangles au bloc près sur toute la hauteur, dans le terrain du clan
-  (`pos1`/`pos2` = bloc visé), sans chevauchement, `zones.max-area` blocs au plus. `ZONES` les crée, supprime, met en
+  (deux blocs cliqués dans le monde après « Nouvelle parcelle » : `ZoneSelection`, aperçu en particules,
+  boutons du chat Valider / Recommencer / Annuler, abandon après 3 min), sans chevauchement, `zones.max-area` blocs au plus. `ZONES` les crée, supprime, met en
   location (loyer par semaine). Un membre la loue (première semaine payée tout de suite). **Louée, elle n'obéit plus
   aux permissions du clan** : seuls le locataire et ceux qu'il a choisis (`trust`) y agissent ; `ZONES` ne fait que gérer
   (fin de location), jamais accéder. Une parcelle louée ne se supprime pas ; un membre qui part perd ses locations.
 - **`sync`** (`ClanSync`) : clans, chunks et parcelles utiles à ce serveur, en mémoire ; relus après chaque changement
   puis annoncés aux autres serveurs (bus réseau `eterclan`).
-- **`menu`** : `/clan` (le clan, la banque avec saisie dans des Dialogs, le terrain), les membres, leurs permissions.
+- **`menu`** : **tout se fait dans l'interface** (`/clan` est la seule commande). Sans clan : expliquer, créer (fenêtre
+  avec nom, tag et prix affiché avant de payer), accepter une invitation. Avec : le clan, la banque, le terrain, les
+  membres (inviter, fiche : permissions, exclure, céder), les parcelles (créer, louer, accès, loyer, supprimer). Les
+  saisies et les confirmations passent par des Dialogs ; Annuler rouvre le menu d'où l'on vient.
 
 ## Commandes et permissions
 
-`/clan` (alias `/clans`, `/guild`) : menu ; `create <nom> <TAG>`, `invite`, `accept`, `leave`, `kick`, `transfer`,
-`disband confirm`, `claim`, `unclaim`, `here`, `deposit`, `withdraw`, `give`, `take`, `interest <taux>`, `display`,
-`zone pos1|pos2|create|delete|rent|take|end|trust|untrust|list`.
+`/clan` (alias `/clans`, `/guild`) : le menu, seule commande.
 
 | Permission | Par défaut | Rôle |
 |---|---|---|

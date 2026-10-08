@@ -9,8 +9,7 @@ import java.util.Objects;
 public class Commands {
 
     public Commands(Main main) {
-        ClanCommand clan = new ClanCommand(main.getGui(), main.getClans(), main.getBank(), main.getLand(), main.getZones(),
-                main.getSync(), main.getMessages());
+        ClanCommand clan = new ClanCommand(main.getGui(), main.getMessages());
         PluginCommand command = Objects.requireNonNull(main.getCommand("clan"), "Commande absente du plugin.yml : clan");
         command.setExecutor(clan);
         command.setTabCompleter(clan);

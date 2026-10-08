@@ -13,6 +13,7 @@ import fr.eternom.eterClan.module.clan.ClanService;
 import fr.eternom.eterClan.module.menu.ClanGui;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.ZoneRepository;
+import fr.eternom.eterClan.module.zone.ZoneSelection;
 import fr.eternom.eterClan.module.zone.ZoneService;
 import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.message.Messages;
@@ -39,6 +40,7 @@ public final class Main extends JavaPlugin {
     private ClaimService land;
     private ZoneService zones;
     private Access access;
+    private ZoneSelection selection;
     private ClanGui gui;
 
     @Override
@@ -71,7 +73,9 @@ public final class Main extends JavaPlugin {
         land = new ClaimService(this, claimRepository, zoneRepository, clanRepository, sync, clans, messages, pricing);
         zones = new ZoneService(this, zoneRepository, clanRepository, sync, clans, messages);
         access = new Access(sync);
-        gui = new ClanGui(this, sync, clans, bank, land, messages, lib.backButton(getConfig().getString("menus.clan.back-command", "")));
+        selection = new ZoneSelection(this, messages, zones);
+        gui = new ClanGui(this, sync, clans, bank, land, zones, selection, messages,
+                lib.backButton(getConfig().getString("menus.clan.back-command", "")));
         new WeeklyCycle(this, clanRepository, claimRepository, zoneRepository, sync, pricing).start();
 
         new Commands(this);
@@ -104,6 +108,10 @@ public final class Main extends JavaPlugin {
 
     public Access getAccess() {
         return access;
+    }
+
+    public ZoneSelection getSelection() {
+        return selection;
     }
 
     public ClanGui getGui() {

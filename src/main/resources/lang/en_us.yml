@@ -3,27 +3,26 @@
 #   <info> = regular light gray text, <accent> = important words in orange.
 # A missing key falls back to the text bundled in the plugin: keep only the lines you change.
 # The message prefix ("Core") is shared by all plugins: EterLib/config.yml > language.prefix.
+# Everything is done in the /clan menu: texts talk about its buttons, not commands.
 
 # Badge that replaces the rank (Tab, chat, name tag) for clan members: <tag> = the clan tag.
 badge: "<accent>[<tag>]</accent> "
 
 clan:
-  usage: "<info>Commands: <accent>/clan</accent> (menu), create, invite, accept, leave, kick, transfer, disband, claim, unclaim, here, deposit, withdraw, give, take, interest, display, zone."
-  help-no-clan: "<info>You have no clan. Create yours with <accent>/clan create \\<name> \\<TAG></accent>, or accept an invite with <accent>/clan accept</accent>."
-  none: "<error>You have no clan: <accent>/clan create \\<name> \\<TAG>"
-  create-usage: "<error>Usage: <accent>/clan create \\<name> \\<TAG></accent> (name of 3 to 24 characters, tag of 2 to 5 letters or digits)."
+  none: "<error>You have no clan: open <accent><click:run_command:'/clan'>/clan</click></accent> to create one or accept an invite."
+  create-usage: "<error>Name of 3 to 24 characters, tag of 2 to 5 letters or digits."
   already: "<error>You are already in a clan."
   name-taken: "<error>That name or tag is already taken."
   create-not-enough: "<error>You need <accent><price></accent> to create a clan."
-  created: "<success>Clan <accent><clan></accent> <dark_gray>[<tag>]</dark_gray> created!</success> <info>Take your first land with <accent>/clan claim</accent>."
+  created: "<success>Clan <accent><clan></accent> <dark_gray>[<tag>]</dark_gray> created!</success> <info>Paid <accent><price></accent>. Open <accent><click:run_command:'/clan'>/clan</click></accent> to take your first land."
   no-permission: "<error>Your clan didn't give you this permission."
   target-in-clan: "<error><accent><player></accent> is already in a clan."
   invite-sent: "<info>Invite sent to <accent><player></accent> (5 minutes to accept)."
-  invited: "<info><accent><player></accent> invites you to the clan <accent><clan></accent>: <accent><click:run_command:'/clan accept'>/clan accept</click></accent> to join."
+  invited: "<info><accent><player></accent> invites you to the clan <accent><clan></accent>: open <accent><click:run_command:'/clan'>/clan</click></accent> to accept."
   no-invite: "<error>You have no pending invite (or it expired)."
   joined: "<success>You joined the clan <accent><clan></accent>!"
   member-joined: "<info><accent><player></accent> joined your clan."
-  owner-cannot-leave: "<error>The leader can't leave: give the clan away (<accent>/clan transfer</accent>) or disband it (<accent>/clan disband</accent>)."
+  owner-cannot-leave: "<error>The leader can't leave: give the clan to a member first, or disband it."
   left: "<info>You left the clan <accent><clan></accent>; your account was given back to you."
   not-member: "<error><accent><player></accent> is not in your clan."
   cannot-kick-owner: "<error>The leader can't be kicked."
@@ -32,7 +31,6 @@ clan:
   owner-only: "<error>Only the clan leader can do that."
   transferred: "<info><accent><player></accent> is now the clan leader."
   you-are-owner: "<success>You are now the leader of the clan <accent><clan></accent>!"
-  disband-confirm: "<error>Disbanding gives everyone their account back, frees all the land and LOSES the reserve. Confirm with <accent>/clan disband confirm</accent>."
   disbanded: "<info>The clan <accent><clan></accent> is disbanded."
   disbanded-notice: "<error>The clan <accent><clan></accent> was disbanded.</error> <info>Your account was given back to you."
   owner-has-all: "<error>The leader has every permission."
@@ -60,7 +58,7 @@ claim:
   already-yours: "<error>This chunk already belongs to your clan."
   taken: "<error>This chunk already belongs to a clan."
   not-adjacent: "<error>This chunk must touch your clan's land."
-  reserve-not-enough: "<error>The clan reserve doesn't have <accent><price></accent> for this chunk (<accent>/clan give</accent> to fill it)."
+  reserve-not-enough: "<error>The clan reserve doesn't have <accent><price></accent> for this chunk: give it money in the menu."
   claimed: "<success>Chunk taken!</success> <info>Paid <accent><price></accent> by the reserve; land upkeep: <accent><upkeep></accent> per week."
   not-yours: "<error>This chunk isn't your clan's."
   rented-zone: "<error>A rented plot is on this chunk: the rental must end first."
@@ -76,17 +74,13 @@ land:
   zone-rented: "<info><accent><tenant></accent>'s plot <accent><zone></accent> <dark_gray>·</dark_gray> <info><clan>"
 
 zone:
-  usage: "<info>Plots: <accent>/clan zone pos1</accent>, <accent>pos2</accent> (both corners, the targeted block), <accent>create \\<name></accent>, <accent>delete \\<name></accent>, <accent>rent \\<name> \\<rent></accent>, <accent>take \\<name></accent> (rent it), <accent>end \\<name></accent>, <accent>trust \\<name> \\<player></accent>, <accent>untrust</accent>, <accent>list</accent>."
-  pos1: "<info>First corner: <accent><x>, <z>"
-  pos2: "<info>Second corner: <accent><x>, <z>"
-  no-selection: "<error>Pick both corners first: <accent>/clan zone pos1</accent> and <accent>/clan zone pos2</accent>."
+  other-world: "<error>Both corners must be in the same world."
   name-invalid: "<error>Plot name: 2 to 24 letters, digits, - or _."
   too-big: "<error>Plot too big: <accent><max></accent> blocks at most."
   outside-land: "<error>The plot must be entirely inside your clan's land."
   overlaps: "<error>It overlaps another plot."
   name-taken: "<error>Your clan already has a plot <accent><zone></accent>."
-  created: "<success>Plot <accent><zone></accent> created</success> <info>(<accent><area></accent> blocks). Put it up for rent with <accent>/clan zone rent <zone> \\<rent></accent>."
-  unknown: "<error>No plot <accent><zone></accent> in your clan."
+  created: "<success>Plot <accent><zone></accent> created</success> <info>(<accent><area></accent> blocks). Set its rent in the menu to put it up for rent."
   deleted: "<info>Plot <accent><zone></accent> deleted."
   rented-cannot-delete: "<error>The plot <accent><zone></accent> is rented: the rental must end first."
   rented-locked: "<error>The plot <accent><zone></accent> is rented: its rent doesn't change during the rental."
@@ -94,19 +88,25 @@ zone:
   rent-off: "<info>The plot <accent><zone></accent> is no longer for rent."
   not-for-rent: "<error>The plot <accent><zone></accent> isn't for rent (or is already rented)."
   rent-not-enough: "<error>You need <accent><rent></accent> for the first week."
-  rented: "<success>You rent the plot <accent><zone></accent>!</success> <info><accent><rent></accent> per week, paid to the reserve. Only you build there: <accent>/clan zone trust <zone> \\<player></accent> to invite."
-  not-rented: "<error>The plot <accent><zone></accent> isn't rented."
+  rented: "<success>You rent the plot <accent><zone></accent>!</success> <info><accent><rent></accent> per week, paid to the reserve. Only you build there: add whoever you want in \"Access\"."
   ended: "<info>The rental of <accent><zone></accent> is over: the plot goes back to the clan."
   ended-by-clan: "<error>Your clan ended your rental of the plot <accent><zone></accent>."
   rent-failed: "<error>You couldn't pay the rent of <accent><zone></accent>: the rental is over."
   not-tenant: "<error>You don't rent the plot <accent><zone></accent>."
   trusted: "<info><accent><player></accent> can now build and open things in <accent><zone></accent>."
   untrusted: "<info><accent><player></accent> no longer has access to <accent><zone></accent>."
-  list-empty: "<info>Your clan has no plots."
-  list-header: "<info>Clan plots (<accent><count></accent>):"
-  list-free: "<dark_gray>▸ <accent><zone></accent> <info>(<area> blocks): the clan's"
-  list-for-rent: "<dark_gray>▸ <accent><zone></accent> <info>(<area> blocks): for rent <accent><rent></accent>/week"
-  list-rented: "<dark_gray>▸ <accent><zone></accent> <info>(<area> blocks): rented by <accent><tenant></accent>, <rent>/week"
+
+# Drawing a plot: two clicked blocks, then buttons in the chat
+selection:
+  start: "<info>Click (left or right) the <accent>first corner</accent> of the plot, then the <accent>second</accent>. <accent><max></accent> blocks at most, inside the clan's land."
+  first: "<info>First corner: <accent><x>, <z></accent>. Now click the second one."
+  done: "<info>Plot of <accent><width> × <depth></accent> (<accent><area></accent> blocks)."
+  confirm: "<success><bold>[Confirm]</bold></success>"
+  restart: "<accent><bold>[Start over]</bold></accent>"
+  cancel: "<error><bold>[Cancel]</bold></error>"
+  restarted: "<info>Starting over: click the first corner."
+  cancelled: "<info>Plot cancelled."
+  expired: "<info>Plot abandoned (3 minutes without confirming)."
 
 # Name of each permission (menus, messages) and its description
 permission:
@@ -138,10 +138,110 @@ permission-lore:
   interest: "<info>Set the accounts' interest rate"
   permissions: "<info>Give and remove these permissions"
 
-menu:
-  title: "<primary><clan> <dark_gray>[<tag>]"
+# Input windows
+dialogs:
   confirm: "Confirm"
   amount: "Amount"
+  deposit:
+    title: "<primary>Store money"
+    body: "Money on your clan account is safe from death. Every week, the clan interest sends part of it to the reserve."
+  withdraw:
+    title: "<primary>Take money back"
+    body: "How much to take back from your clan account?"
+  give:
+    title: "<primary>Give to the reserve"
+    body: "The reserve pays for chunks and land upkeep."
+  take:
+    title: "<primary>Take from the reserve"
+    body: "How much to take from the clan reserve?"
+  interest:
+    title: "<primary>Clan interest"
+    body: "Percentage taken every week from each member's account and paid to the reserve (0 to <max> %)."
+  rent:
+    title: "<primary>Plot rent"
+    body: "Rent per week, paid to the clan reserve (0 = no longer for rent)."
+  invite:
+    title: "<primary>Invite a player"
+    body: "Their name: they will get an invite valid for 5 minutes."
+    label: "Player"
+  trust:
+    title: "<primary>Give access"
+    body: "This player will be able to build and open chests in your plot."
+    label: "Player"
+  zone-name:
+    title: "<primary>Plot name"
+    body: "2 to 24 letters, digits, - or _ (e.g. peter-house)."
+    label: "Name"
+
+# Confirmations: title, text, button
+confirm:
+  claim:
+    title: "<primary>Take this chunk"
+    body: "Paid <price> by the clan reserve. Your land upkeep will become <upkeep> per week."
+    button: "Take (<price>)"
+  unclaim:
+    title: "<primary>Give up this chunk"
+    body: "The chunk you stand in becomes free again, with no refund. Non-rented plots on it are deleted."
+    button: "Give up"
+  disband:
+    title: "<primary>Disband <clan>"
+    body: "Every member gets their account back, all the land is freed, and the reserve (<reserve>) is LOST."
+    button: "Disband"
+  leave:
+    title: "<primary>Leave <clan>"
+    body: "Your clan account will be given back to you; your plot rentals end."
+    button: "Leave"
+  kick:
+    title: "<primary>Kick <player>"
+    body: "Their account (<amount>) will be given back to them; their plot rentals end."
+    button: "Kick"
+  transfer:
+    title: "<primary>Give the clan away"
+    body: "<player> will become the clan leader, with every permission. You become a member."
+    button: "Give away"
+  zone-take:
+    title: "<primary>Rent <zone>"
+    body: "<rent> now, then every week (paid to the reserve). Only you will build there, with whoever you choose."
+    button: "Rent (<rent>)"
+  zone-leave:
+    title: "<primary>Leave <zone>"
+    body: "The rental ends: the plot goes back to the clan, with whatever you left in it."
+    button: "Leave"
+  zone-delete:
+    title: "<primary>Delete <zone>"
+    body: "The plot disappears (the land stays the clan's)."
+    button: "Delete"
+  zone-evict:
+    title: "<primary>End the rental"
+    body: "<tenant> no longer rents <zone>: the plot goes back to the clan."
+    button: "End"
+
+# Creating a clan
+create:
+  title: "<primary>Create a clan"
+  body: "Creating a clan costs <price>. You are its leader: invite your friends, take land, keep your money safe from death."
+  name: "Name (3 to 24 characters)"
+  tag: "Tag (2 to 5 letters)"
+  confirm: "Create (<price>)"
+
+no-clan:
+  title: "<primary>Clans"
+  info:
+    name: "<accent>What is a clan?"
+    line1: "<info>A guild with its members and their permissions"
+    line2: "<info>A bank: your money is safe from death there"
+    line3: "<info>Protected land, and plots to rent"
+    line4: "<info>Your tag shown instead of your rank"
+  create:
+    name: "<accent>Create a clan"
+    price: "<dark_gray>▸ <info>Price: <accent><price>"
+    click: "<accent>Click</accent> <info>: choose the name and tag"
+  accept:
+    name: "<accent>Accept the invite"
+    lore: "<info>Join the clan that invited you (5 minutes)"
+
+menu:
+  title: "<primary><clan> <dark_gray>[<tag>]"
   locked: "<error>● <info>Your clan didn't give you this permission"
   back-to-clan: "<accent>« Back to the clan"
   head:
@@ -163,41 +263,43 @@ menu:
     next: "<dark_gray>▸ <info>Next cycle in <accent><time>"
   members:
     name: "<accent>Members"
-    lore: "<info><count> member(s): permissions, accounts"
+    lore: "<info><count> member(s): invite, permissions, accounts"
   deposit:
     name: "<accent>Store on my account"
     lore: "<info>Wallet -> your account (safe from death)"
-    title: "<primary>Store money"
-    body: "Money on your clan account is safe from death. Every week, the clan interest sends part of it to the reserve."
   withdraw:
     name: "<accent>Take back from my account"
     lore: "<info>Your account -> wallet"
-    title: "<primary>Take money back"
-    body: "How much to take back from your clan account?"
   give:
     name: "<accent>Give to the reserve"
     lore: "<info>Wallet -> clan reserve"
-    title: "<primary>Give to the reserve"
-    body: "The reserve pays for chunks and land upkeep."
   take:
     name: "<accent>Take from the reserve"
     lore: "<info>Clan reserve -> wallet"
-    title: "<primary>Take from the reserve"
-    body: "How much to take from the clan reserve?"
   interest:
     name: "<accent>Set the interest"
     lore: "<info>Share of the accounts paid every week to the reserve"
-    title: "<primary>Clan interest"
-    body: "Percentage taken every week from each member's account and paid to the reserve (0 to <max> %)."
   claim:
     name: "<accent>Take this chunk"
-    lore: "<info>Paid by the reserve, at the next chunk's price"
+    lore: "<info>The chunk you stand in, paid by the reserve"
   here:
     name: "<accent>See the land"
     lore: "<info>Borders in particles, and prices"
   unclaim:
     name: "<accent>Give up this chunk"
-    lore: "<info>No refund"
+    lore: "<info>The chunk you stand in, no refund"
+  zones:
+    name: "<accent>Plots"
+    lore: "<info><count> plot(s): create, rent, manage"
+  no-land:
+    name: "<accent>No land here"
+    lore: "<info>Land is taken on the survival server"
+  leave:
+    name: "<error>Leave the clan"
+    lore: "<info>Your account will be given back"
+  disband:
+    name: "<error>Disband the clan"
+    lore: "<info>Accounts given back, land freed, reserve lost"
 
 members:
   title: "<primary>Members: <clan>"
@@ -206,13 +308,85 @@ members:
   permissions: "<count> permission(s)"
   role: "<dark_gray>▸ <info><role>"
   account: "<dark_gray>▸ <info>Account: <accent><amount>"
-  click: "<accent>Click</accent> <info>: their permissions"
+  click: "<accent>Click</accent> <info>: their page"
+  invite:
+    name: "<accent>Invite a player"
+    lore: "<info>Their name, in a window"
+
+member:
+  title: "<primary><player>"
+  is-owner: "<success>● <info>Clan leader"
+  permissions: "<dark_gray>▸ <info><count> permission(s)"
+  back: "<accent>« Members"
+  owner-all:
+    name: "<accent>The leader has everything"
+    lore: "<info>Every permission"
+  permissions-button:
+    name: "<accent>Permissions"
+    lore: "<info>Give and remove their permissions"
+  kick:
+    name: "<error>Kick"
+    lore: "<info>Their account will be given back"
+  transfer:
+    name: "<accent>Give the clan away"
+    lore: "<info>They become the leader"
 
 permissions:
   title: "<primary>Permissions: <player>"
   granted: "<success>● <info>Given <dark_gray>· <accent>click</accent> <info>to remove"
   denied: "<error>● <info>Not given <dark_gray>· <accent>click</accent> <info>to give"
-  back: "<accent>« Members"
+  back: "<accent>« Their page"
   note:
     name: "<accent>Rented plots"
     lore: "<info>These permissions never apply in a rented plot: only its tenant decides there."
+
+zones:
+  title: "<primary>Plots: <clan>"
+  name: "<accent><zone>"
+  area: "<dark_gray>▸ <info><area> blocks"
+  rented: "<dark_gray>▸ <info>Rented by <accent><tenant></accent>, <rent>/week"
+  for-rent: "<dark_gray>▸ <info>For rent: <accent><rent></accent>/week"
+  free: "<dark_gray>▸ <info>The clan's, not for rent"
+  click: "<accent>Click</accent> <info>: the plot"
+  empty:
+    name: "<accent>No plot yet"
+    lore: "<info>A plot is drawn inside the clan's land, then rented to a member."
+  new:
+    name: "<accent>New plot"
+    lore: "<info>Click its two corners in the world"
+
+zone-menu:
+  title: "<primary>Plot <zone>"
+  rent: "<dark_gray>▸ <info>Rent: <accent><rent></accent>/week"
+  back: "<accent>« Plots"
+  back-zone: "<accent>« The plot"
+  status:
+    line: "<dark_gray>▸ <info><status>"
+    rented: "Rented by <tenant>"
+    for-rent: "For rent"
+    free: "The clan's, not for rent"
+  access:
+    name: "<accent>Access"
+    lore: "<info>Who can build and open things here"
+  leave:
+    name: "<error>Leave the rental"
+    lore: "<info>The plot goes back to the clan"
+  take:
+    name: "<success>Rent"
+    lore: "<info>Only you build there, with whoever you choose"
+  set-rent:
+    name: "<accent>Set the rent"
+    lore: "<info>0 = no longer for rent"
+  delete:
+    name: "<error>Delete"
+    lore: "<info>The land stays the clan's"
+  evict:
+    name: "<error>End the rental"
+    lore: "<info>The plot goes back to the clan"
+
+trust:
+  title: "<primary>Access: <zone>"
+  remove: "<accent>Click</accent> <info>: remove their access"
+  add:
+    name: "<accent>Add a player"
+    lore: "<info>Their name, in a window"

@@ -64,9 +64,13 @@ public class ClanSync {
         claimIndex.load(claims.onServer(server));
         zoneIndex.load(zones.onServer(server));
         claimIndex.clans().forEach(id -> clans.byId(id).ifPresent(cache::put));
-        bus.on(CLAN, data -> reloadClan(data.get("id").getAsLong()));
-        bus.on(CLAIMS, data -> reloadClaims());
-        bus.on(ZONES, data -> reloadZones());
+        // Annonces des autres serveurs (reçues sur le thread principal) : relues en tâche de fond
+        bus.on(CLAN, data -> {
+            long id = data.get("id").getAsLong();
+            Tasks.async(plugin, () -> loadClan(id), "Clan " + id + " non relu");
+        });
+        bus.on(CLAIMS, data -> Tasks.async(plugin, this::loadClaims, "Chunks des clans non relus"));
+        bus.on(ZONES, data -> Tasks.async(plugin, () -> zoneIndex.load(zones.onServer(server)), "Parcelles non relues"));
         Bukkit.getOnlinePlayers().forEach(this::join); // /reload
     }
 
@@ -85,47 +89,45 @@ public class ClanSync {
 
     // ---------- Changements ----------
 
-    /** Après une modification du clan (membres, argent, permissions) : relu ici, puis sur les autres serveurs. */
+    /**
+     * Après une modification du clan (membres, argent, permissions) : relu ici, puis annoncé aux autres serveurs.
+     * Bloquant, depuis une tâche de fond : la mémoire est à jour avant la réponse au joueur (menu rouvert à jour).
+     */
     public void clanChanged(long id) {
-        reloadClan(id);
+        loadClan(id);
         JsonObject data = new JsonObject();
         data.addProperty("id", id);
         bus.publish(CLAN, data);
     }
 
+    /** Bloquant, depuis une tâche de fond (voir clanChanged). */
     public void claimsChanged() {
-        reloadClaims();
+        loadClaims();
         bus.publish(CLAIMS, new JsonObject());
     }
 
+    /** Bloquant, depuis une tâche de fond (voir clanChanged). */
     public void zonesChanged() {
-        reloadZones();
+        zoneIndex.load(zones.onServer(server));
         bus.publish(ZONES, new JsonObject());
     }
 
-    private void reloadClan(long id) {
-        Tasks.async(plugin, () -> {
-            Optional<Clan> clan = clans.byId(id);
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                // Les anciens membres oubliés, puis le clan tel qu'il est maintenant (absent : dissous)
-                cache.get(id).ifPresent(old -> old.members().forEach(member -> cache.forget(member.uuid())));
-                clan.ifPresentOrElse(cache::put, () -> cache.remove(id));
-                Bukkit.getOnlinePlayers().forEach(this::showTag);
-            });
-        }, "Clan " + id + " non relu");
+    /** Bloquant : relit le clan, puis met la mémoire à jour sur le thread principal. */
+    private void loadClan(long id) {
+        Optional<Clan> clan = clans.byId(id);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            // Les anciens membres oubliés, puis le clan tel qu'il est maintenant (absent : dissous)
+            cache.get(id).ifPresent(old -> old.members().forEach(member -> cache.forget(member.uuid())));
+            clan.ifPresentOrElse(cache::put, () -> cache.remove(id));
+            Bukkit.getOnlinePlayers().forEach(this::showTag);
+        });
     }
 
-    private void reloadClaims() {
-        Tasks.async(plugin, () -> {
-            claimIndex.load(claims.onServer(server));
-            // Un clan qui vient de poser son premier chunk ici doit être en mémoire
-            claimIndex.clans().stream().filter(id -> cache.get(id).isEmpty())
-                    .forEach(id -> clans.byId(id).ifPresent(clan -> Bukkit.getScheduler().runTask(plugin, () -> cache.put(clan))));
-        }, "Chunks des clans non relus");
-    }
-
-    private void reloadZones() {
-        Tasks.async(plugin, () -> zoneIndex.load(zones.onServer(server)), "Parcelles non relues");
+    /** Bloquant : les chunks de ce serveur, et les clans qui viennent d'y poser leur premier chunk. */
+    private void loadClaims() {
+        claimIndex.load(claims.onServer(server));
+        claimIndex.clans().stream().filter(id -> cache.get(id).isEmpty())
+                .forEach(id -> clans.byId(id).ifPresent(clan -> Bukkit.getScheduler().runTask(plugin, () -> cache.put(clan))));
     }
 
     /**

@@ -63,6 +63,10 @@ public class ClanService {
         this.defaultPermissions = permissions;
     }
 
+    public double creationPrice() {
+        return creationPrice;
+    }
+
     /** Le clan du joueur (en mémoire) ; message s'il n'en a pas. */
     public Optional<Clan> clanOf(Player player) {
         Optional<Clan> clan = sync.cache().of(player.getUniqueId());
@@ -103,14 +107,18 @@ public class ClanService {
             if (clans.nameTaken(name, upperTag)) {
                 return "clan.name-taken";
             }
-            if (creationPrice > 0 && !economy.withdrawPlayer(player, creationPrice).transactionSuccess()) {
+            if (creationPrice > 0 && !economy.has(player, creationPrice)) {
                 return "clan.create-not-enough";
             }
+            // Le clan d'abord, l'argent ensuite : une erreur ne fait jamais payer un clan qui n'existe pas
             long now = System.currentTimeMillis();
             Optional<Long> id = clans.create(name, upperTag, uuid, player.getName(), defaultInterest, now, now + WEEK.toMillis());
             if (id.isEmpty()) {
-                economy.depositPlayer(player, creationPrice); // déjà dans un clan (autre serveur) : remboursé
-                return "clan.already";
+                return "clan.already"; // déjà dans un clan (autre serveur)
+            }
+            if (creationPrice > 0 && !economy.withdrawPlayer(player, creationPrice).transactionSuccess()) {
+                clans.delete(id.get());
+                return "clan.create-not-enough";
             }
             sync.clanChanged(id.get());
             return "clan.created";
@@ -165,36 +173,38 @@ public class ClanService {
         });
     }
 
-    public void kick(Player player, String targetName) {
+    public void kick(Player player, UUID member, Runnable after) {
         clanWith(player, ClanPermission.KICK).ifPresent(clan -> {
-            Optional<Clan.Member> target = clan.members().stream().filter(member -> member.name().equalsIgnoreCase(targetName)).findFirst();
+            Optional<Clan.Member> target = clan.member(member);
             if (target.isEmpty()) {
-                messages.send(player, "clan.not-member", "player", targetName);
+                messages.send(player, "clan.not-member", "player", "?");
             } else if (clan.isOwner(target.get().uuid())) {
                 messages.send(player, "clan.cannot-kick-owner");
             } else {
                 remove(clan, target.get().uuid(), () -> {
                     messages.send(player, "clan.kicked", "player", target.get().name());
                     sync.bus().notify(target.get().uuid(), "clan.you-were-kicked", true, "clan", clan.name());
+                    after.run();
                 });
             }
         });
     }
 
-    public void transfer(Player player, String targetName) {
+    public void transfer(Player player, UUID member, Runnable after) {
         clanOf(player).ifPresent(clan -> {
-            Optional<Clan.Member> target = clan.members().stream().filter(member -> member.name().equalsIgnoreCase(targetName)).findFirst();
+            Optional<Clan.Member> target = clan.member(member).filter(found -> !found.uuid().equals(player.getUniqueId()));
             if (!clan.isOwner(player.getUniqueId())) {
                 messages.send(player, "clan.owner-only");
-            } else if (target.isEmpty() || target.get().uuid().equals(player.getUniqueId())) {
-                messages.send(player, "clan.not-member", "player", targetName);
-            } else {
-                Tasks.async(plugin, () -> {
+            } else if (target.isPresent()) {
+                Tasks.async(plugin, player, () -> {
                     clans.setOwner(clan.id(), target.get().uuid());
                     sync.clanChanged(clan.id());
-                }, "Cession du clan " + clan.id());
-                messages.send(player, "clan.transferred", "player", target.get().name());
-                sync.bus().notify(target.get().uuid(), "clan.you-are-owner", true, "clan", clan.name());
+                    return true;
+                }, done -> {
+                    messages.send(player, "clan.transferred", "player", target.get().name());
+                    sync.bus().notify(target.get().uuid(), "clan.you-are-owner", true, "clan", clan.name());
+                    after.run();
+                }, () -> messages.send(player, "error.generic"));
             }
         });
     }

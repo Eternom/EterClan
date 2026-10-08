@@ -17,13 +17,20 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
 /**
- * Menu du clan, 5 lignes : le joueur (son compte ; clic = afficher son grade ou le tag du clan), le clan (réserve, chunks, entretien, prochain passage), les membres ;
- * la banque (verser, retirer, donner à la réserve, en prendre, taux d'intérêt) ; le terrain (poser, voir, rendre).
- * Un bouton dont on n'a pas la permission est grisé et le dit.
+ * Menu du clan, 5 lignes :
+ * <pre>
+ *  ▣ ▣ ▢ ▢ ▢ ▢ ▢ ▣ ▣
+ *  ▣ ☺ · · ⚑ · · ♟ ▣     ☺ = moi (mon compte ; clic : grade ou tag) · ⚑ = le clan · ♟ = membres
+ *  ▢ ⇩ ⇧ · $ ¢ · % ▢     ⇩ ⇧ = mon compte · $ ¢ = réserve (donner, prendre) · % = intérêt
+ *  ▣ ■ · ◎ · □ · ▦ ▣     ■ = prendre ce chunk · ◎ = voir le terrain · □ = rendre ce chunk · ▦ = parcelles
+ *  ✖ ▣ ▢ ▢ ← ▢ ▢ ▣ ▣     ✖ = quitter (ou dissoudre pour le chef)
+ * </pre>
+ * Un bouton dont on n'a pas la permission est grisé et le dit. Tout ce qui coûte ou détruit demande confirmation.
  */
 class ClanMenu implements Menu {
 
@@ -35,9 +42,11 @@ class ClanMenu implements Menu {
     private static final int GIVE = 22;
     private static final int TAKE = 23;
     private static final int INTEREST = 25;
-    private static final int CLAIM = 29;
-    private static final int HERE = 31;
-    private static final int UNCLAIM = 33;
+    private static final int CLAIM = 28;
+    private static final int HERE = 30;
+    private static final int UNCLAIM = 32;
+    private static final int ZONES = 34;
+    private static final int LEAVE = 36;
     private static final int BACK = 40;
 
     private final ClanGui gui;
@@ -67,24 +76,33 @@ class ClanMenu implements Menu {
                 Sounds.page(player);
                 gui.openMembers(player);
             }
-            case DEPOSIT -> gui.askAmount(player, "menu.deposit", amount -> gui.bank().deposit(player, amount, reopen));
-            case WITHDRAW -> gui.askAmount(player, "menu.withdraw", amount -> gui.bank().withdraw(player, amount, reopen));
-            case GIVE -> gui.askAmount(player, "menu.give", amount -> gui.bank().giveToReserve(player, amount, reopen));
+            case DEPOSIT -> gui.askAmount(player, "deposit", amount -> gui.bank().deposit(player, amount, reopen), reopen);
+            case WITHDRAW -> gui.askAmount(player, "withdraw", amount -> gui.bank().withdraw(player, amount, reopen), reopen);
+            case GIVE -> gui.askAmount(player, "give", amount -> gui.bank().giveToReserve(player, amount, reopen), reopen);
             case TAKE -> allowed(player, ClanPermission.RESERVE,
-                    () -> gui.askAmount(player, "menu.take", amount -> gui.bank().takeFromReserve(player, amount, reopen)));
+                    () -> gui.askAmount(player, "take", amount -> gui.bank().takeFromReserve(player, amount, reopen), reopen));
             case INTEREST -> allowed(player, ClanPermission.INTEREST,
-                    () -> gui.askAmount(player, "menu.interest", rate -> gui.bank().setInterest(player, rate, reopen)));
-            case CLAIM -> {
-                player.closeInventory();
-                gui.land().claim(player);
-            }
+                    () -> gui.askAmount(player, "interest", rate -> gui.bank().setInterest(player, rate, reopen), reopen));
+            case CLAIM -> allowed(player, ClanPermission.CLAIM, () -> gui.confirm(player, "claim", () -> gui.land().claim(player), reopen,
+                    "price", Money.format(gui.land().pricing().priceOf(clan.chunks() + 1)),
+                    "upkeep", Money.format(gui.land().pricing().upkeepOf(clan.chunks() + 1))));
             case HERE -> {
                 player.closeInventory();
                 gui.land().here(player);
             }
-            case UNCLAIM -> {
-                player.closeInventory();
-                gui.land().unclaim(player);
+            case UNCLAIM -> allowed(player, ClanPermission.CLAIM,
+                    () -> gui.confirm(player, "unclaim", () -> gui.land().unclaim(player), reopen));
+            case ZONES -> {
+                Sounds.page(player);
+                gui.openZones(player);
+            }
+            case LEAVE -> {
+                if (clan.isOwner(player.getUniqueId())) {
+                    gui.confirm(player, "disband", () -> gui.clans().disband(player), reopen, "clan", clan.name(),
+                            "reserve", Money.format(clan.reserve()));
+                } else {
+                    gui.confirm(player, "leave", () -> gui.clans().leave(player), reopen, "clan", clan.name());
+                }
             }
             case BACK -> gui.back().click(player);
             default -> {
@@ -115,14 +133,13 @@ class ClanMenu implements Menu {
                 text(showsRank() ? "menu.head.display-rank" : "menu.head.display-clan", "tag", clan.tag()),
                 text("menu.head.display-click"))));
         long seconds = Math.max(0, (clan.nextCycle() - System.currentTimeMillis()) / 1000);
-        int upkeepChunks = clan.chunks();
         inventory.setItem(INFO, Items.item(Material.WHITE_BANNER, text("menu.info.name", "clan", clan.name(), "tag", clan.tag()), List.of(
                 text("menu.info.members", "count", String.valueOf(clan.members().size())),
                 text("menu.info.chunks", "count", String.valueOf(clan.chunks()), "free", String.valueOf(gui.land().pricing().free())),
                 text("menu.info.reserve", "amount", Money.format(clan.reserve())),
                 text("menu.info.accounts", "amount", Money.format(clan.accounts())),
                 text("menu.info.interest", "rate", BankService.percent(clan.interest())),
-                text("menu.info.upkeep", "amount", Money.format(gui.land().pricing().upkeepOf(upkeepChunks))),
+                text("menu.info.upkeep", "amount", Money.format(gui.land().pricing().upkeepOf(clan.chunks()))),
                 text("menu.info.next", "time", EterLib.get().formatDuration(viewer, seconds)))));
         inventory.setItem(MEMBERS, Items.item(Material.PLAYER_HEAD, text("menu.members.name"),
                 List.of(text("menu.members.lore", "count", String.valueOf(clan.members().size())))));
@@ -131,20 +148,29 @@ class ClanMenu implements Menu {
         inventory.setItem(GIVE, Items.item(Material.GOLD_INGOT, text("menu.give.name"), List.of(text("menu.give.lore"))));
         inventory.setItem(TAKE, button(Material.GOLD_BLOCK, "menu.take", ClanPermission.RESERVE));
         inventory.setItem(INTEREST, button(Material.GOLD_NUGGET, "menu.interest", ClanPermission.INTEREST));
-        inventory.setItem(CLAIM, button(Material.GRASS_BLOCK, "menu.claim", ClanPermission.CLAIM));
-        inventory.setItem(HERE, Items.item(Material.COMPASS, text("menu.here.name"), List.of(text("menu.here.lore"))));
-        inventory.setItem(UNCLAIM, button(Material.COARSE_DIRT, "menu.unclaim", ClanPermission.CLAIM));
+        if (gui.land().isEnabled()) {
+            inventory.setItem(CLAIM, button(Material.GRASS_BLOCK, "menu.claim", ClanPermission.CLAIM));
+            inventory.setItem(HERE, Items.item(Material.COMPASS, text("menu.here.name"), List.of(text("menu.here.lore"))));
+            inventory.setItem(UNCLAIM, button(Material.COARSE_DIRT, "menu.unclaim", ClanPermission.CLAIM));
+            inventory.setItem(ZONES, Items.item(Material.OAK_FENCE, text("menu.zones.name"),
+                    List.of(text("menu.zones.lore", "count", String.valueOf(gui.zonesOf(clan).size())))));
+        } else {
+            inventory.setItem(HERE, Items.item(Material.BARRIER, text("menu.no-land.name"), List.of(text("menu.no-land.lore"))));
+        }
+        inventory.setItem(LEAVE, Items.item(Material.RED_BANNER,
+                text(clan.isOwner(viewer.getUniqueId()) ? "menu.disband.name" : "menu.leave.name"),
+                List.of(text(clan.isOwner(viewer.getUniqueId()) ? "menu.disband.lore" : "menu.leave.lore"))));
         inventory.setItem(BACK, gui.back().item(viewer));
     }
 
-    /** Bouton qui demande une permission : sa description, ou « tu n'as pas la permission ». */
     /** Affiche son grade (préférence, ou staff) plutôt que le tag du clan. */
     private boolean showsRank() {
         return viewer.hasPermission(ClanSync.STAFF)
                 || clan.member(viewer.getUniqueId()).map(Clan.Member::showRank).orElse(false);
     }
 
-    private org.bukkit.inventory.ItemStack button(Material icon, String key, ClanPermission permission) {
+    /** Bouton qui demande une permission : sa description, ou « tu n'as pas la permission ». */
+    private ItemStack button(Material icon, String key, ClanPermission permission) {
         boolean can = clan.can(viewer.getUniqueId(), permission);
         return Items.item(can ? icon : Material.GRAY_DYE, text(key + ".name"),
                 List.of(text(can ? key + ".lore" : "menu.locked")));

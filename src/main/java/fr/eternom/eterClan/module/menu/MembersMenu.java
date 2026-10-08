@@ -23,13 +23,14 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 /**
- * Les membres (28 au plus affichés) : tête, chef ou nombre de permissions, compte en banque. Clic : ses permissions
- * (pour qui a PERMISSIONS). Le chef d'abord, puis par date d'arrivée.
+ * Les membres (28 au plus affichés) : tête, chef ou nombre de permissions, compte en banque ; clic : sa fiche
+ * (permissions, exclure, céder le clan). Le chef d'abord, puis par date d'arrivée. Bouton : inviter (INVITE).
  */
 class MembersMenu implements Menu {
 
     private static final List<Integer> SLOTS = IntStream.rangeClosed(1, 4)
             .flatMap(row -> IntStream.rangeClosed(row * 9 + 1, row * 9 + 7)).boxed().toList();
+    private static final int INVITE = 47;
     private static final int BACK = 49;
 
     private final ClanGui gui;
@@ -52,12 +53,18 @@ class MembersMenu implements Menu {
     public void onClick(Player player, int slot, ClickType click) {
         UUID member = memberAt.get(slot);
         if (member != null) {
-            if (!clan.can(player.getUniqueId(), ClanPermission.PERMISSIONS)) {
+            Sounds.page(player);
+            gui.openMember(player, member);
+        } else if (slot == INVITE) {
+            if (!clan.can(player.getUniqueId(), ClanPermission.INVITE)) {
                 messages.send(player, "clan.no-permission");
                 return;
             }
-            Sounds.page(player);
-            gui.openPermissions(player, member);
+            Sounds.click(player);
+            gui.askText(player, "invite", "", name -> {
+                gui.clans().invite(player, name);
+                gui.openMembers(player);
+            }, () -> gui.openMembers(player));
         } else if (slot == BACK) {
             Sounds.page(player);
             gui.open(player);
@@ -85,6 +92,10 @@ class MembersMenu implements Menu {
                             messages.get(viewer, "members.account", "amount", Money.format(member.account())),
                             messages.get(viewer, "members.click"))));
         }
+        boolean canInvite = clan.can(viewer.getUniqueId(), ClanPermission.INVITE);
+        inventory.setItem(INVITE, Items.item(canInvite ? Material.WRITABLE_BOOK : Material.GRAY_DYE,
+                messages.get(viewer, "members.invite.name"),
+                List.of(messages.get(viewer, canInvite ? "members.invite.lore" : "menu.locked"))));
         inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-clan"), List.of()));
     }
 }

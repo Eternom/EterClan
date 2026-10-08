@@ -3,27 +3,26 @@
 #   <info> = texte courant gris clair, <accent> = mots importants en orange.
 # Une clé absente reprend le texte intégré au plugin : tu peux ne garder que les lignes que tu modifies.
 # Le préfixe des messages (« Core ») est commun à tous les plugins : EterLib/config.yml > language.prefix.
+# Tout se fait dans le menu /clan : les textes parlent de ses boutons, pas de commandes.
 
 # Badge qui remplace le grade (Tab, chat, pseudo) pour les membres d'un clan : <tag> = le tag du clan.
 badge: "<accent>[<tag>]</accent> "
 
 clan:
-  usage: "<info>Commandes : <accent>/clan</accent> (menu), create, invite, accept, leave, kick, transfer, disband, claim, unclaim, here, deposit, withdraw, give, take, interest, display, zone."
-  help-no-clan: "<info>Tu n'as pas de clan. Crée le tien avec <accent>/clan create \\<nom> \\<TAG></accent>, ou accepte une invitation avec <accent>/clan accept</accent>."
-  none: "<error>Tu n'as pas de clan : <accent>/clan create \\<nom> \\<TAG>"
-  create-usage: "<error>Utilisation : <accent>/clan create \\<nom> \\<TAG></accent> (nom de 3 à 24 caractères, tag de 2 à 5 lettres ou chiffres)."
+  none: "<error>Tu n'as pas de clan : ouvre <accent><click:run_command:'/clan'>/clan</click></accent> pour en créer un ou accepter une invitation."
+  create-usage: "<error>Nom de 3 à 24 caractères, tag de 2 à 5 lettres ou chiffres."
   already: "<error>Tu es déjà dans un clan."
   name-taken: "<error>Ce nom ou ce tag est déjà pris."
   create-not-enough: "<error>Il te faut <accent><price></accent> pour créer un clan."
-  created: "<success>Clan <accent><clan></accent> <dark_gray>[<tag>]</dark_gray> créé !</success> <info>Prends ton premier terrain avec <accent>/clan claim</accent>."
+  created: "<success>Clan <accent><clan></accent> <dark_gray>[<tag>]</dark_gray> créé !</success> <info>Payé <accent><price></accent>. Ouvre <accent><click:run_command:'/clan'>/clan</click></accent> pour prendre ton premier terrain."
   no-permission: "<error>Ton clan ne t'a pas donné cette permission."
   target-in-clan: "<error><accent><player></accent> est déjà dans un clan."
   invite-sent: "<info>Invitation envoyée à <accent><player></accent> (5 minutes pour accepter)."
-  invited: "<info><accent><player></accent> t'invite dans le clan <accent><clan></accent> : <accent><click:run_command:'/clan accept'>/clan accept</click></accent> pour le rejoindre."
+  invited: "<info><accent><player></accent> t'invite dans le clan <accent><clan></accent> : ouvre <accent><click:run_command:'/clan'>/clan</click></accent> pour accepter."
   no-invite: "<error>Tu n'as pas d'invitation en cours (ou elle a expiré)."
   joined: "<success>Tu as rejoint le clan <accent><clan></accent> !"
   member-joined: "<info><accent><player></accent> a rejoint ton clan."
-  owner-cannot-leave: "<error>Le chef ne peut pas partir : cède le clan (<accent>/clan transfer</accent>) ou dissous-le (<accent>/clan disband</accent>)."
+  owner-cannot-leave: "<error>Le chef ne peut pas partir : cède d'abord le clan à un membre, ou dissous-le."
   left: "<info>Tu as quitté le clan <accent><clan></accent> ; ton compte t'a été rendu."
   not-member: "<error><accent><player></accent> n'est pas dans ton clan."
   cannot-kick-owner: "<error>On ne peut pas exclure le chef."
@@ -32,7 +31,6 @@ clan:
   owner-only: "<error>Seul le chef du clan peut faire ça."
   transferred: "<info><accent><player></accent> est maintenant le chef du clan."
   you-are-owner: "<success>Tu es maintenant le chef du clan <accent><clan></accent> !"
-  disband-confirm: "<error>Dissoudre le clan rend à chacun son compte, libère tout le terrain et PERD la réserve. Confirme avec <accent>/clan disband confirm</accent>."
   disbanded: "<info>Le clan <accent><clan></accent> est dissous."
   disbanded-notice: "<error>Le clan <accent><clan></accent> a été dissous.</error> <info>Ton compte t'a été rendu."
   owner-has-all: "<error>Le chef a toutes les permissions."
@@ -60,7 +58,7 @@ claim:
   already-yours: "<error>Ce chunk est déjà à ton clan."
   taken: "<error>Ce chunk appartient déjà à un clan."
   not-adjacent: "<error>Ce chunk doit toucher le terrain de ton clan."
-  reserve-not-enough: "<error>La réserve du clan n'a pas <accent><price></accent> pour ce chunk (<accent>/clan give</accent> pour la remplir)."
+  reserve-not-enough: "<error>La réserve du clan n'a pas <accent><price></accent> pour ce chunk : donne-lui de l'argent dans le menu."
   claimed: "<success>Chunk pris !</success> <info>Payé <accent><price></accent> par la réserve ; entretien du terrain : <accent><upkeep></accent> par semaine."
   not-yours: "<error>Ce chunk n'est pas à ton clan."
   rented-zone: "<error>Une parcelle louée est sur ce chunk : la location doit d'abord finir."
@@ -76,17 +74,13 @@ land:
   zone-rented: "<info>Parcelle <accent><zone></accent> de <accent><tenant></accent> <dark_gray>·</dark_gray> <info><clan>"
 
 zone:
-  usage: "<info>Parcelles : <accent>/clan zone pos1</accent>, <accent>pos2</accent> (les deux coins, le bloc visé), <accent>create \\<nom></accent>, <accent>delete \\<nom></accent>, <accent>rent \\<nom> \\<loyer></accent>, <accent>take \\<nom></accent> (louer), <accent>end \\<nom></accent>, <accent>trust \\<nom> \\<joueur></accent>, <accent>untrust</accent>, <accent>list</accent>."
-  pos1: "<info>Premier coin : <accent><x>, <z>"
-  pos2: "<info>Second coin : <accent><x>, <z>"
-  no-selection: "<error>Choisis d'abord les deux coins : <accent>/clan zone pos1</accent> et <accent>/clan zone pos2</accent>."
+  other-world: "<error>Les deux coins doivent être dans le même monde."
   name-invalid: "<error>Nom de parcelle : 2 à 24 lettres, chiffres, - ou _."
   too-big: "<error>Parcelle trop grande : <accent><max></accent> blocs au plus."
   outside-land: "<error>La parcelle doit être entièrement dans le terrain de ton clan."
   overlaps: "<error>Elle chevauche une autre parcelle."
   name-taken: "<error>Ton clan a déjà une parcelle <accent><zone></accent>."
-  created: "<success>Parcelle <accent><zone></accent> créée</success> <info>(<accent><area></accent> blocs). Mets-la en location avec <accent>/clan zone rent <zone> \\<loyer></accent>."
-  unknown: "<error>Pas de parcelle <accent><zone></accent> dans ton clan."
+  created: "<success>Parcelle <accent><zone></accent> créée</success> <info>(<accent><area></accent> blocs). Fixe son loyer dans le menu pour la mettre en location."
   deleted: "<info>Parcelle <accent><zone></accent> supprimée."
   rented-cannot-delete: "<error>La parcelle <accent><zone></accent> est louée : la location doit d'abord finir."
   rented-locked: "<error>La parcelle <accent><zone></accent> est louée : son loyer ne change pas pendant la location."
@@ -94,19 +88,25 @@ zone:
   rent-off: "<info>La parcelle <accent><zone></accent> n'est plus à louer."
   not-for-rent: "<error>La parcelle <accent><zone></accent> n'est pas à louer (ou déjà louée)."
   rent-not-enough: "<error>Il te faut <accent><rent></accent> pour la première semaine."
-  rented: "<success>Tu loues la parcelle <accent><zone></accent> !</success> <info><accent><rent></accent> par semaine, versés à la réserve. Toi seul y construis : <accent>/clan zone trust <zone> \\<joueur></accent> pour inviter."
-  not-rented: "<error>La parcelle <accent><zone></accent> n'est pas louée."
+  rented: "<success>Tu loues la parcelle <accent><zone></accent> !</success> <info><accent><rent></accent> par semaine, versés à la réserve. Toi seul y construis : ajoute qui tu veux dans « Accès »."
   ended: "<info>La location de <accent><zone></accent> est terminée : la parcelle revient au clan."
   ended-by-clan: "<error>Ton clan a mis fin à ta location de la parcelle <accent><zone></accent>."
   rent-failed: "<error>Tu n'as pas pu payer le loyer de <accent><zone></accent> : la location est terminée."
   not-tenant: "<error>Tu ne loues pas la parcelle <accent><zone></accent>."
   trusted: "<info><accent><player></accent> peut maintenant construire et ouvrir dans <accent><zone></accent>."
   untrusted: "<info><accent><player></accent> n'a plus accès à <accent><zone></accent>."
-  list-empty: "<info>Ton clan n'a pas de parcelle."
-  list-header: "<info>Parcelles du clan (<accent><count></accent>) :"
-  list-free: "<dark_gray>▸ <accent><zone></accent> <info>(<area> blocs) : au clan"
-  list-for-rent: "<dark_gray>▸ <accent><zone></accent> <info>(<area> blocs) : à louer <accent><rent></accent>/semaine"
-  list-rented: "<dark_gray>▸ <accent><zone></accent> <info>(<area> blocs) : louée par <accent><tenant></accent>, <rent>/semaine"
+
+# Tracer une parcelle : deux blocs cliqués, puis des boutons dans le chat
+selection:
+  start: "<info>Clique (clic gauche ou droit) sur le <accent>premier coin</accent> de la parcelle, puis sur le <accent>second</accent>. <accent><max></accent> blocs au plus, dans le terrain du clan."
+  first: "<info>Premier coin : <accent><x>, <z></accent>. Clique maintenant le second."
+  done: "<info>Parcelle de <accent><width> × <depth></accent> (<accent><area></accent> blocs)."
+  confirm: "<success><bold>[Valider]</bold></success>"
+  restart: "<accent><bold>[Recommencer]</bold></accent>"
+  cancel: "<error><bold>[Annuler]</bold></error>"
+  restarted: "<info>On recommence : clique le premier coin."
+  cancelled: "<info>Parcelle annulée."
+  expired: "<info>Parcelle abandonnée (3 minutes sans valider)."
 
 # Nom de chaque permission (menus, messages) et sa description
 permission:
@@ -138,10 +138,110 @@ permission-lore:
   interest: "<info>Régler le taux d'intérêt des comptes"
   permissions: "<info>Donner et retirer ces permissions"
 
-menu:
-  title: "<primary><clan> <dark_gray>[<tag>]"
+# Fenêtres de saisie
+dialogs:
   confirm: "Valider"
   amount: "Montant"
+  deposit:
+    title: "<primary>Ranger de l'argent"
+    body: "Ton argent sur ton compte du clan est à l'abri de la mort. Chaque semaine, l'intérêt du clan en reverse une part à la réserve."
+  withdraw:
+    title: "<primary>Reprendre de l'argent"
+    body: "Combien reprendre de ton compte du clan ?"
+  give:
+    title: "<primary>Donner à la réserve"
+    body: "La réserve paie les chunks et l'entretien du terrain."
+  take:
+    title: "<primary>Prendre dans la réserve"
+    body: "Combien prendre dans la réserve du clan ?"
+  interest:
+    title: "<primary>Intérêt du clan"
+    body: "Pourcentage pris chaque semaine sur le compte de chaque membre et versé à la réserve (0 à <max> %)."
+  rent:
+    title: "<primary>Loyer de la parcelle"
+    body: "Loyer par semaine, versé à la réserve du clan (0 = plus à louer)."
+  invite:
+    title: "<primary>Inviter un joueur"
+    body: "Son pseudo : il recevra une invitation valable 5 minutes."
+    label: "Pseudo"
+  trust:
+    title: "<primary>Donner l'accès"
+    body: "Ce joueur pourra construire et ouvrir les coffres dans ta parcelle."
+    label: "Pseudo"
+  zone-name:
+    title: "<primary>Nom de la parcelle"
+    body: "2 à 24 lettres, chiffres, - ou _ (ex : maison-pierre)."
+    label: "Nom"
+
+# Confirmations : titre, texte, bouton
+confirm:
+  claim:
+    title: "<primary>Prendre ce chunk"
+    body: "Payé <price> par la réserve du clan. L'entretien de votre terrain passera à <upkeep> par semaine."
+    button: "Prendre (<price>)"
+  unclaim:
+    title: "<primary>Rendre ce chunk"
+    body: "Le chunk où tu es redevient libre, sans remboursement. Les parcelles non louées dessus sont supprimées."
+    button: "Rendre"
+  disband:
+    title: "<primary>Dissoudre <clan>"
+    body: "Chaque membre récupère son compte, tout le terrain est libéré, et la réserve (<reserve>) est PERDUE."
+    button: "Dissoudre"
+  leave:
+    title: "<primary>Quitter <clan>"
+    body: "Ton compte du clan te sera rendu ; tes locations de parcelles s'arrêtent."
+    button: "Quitter"
+  kick:
+    title: "<primary>Exclure <player>"
+    body: "Son compte (<amount>) lui sera rendu ; ses locations de parcelles s'arrêtent."
+    button: "Exclure"
+  transfer:
+    title: "<primary>Céder le clan"
+    body: "<player> deviendra le chef du clan, avec toutes les permissions. Tu redeviens un membre."
+    button: "Céder"
+  zone-take:
+    title: "<primary>Louer <zone>"
+    body: "<rent> tout de suite, puis chaque semaine (versés à la réserve). Toi seul y construiras, avec ceux que tu choisis."
+    button: "Louer (<rent>)"
+  zone-leave:
+    title: "<primary>Quitter <zone>"
+    body: "La location s'arrête : la parcelle revient au clan, avec ce que tu y as laissé."
+    button: "Quitter"
+  zone-delete:
+    title: "<primary>Supprimer <zone>"
+    body: "La parcelle disparaît (le terrain reste au clan)."
+    button: "Supprimer"
+  zone-evict:
+    title: "<primary>Mettre fin à la location"
+    body: "<tenant> ne loue plus <zone> : la parcelle revient au clan."
+    button: "Mettre fin"
+
+# Créer un clan
+create:
+  title: "<primary>Créer un clan"
+  body: "Créer un clan coûte <price>. Tu en es le chef : invite tes amis, prends du terrain, range ton argent à l'abri de la mort."
+  name: "Nom (3 à 24 caractères)"
+  tag: "Tag (2 à 5 lettres)"
+  confirm: "Créer (<price>)"
+
+no-clan:
+  title: "<primary>Clans"
+  info:
+    name: "<accent>Un clan, c'est quoi ?"
+    line1: "<info>Une guilde avec ses membres et leurs permissions"
+    line2: "<info>Une banque : ton argent y est à l'abri de la mort"
+    line3: "<info>Un terrain protégé, et des parcelles à louer"
+    line4: "<info>Ton tag affiché à la place de ton grade"
+  create:
+    name: "<accent>Créer un clan"
+    price: "<dark_gray>▸ <info>Prix : <accent><price>"
+    click: "<accent>Clic</accent> <info>: choisir le nom et le tag"
+  accept:
+    name: "<accent>Accepter l'invitation"
+    lore: "<info>Rejoindre le clan qui t'a invité (5 minutes)"
+
+menu:
+  title: "<primary><clan> <dark_gray>[<tag>]"
   locked: "<error>● <info>Ton clan ne t'a pas donné cette permission"
   back-to-clan: "<accent>« Retour au clan"
   head:
@@ -163,41 +263,43 @@ menu:
     next: "<dark_gray>▸ <info>Prochain passage dans <accent><time>"
   members:
     name: "<accent>Membres"
-    lore: "<info><count> membre(s) : permissions, comptes"
+    lore: "<info><count> membre(s) : inviter, permissions, comptes"
   deposit:
     name: "<accent>Ranger sur mon compte"
     lore: "<info>Porte-monnaie -> ton compte (à l'abri de la mort)"
-    title: "<primary>Ranger de l'argent"
-    body: "Ton argent sur ton compte du clan est à l'abri de la mort. Chaque semaine, l'intérêt du clan en reverse une part à la réserve."
   withdraw:
     name: "<accent>Reprendre de mon compte"
     lore: "<info>Ton compte -> porte-monnaie"
-    title: "<primary>Reprendre de l'argent"
-    body: "Combien reprendre de ton compte du clan ?"
   give:
     name: "<accent>Donner à la réserve"
     lore: "<info>Porte-monnaie -> réserve du clan"
-    title: "<primary>Donner à la réserve"
-    body: "La réserve paie les chunks et l'entretien du terrain."
   take:
     name: "<accent>Prendre dans la réserve"
     lore: "<info>Réserve du clan -> porte-monnaie"
-    title: "<primary>Prendre dans la réserve"
-    body: "Combien prendre dans la réserve du clan ?"
   interest:
     name: "<accent>Régler l'intérêt"
     lore: "<info>Part des comptes versée chaque semaine à la réserve"
-    title: "<primary>Intérêt du clan"
-    body: "Pourcentage pris chaque semaine sur le compte de chaque membre et versé à la réserve (0 à <max> %)."
   claim:
     name: "<accent>Prendre ce chunk"
-    lore: "<info>Payé par la réserve, au prix du prochain chunk"
+    lore: "<info>Le chunk où tu es, payé par la réserve"
   here:
     name: "<accent>Voir le terrain"
     lore: "<info>Les bords en particules, et les prix"
   unclaim:
     name: "<accent>Rendre ce chunk"
-    lore: "<info>Sans remboursement"
+    lore: "<info>Le chunk où tu es, sans remboursement"
+  zones:
+    name: "<accent>Parcelles"
+    lore: "<info><count> parcelle(s) : créer, louer, gérer"
+  no-land:
+    name: "<accent>Pas de terrain ici"
+    lore: "<info>Le terrain se prend sur la survie"
+  leave:
+    name: "<error>Quitter le clan"
+    lore: "<info>Ton compte te sera rendu"
+  disband:
+    name: "<error>Dissoudre le clan"
+    lore: "<info>Comptes rendus, terrain libéré, réserve perdue"
 
 members:
   title: "<primary>Membres : <clan>"
@@ -206,13 +308,85 @@ members:
   permissions: "<count> permission(s)"
   role: "<dark_gray>▸ <info><role>"
   account: "<dark_gray>▸ <info>Compte : <accent><amount>"
-  click: "<accent>Clic</accent> <info>: ses permissions"
+  click: "<accent>Clic</accent> <info>: sa fiche"
+  invite:
+    name: "<accent>Inviter un joueur"
+    lore: "<info>Son pseudo, dans une fenêtre"
+
+member:
+  title: "<primary><player>"
+  is-owner: "<success>● <info>Chef du clan"
+  permissions: "<dark_gray>▸ <info><count> permission(s)"
+  back: "<accent>« Membres"
+  owner-all:
+    name: "<accent>Le chef a tout"
+    lore: "<info>Toutes les permissions"
+  permissions-button:
+    name: "<accent>Permissions"
+    lore: "<info>Donner et retirer ses permissions"
+  kick:
+    name: "<error>Exclure"
+    lore: "<info>Son compte lui sera rendu"
+  transfer:
+    name: "<accent>Céder le clan"
+    lore: "<info>Il devient le chef"
 
 permissions:
   title: "<primary>Permissions : <player>"
   granted: "<success>● <info>Donnée <dark_gray>· <accent>clic</accent> <info>pour la retirer"
   denied: "<error>● <info>Pas donnée <dark_gray>· <accent>clic</accent> <info>pour la donner"
-  back: "<accent>« Membres"
+  back: "<accent>« Sa fiche"
   note:
     name: "<accent>Parcelles louées"
     lore: "<info>Ces permissions ne valent jamais dans une parcelle louée : seul son locataire y décide."
+
+zones:
+  title: "<primary>Parcelles : <clan>"
+  name: "<accent><zone>"
+  area: "<dark_gray>▸ <info><area> blocs"
+  rented: "<dark_gray>▸ <info>Louée par <accent><tenant></accent>, <rent>/semaine"
+  for-rent: "<dark_gray>▸ <info>À louer : <accent><rent></accent>/semaine"
+  free: "<dark_gray>▸ <info>Au clan, pas à louer"
+  click: "<accent>Clic</accent> <info>: la parcelle"
+  empty:
+    name: "<accent>Pas encore de parcelle"
+    lore: "<info>Une parcelle se trace dans le terrain du clan, puis se loue à un membre."
+  new:
+    name: "<accent>Nouvelle parcelle"
+    lore: "<info>Clique ses deux coins dans le monde"
+
+zone-menu:
+  title: "<primary>Parcelle <zone>"
+  rent: "<dark_gray>▸ <info>Loyer : <accent><rent></accent>/semaine"
+  back: "<accent>« Parcelles"
+  back-zone: "<accent>« La parcelle"
+  status:
+    line: "<dark_gray>▸ <info><status>"
+    rented: "Louée par <tenant>"
+    for-rent: "À louer"
+    free: "Au clan, pas à louer"
+  access:
+    name: "<accent>Accès"
+    lore: "<info>Qui peut construire et ouvrir ici"
+  leave:
+    name: "<error>Quitter la location"
+    lore: "<info>La parcelle revient au clan"
+  take:
+    name: "<success>Louer"
+    lore: "<info>Toi seul y construis, avec ceux que tu choisis"
+  set-rent:
+    name: "<accent>Fixer le loyer"
+    lore: "<info>0 = plus à louer"
+  delete:
+    name: "<error>Supprimer"
+    lore: "<info>Le terrain reste au clan"
+  evict:
+    name: "<error>Mettre fin à la location"
+    lore: "<info>La parcelle revient au clan"
+
+trust:
+  title: "<primary>Accès : <zone>"
+  remove: "<accent>Clic</accent> <info>: lui retirer l'accès"
+  add:
+    name: "<accent>Ajouter un joueur"
+    lore: "<info>Son pseudo, dans une fenêtre"

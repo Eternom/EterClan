@@ -52,7 +52,7 @@ class PermissionsMenu implements Menu {
                     () -> gui.openPermissions(player, member.uuid()));
         } else if (slot == BACK) {
             Sounds.page(player);
-            gui.openMembers(player);
+            gui.openMember(player, member.uuid());
         }
     }
 

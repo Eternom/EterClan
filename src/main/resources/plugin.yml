@@ -11,8 +11,8 @@ softdepend: [Vault]
 
 commands:
   clan:
-    description: Le menu de ton clan, et toutes ses commandes.
-    usage: /clan [create|invite|accept|leave|kick|transfer|disband|claim|unclaim|here|deposit|withdraw|give|take|interest|display|zone]
+    description: Le menu de ton clan (tout se fait dedans).
+    usage: /clan
     aliases: [clans, guild]
     permission: eterclan.use
 
