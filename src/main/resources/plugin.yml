@@ -1,0 +1,30 @@
+name: EterClan
+version: '${version}'
+
+main: fr.eternom.eterClan.Main
+api-version: '26.2'
+load: POSTWORLD
+authors: [ NadTum ]
+description: 'Clans du réseau : guildes, banque, terrain en chunks et parcelles à louer.'
+depend: [EterLib]
+softdepend: [Vault]
+
+commands:
+  clan:
+    description: Le menu de ton clan, et toutes ses commandes.
+    usage: /clan [create|invite|accept|leave|kick|transfer|disband|claim|unclaim|here|deposit|withdraw|give|take|interest|zone]
+    aliases: [clans, guild]
+    permission: eterclan.use
+
+permissions:
+  eterclan.use:
+    default: true
+  eterclan.bypass.claims:
+    description: Agir sur n'importe quel terrain ou parcelle (staff).
+    default: op
+  eterclan.admin:
+    description: Toutes les permissions d'EterClan.
+    default: op
+    children:
+      eterclan.use: true
+      eterclan.bypass.claims: true

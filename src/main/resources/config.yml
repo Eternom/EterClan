@@ -1,0 +1,45 @@
+# ============================================================
+#  EterClan : les clans du réseau
+# ============================================================
+#
+#  Un clan est une guilde : des membres avec chacun leurs permissions, une banque (un compte par membre,
+#  protégé de la perte d'argent à la mort, et une réserve commune), un terrain en chunks et des parcelles
+#  à louer. Le clan existe sur tout le réseau ; chaque chunk et chaque parcelle restent sur le serveur où
+#  ils ont été posés. À installer sur les survies seulement.
+#  Les textes sont dans lang/. Toute modification nécessite un redémarrage du serveur.
+
+clan:
+  # Prix de création d'un clan (un joueur seul est un clan d'une personne).
+  creation-price: 1000
+  # Permissions d'un nouveau membre (le chef a tout ; les autres se donnent dans le menu des membres) :
+  # build, containers, doors, redstone, crops, animals, invite, kick, claim, zones, reserve, interest, permissions
+  default-permissions: [doors, crops, animals]
+
+bank:
+  # Intérêt d'un nouveau clan, en % par semaine : pris sur le compte de chaque membre et versé à la réserve.
+  default-interest: 2
+  # Taux maximum qu'un clan peut régler.
+  max-interest: 10
+
+# Le terrain, payé au SERVEUR (évier de l'économie) : free-chunks gratuits, puis le premier chunk payant coûte
+# price, et chaque suivant growth fois plus que le précédent, jamais plus de cap fois le premier.
+# L'entretien hebdomadaire suit la même courbe à partir de upkeep (payé par la réserve, puis les comptes au
+# prorata ; sinon les chunks les plus récents sont perdus). Les chunks se comptent sur tout le réseau.
+land:
+  free-chunks: 9
+  price: 250
+  upkeep: 20
+  growth: 1.07
+  cap: 15
+  # Mondes où l'on peut prendre du terrain (vide = tous).
+  worlds: []
+
+zones:
+  # Surface maximale d'une parcelle, en blocs (64 x 64 = 4096).
+  max-area: 4096
+
+# Menu /clan : bouton en bas. Avec une commande (sans le /), il la lance pour le joueur et relie les menus
+# entre eux ; vide, il ferme le menu.
+menus:
+  clan:
+    back-command: ""
