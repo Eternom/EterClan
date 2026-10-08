@@ -57,7 +57,9 @@ claim:
   disabled-here: "<error>On ne prend pas de terrain sur ce serveur."
   already-yours: "<error>Ce chunk est déjà à ton clan."
   taken: "<error>Ce chunk appartient déjà à un clan."
-  not-adjacent: "<error>Ce chunk doit toucher le terrain de ton clan."
+  not-adjacent: "<error>Ton clan a un seul territoire : ce chunk doit toucher un de ses chunks."
+  land-elsewhere: "<error>Le territoire de ton clan est ailleurs (autre serveur ou autre monde) : les nouveaux chunks se posent contre lui."
+  would-split: "<error>Rendre ce chunk couperait ton territoire en deux : rends plutôt un chunk du bord."
   reserve-not-enough: "<error>La réserve du clan n'a pas <accent><price></accent> pour ce chunk : donne-lui de l'argent dans le menu."
   claimed: "<success>Chunk pris !</success> <info>Payé <accent><price></accent> par la réserve ; entretien du terrain : <accent><upkeep></accent> par semaine."
   not-yours: "<error>Ce chunk n'est pas à ton clan."
@@ -177,7 +179,7 @@ dialogs:
 confirm:
   claim:
     title: "<primary>Prendre ce chunk"
-    body: "Payé <price> par la réserve du clan. L'entretien de votre terrain passera à <upkeep> par semaine."
+    body: "Payé <price> par la réserve du clan. L'entretien de votre terrain passera à <upkeep> par semaine. Un clan a un seul territoire : le premier chunk se pose où tu veux, les suivants contre lui."
     button: "Prendre (<price>)"
   unclaim:
     title: "<primary>Rendre ce chunk"

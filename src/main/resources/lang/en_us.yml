@@ -57,7 +57,9 @@ claim:
   disabled-here: "<error>Land can't be taken on this server."
   already-yours: "<error>This chunk already belongs to your clan."
   taken: "<error>This chunk already belongs to a clan."
-  not-adjacent: "<error>This chunk must touch your clan's land."
+  not-adjacent: "<error>Your clan has a single territory: this chunk must touch one of its chunks."
+  land-elsewhere: "<error>Your clan's territory is elsewhere (another server or world): new chunks go next to it."
+  would-split: "<error>Giving up this chunk would cut your territory in two: give up a chunk on the edge instead."
   reserve-not-enough: "<error>The clan reserve doesn't have <accent><price></accent> for this chunk: give it money in the menu."
   claimed: "<success>Chunk taken!</success> <info>Paid <accent><price></accent> by the reserve; land upkeep: <accent><upkeep></accent> per week."
   not-yours: "<error>This chunk isn't your clan's."
@@ -177,7 +179,7 @@ dialogs:
 confirm:
   claim:
     title: "<primary>Take this chunk"
-    body: "Paid <price> by the clan reserve. Your land upkeep will become <upkeep> per week."
+    body: "Paid <price> by the clan reserve. Your land upkeep will become <upkeep> per week. A clan has a single territory: the first chunk goes anywhere, the next ones next to it."
     button: "Take (<price>)"
   unclaim:
     title: "<primary>Give up this chunk"

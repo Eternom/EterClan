@@ -24,8 +24,10 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   qui **remplace le grade** dans le Tab, le pseudo, la sidebar (EterTab) et le chat (EterChat). Pas de badge (donc le
   grade) pour le staff (`eter.display.staff`) et pour qui préfère son grade (clic sur sa tête dans le menu ; colonne
   `show_rank`).
-- **`claim`** : chunks (`eterclan_claims`, clé serveur + monde + x + z : un seul clan par chunk). Le premier chunk
-  d'un clan sur un serveur se pose n'importe où, les suivants doivent toucher son terrain. Payés au serveur par la
+- **`claim`** : chunks (`eterclan_claims`, clé serveur + monde + x + z : un seul clan par chunk). **Un clan a UN
+  territoire d'un seul tenant** (sa base) : le premier chunk se pose n'importe où, les suivants contre un de ses chunks
+  (donc sur le même serveur et dans le même monde) ; rendre un chunk ne doit pas couper le territoire en deux
+  (`ClaimIndex#staysConnected`), sauf le dernier (le clan peut alors s'installer ailleurs). Payés au serveur par la
   **réserve** (`Pricing` : `free-chunks` gratuits, puis `price` × `growth`^(n-1), plafonné à `cap` fois ; l'entretien
   hebdomadaire suit la même courbe depuis `upkeep`). Rendre un chunk : sans remboursement, pas sous une parcelle louée.
   - **Protection** (`ProtectionListener`, `Access`, tout en mémoire) : chaque action demande sa permission (blocs,

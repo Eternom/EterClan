@@ -4,10 +4,14 @@ import fr.eternom.eterClan.module.claim.ClaimRepository.Claim;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -66,6 +70,33 @@ public class ClaimIndex {
     public boolean touches(ChunkKey chunk, long clanId) {
         return List.of(chunk.relative(1, 0), chunk.relative(-1, 0), chunk.relative(0, 1), chunk.relative(0, -1)).stream()
                 .anyMatch(neighbour -> owner(neighbour).orElse(-1) == clanId);
+    }
+
+    /**
+     * Le territoire du clan reste d'un seul tenant sans ce chunk (4 voisins, même monde) : parcours depuis un chunk
+     * restant. Un territoire réduit à ce chunk (le dernier) reste valable.
+     */
+    public boolean staysConnected(long clanId, ChunkKey removed) {
+        Set<ChunkKey> rest = new HashSet<>();
+        owners.forEach((chunk, clan) -> {
+            if (clan == clanId && !chunk.equals(removed)) {
+                rest.add(chunk);
+            }
+        });
+        if (rest.isEmpty()) {
+            return true;
+        }
+        Deque<ChunkKey> queue = new ArrayDeque<>(List.of(rest.iterator().next()));
+        Set<ChunkKey> reached = new HashSet<>(queue);
+        while (!queue.isEmpty()) {
+            ChunkKey chunk = queue.poll();
+            for (ChunkKey next : List.of(chunk.relative(1, 0), chunk.relative(-1, 0), chunk.relative(0, 1), chunk.relative(0, -1))) {
+                if (rest.contains(next) && reached.add(next)) {
+                    queue.add(next);
+                }
+            }
+        }
+        return reached.size() == rest.size();
     }
 
     /** Le clan a-t-il au moins un chunk sur ce serveur ? */

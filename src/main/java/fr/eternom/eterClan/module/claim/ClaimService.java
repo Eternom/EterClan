@@ -25,9 +25,10 @@ import java.util.List;
 import java.util.OptionalLong;
 
 /**
- * Le terrain d'un clan : poser le chunk où l'on est (attenant au reste du terrain sur ce serveur, payé par la réserve au
- * prix de Pricing, compté sur tout le réseau), le rendre (sans remboursement ; pas sous une parcelle louée), et voir les
- * bords (particules). Mondes autorisés : config.yml > land.worlds (vide = tous).
+ * Le terrain d'un clan : UN seul territoire d'un tenant (sa base). Le premier chunk se pose n'importe où, les suivants
+ * contre un chunk du clan ; payés par la réserve au prix de Pricing (comptés sur tout le réseau). Rendre un chunk : sans
+ * remboursement, pas sous une parcelle louée, et jamais s'il coupe le territoire en deux (le dernier, oui : le clan peut
+ * s'installer ailleurs). Voir les bords : particules. Mondes autorisés : config.yml > land.worlds (vide = tous).
  */
 public class ClaimService {
 
@@ -76,13 +77,13 @@ public class ClaimService {
                 messages.send(player, owner.getAsLong() == clan.id() ? "claim.already-yours" : "claim.taken");
                 return;
             }
-            if (sync.claims().hasLand(clan.id()) && !sync.claims().touches(chunk, clan.id())) {
-                messages.send(player, "claim.not-adjacent");
-                return;
-            }
             Tasks.async(plugin, player, () -> {
-                // Prix lu en base au moment de payer : un autre serveur a pu poser un chunk entre-temps
+                // Lu en base au moment de payer : un autre serveur a pu poser un chunk entre-temps
                 Clan fresh = clans.byId(clan.id()).orElse(clan);
+                // Un seul territoire : le premier chunk n'importe où, les suivants contre un chunk du clan
+                if (fresh.chunks() > 0 && !sync.claims().touches(chunk, clan.id())) {
+                    return new Result(sync.claims().hasLand(clan.id()) ? "claim.not-adjacent" : "claim.land-elsewhere", 0);
+                }
                 double price = pricing.priceOf(fresh.chunks() + 1);
                 if (price > 0 && !clans.takeReserve(clan.id(), price)) {
                     return new Result("claim.reserve-not-enough", price);
@@ -116,6 +117,10 @@ public class ClaimService {
                     .filter(zone -> zone.overlapsChunk(chunk.world(), chunk.x(), chunk.z())).toList();
             if (onChunk.stream().anyMatch(Zone::isRented)) {
                 messages.send(player, "claim.rented-zone");
+                return;
+            }
+            if (!sync.claims().staysConnected(clan.id(), chunk)) {
+                messages.send(player, "claim.would-split");
                 return;
             }
             Tasks.async(plugin, player, () -> {
