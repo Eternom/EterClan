@@ -11,7 +11,7 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
 ## Prérequis
 
 - **EterLib 1.10.0+** (`depend`) : base, Redis (invitations, bus réseau), langues, menus (cadre, Dialogs), étiquettes.
-- **EterEconomy 2.2.1+** (`softdepend`, son API `EconomyApi`) : création payante, banque, chunks, loyers.
+- **EterEconomy 2.2.2+** (`softdepend`, son API `EconomyApi`) : création payante, banque, chunks, loyers.
 - **EterEssential 1.0.6+** : la perte d'argent à la mort (5 %) ne touche que le porte-monnaie, pas la banque du clan.
 
 ## Modules
