@@ -10,7 +10,7 @@ import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterClan.module.zone.ZoneRepository;
 import fr.eternom.eterLib.helper.economy.Money;
-import net.milkbowl.vault.economy.Economy;
+import fr.eternom.eterEconomy.api.EconomyApi;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -66,7 +66,7 @@ public class WeeklyCycle {
                     }
                 });
             }
-            Economy economy = Money.economy();
+            EconomyApi economy = EconomyApi.get().orElse(null);
             if (economy != null) {
                 zones.dueRents(now).forEach(zone -> rent(zone, economy, now));
             }
@@ -152,12 +152,12 @@ public class WeeklyCycle {
                 sync.bus().notify(member.uuid(), "bank.chunks-lost", true, "count", String.valueOf(count))));
     }
 
-    private void rent(Zone zone, Economy economy, long now) {
+    private void rent(Zone zone, EconomyApi economy, long now) {
         long next = Math.max(zone.rentDue() + WEEK.toMillis(), now + 60_000);
         if (!zones.claimRent(zone.id(), zone.rentDue(), next)) {
             return;
         }
-        if (economy.withdrawPlayer(Bukkit.getOfflinePlayer(zone.tenant()), zone.rent()).transactionSuccess()) {
+        if (economy.withdraw(zone.tenant(), zone.rent(), "EterClan · loyer")) {
             clans.addReserve(zone.clanId(), zone.rent());
             return;
         }

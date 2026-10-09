@@ -6,8 +6,7 @@ api-version: '26.2'
 load: POSTWORLD
 authors: [ NadTum ]
 description: 'Clans du réseau : guildes, banque, terrain en chunks et parcelles à louer.'
-depend: [EterLib]
-softdepend: [Vault]
+depend: [EterLib, EterEconomy]
 
 commands:
   clan:

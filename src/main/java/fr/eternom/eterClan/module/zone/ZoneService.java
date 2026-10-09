@@ -9,7 +9,7 @@ import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterLib.helper.economy.Money;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.task.Tasks;
-import net.milkbowl.vault.economy.Economy;
+import fr.eternom.eterEconomy.api.EconomyApi;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -141,17 +141,17 @@ public class ZoneService {
             messages.send(player, "zone.not-for-rent", "zone", zone.name());
             return;
         }
-        Economy economy = Money.economy();
+        EconomyApi economy = EconomyApi.get().orElse(null);
         if (economy == null) {
             messages.send(player, "economy.unavailable");
             return;
         }
         write(player, after, () -> {
-            if (!economy.withdrawPlayer(player, zone.rent()).transactionSuccess()) {
+            if (!economy.withdraw(player.getUniqueId(), zone.rent(), "EterClan · loyer")) {
                 return "zone.rent-not-enough";
             }
             if (!zones.take(zone.id(), player.getUniqueId(), player.getName(), System.currentTimeMillis() + WEEK.toMillis())) {
-                economy.depositPlayer(player, zone.rent()); // louée entre-temps : remboursé
+                economy.deposit(player.getUniqueId(), zone.rent(), "EterClan · loyer"); // louée entre-temps : remboursé
                 return "zone.not-for-rent";
             }
             clans.addReserve(clan.id(), zone.rent());

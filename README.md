@@ -10,8 +10,8 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
 
 ## Prérequis
 
-- **EterLib 1.8.0+** (`depend`) : base, Redis (invitations, bus réseau), langues, menus (cadre, Dialogs), étiquettes.
-- **Vault + EterEconomy** (`softdepend`) : création payante, banque, chunks, loyers.
+- **EterLib 1.10.0+** (`depend`) : base, Redis (invitations, bus réseau), langues, menus (cadre, Dialogs), étiquettes.
+- **EterEconomy 2.2.1+** (`softdepend`, son API `EconomyApi`) : création payante, banque, chunks, loyers.
 - **EterEssential 1.0.6+** : la perte d'argent à la mort (5 %) ne touche que le porte-monnaie, pas la banque du clan.
 
 ## Modules
@@ -68,3 +68,14 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
 ## Plus tard
 
 Guerre et points entre clans (les terrains resteront hors d'atteinte) : pas encore discutés.
+
+## API (pour les autres plugins)
+
+`fr.eternom.eterClan.api.ClanApi` (`ClanApi.get()`) : personne d'autre ne lit les tables `eterclan_*`.
+
+- `clanOf(uuid)` : le clan d'un joueur, connecté ou non, et ses membres (bloquant) ;
+- `isClaimed(position)`, `canBuild(joueur, position)` : la protection du terrain, en mémoire (thread principal) ;
+- `openMenu(joueur)` : le menu `/clan`.
+
+L'argent passe par l'API d'EterEconomy, avec sa source : « EterClan · clan » (création, comptes rendus), « · banque »,
+« · loyer ».

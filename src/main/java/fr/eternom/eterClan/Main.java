@@ -18,6 +18,9 @@ import fr.eternom.eterClan.module.zone.ZoneService;
 import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.sql.Database;
+import fr.eternom.eterClan.api.ClanApi;
+import fr.eternom.eterClan.module.clan.ClanApiService;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -29,7 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : Redis obligatoire (invitations) et complétion des pseudos réseau depuis 1.8.0. */
-    private static final String REQUIRED_ETERLIB = "1.8.0";
+    private static final String REQUIRED_ETERLIB = "1.10.0";
     /** Préfixe des tables : eterclan_clans, eterclan_members, eterclan_claims, eterclan_zones. */
     private static final String TABLE_PREFIX = "eterclan_";
 
@@ -77,6 +80,10 @@ public final class Main extends JavaPlugin {
         gui = new ClanGui(this, sync, clans, bank, land, zones, selection, messages,
                 lib.backButton(getConfig().getString("menus.clan.back-command", "")));
         new WeeklyCycle(this, clanRepository, claimRepository, zoneRepository, sync, pricing).start();
+
+        // API pour les autres plugins (ClanApi.get())
+        getServer().getServicesManager().register(ClanApi.class, new ClanApiService(clanRepository, access, gui), this,
+                ServicePriority.Normal);
 
         new Commands(this);
         new Events(this);

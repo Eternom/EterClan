@@ -8,7 +8,7 @@ import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterLib.helper.economy.Money;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.task.Tasks;
-import net.milkbowl.vault.economy.Economy;
+import fr.eternom.eterEconomy.api.EconomyApi;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,7 +42,7 @@ public class BankService {
     /** Porte-monnaie -> son compte. */
     public void deposit(Player player, double amount, Runnable after) {
         clanService.clanOf(player).ifPresent(clan -> move(player, clan, amount, after, (economy, sum) -> {
-            if (!economy.withdrawPlayer(player, sum).transactionSuccess()) {
+            if (!economy.withdraw(player.getUniqueId(), sum, "EterClan · banque")) {
                 return "bank.not-enough";
             }
             clans.deposit(player.getUniqueId(), sum);
@@ -56,7 +56,7 @@ public class BankService {
             if (!clans.withdraw(player.getUniqueId(), sum)) {
                 return "bank.account-not-enough";
             }
-            economy.depositPlayer(player, sum);
+            economy.deposit(player.getUniqueId(), sum, "EterClan · banque");
             return "bank.withdrawn";
         }));
     }
@@ -64,7 +64,7 @@ public class BankService {
     /** Porte-monnaie -> réserve du clan (tout membre peut donner). */
     public void giveToReserve(Player player, double amount, Runnable after) {
         clanService.clanOf(player).ifPresent(clan -> move(player, clan, amount, after, (economy, sum) -> {
-            if (!economy.withdrawPlayer(player, sum).transactionSuccess()) {
+            if (!economy.withdraw(player.getUniqueId(), sum, "EterClan · banque")) {
                 return "bank.not-enough";
             }
             clans.addReserve(clan.id(), sum);
@@ -78,7 +78,7 @@ public class BankService {
             if (!clans.takeReserve(clan.id(), sum)) {
                 return "bank.reserve-not-enough";
             }
-            economy.depositPlayer(player, sum);
+            economy.deposit(player.getUniqueId(), sum, "EterClan · banque");
             return "bank.reserve-taken";
         }));
     }
@@ -109,8 +109,8 @@ public class BankService {
     }
 
     /** Un mouvement d'argent en tâche de fond (montant positif arrondi au centime, économie disponible), puis le message et after. */
-    private void move(Player player, Clan clan, double amount, Runnable after, BiFunction<Economy, Double, String> action) {
-        Economy economy = Money.economy();
+    private void move(Player player, Clan clan, double amount, Runnable after, BiFunction<EconomyApi, Double, String> action) {
+        EconomyApi economy = EconomyApi.get().orElse(null);
         if (economy == null) {
             messages.send(player, "economy.unavailable");
             return;

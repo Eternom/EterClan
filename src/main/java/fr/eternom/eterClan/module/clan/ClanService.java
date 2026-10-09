@@ -8,7 +8,7 @@ import fr.eternom.eterLib.helper.economy.Money;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.task.Tasks;
 import fr.eternom.eterLib.module.player.PlayerDirectory.NetworkPlayer;
-import net.milkbowl.vault.economy.Economy;
+import fr.eternom.eterEconomy.api.EconomyApi;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -96,7 +96,7 @@ public class ClanService {
             messages.send(player, "clan.already");
             return;
         }
-        Economy economy = Money.economy();
+        EconomyApi economy = EconomyApi.get().orElse(null);
         if (economy == null) {
             messages.send(player, "economy.unavailable");
             return;
@@ -107,7 +107,7 @@ public class ClanService {
             if (clans.nameTaken(name, upperTag)) {
                 return "clan.name-taken";
             }
-            if (creationPrice > 0 && !economy.has(player, creationPrice)) {
+            if (creationPrice > 0 && !economy.has(player.getUniqueId(), creationPrice)) {
                 return "clan.create-not-enough";
             }
             // Le clan d'abord, l'argent ensuite : une erreur ne fait jamais payer un clan qui n'existe pas
@@ -116,7 +116,7 @@ public class ClanService {
             if (id.isEmpty()) {
                 return "clan.already"; // déjà dans un clan (autre serveur)
             }
-            if (creationPrice > 0 && !economy.withdrawPlayer(player, creationPrice).transactionSuccess()) {
+            if (creationPrice > 0 && !economy.withdraw(player.getUniqueId(), creationPrice, "EterClan · clan")) {
                 clans.delete(id.get());
                 return "clan.create-not-enough";
             }
@@ -216,13 +216,13 @@ public class ClanService {
                 messages.send(player, "clan.owner-only");
                 return;
             }
-            Economy economy = Money.economy();
+            EconomyApi economy = EconomyApi.get().orElse(null);
             Tasks.async(plugin, player, () -> {
                 Map<UUID, Double> refunds = clans.delete(clan.id());
                 if (economy != null) {
                     refunds.forEach((member, amount) -> {
                         if (amount > 0) {
-                            economy.depositPlayer(Bukkit.getOfflinePlayer(member), amount);
+                            economy.deposit(member, amount, "EterClan · clan");
                         }
                     });
                 }
@@ -287,11 +287,11 @@ public class ClanService {
 
     /** Retire un membre : son compte lui est reversé (même hors ligne), ses locations s'arrêtent. */
     private void remove(Clan clan, UUID member, Runnable then) {
-        Economy economy = Money.economy();
+        EconomyApi economy = EconomyApi.get().orElse(null);
         Tasks.async(plugin, () -> {
             Optional<Double> account = clans.removeMember(clan.id(), member);
             if (account.isPresent() && account.get() > 0 && economy != null) {
-                economy.depositPlayer(Bukkit.getOfflinePlayer(member), account.get());
+                economy.deposit(member, account.get(), "EterClan · clan");
             }
             zones.releaseTenant(clan.id(), member);
             sync.zonesChanged();

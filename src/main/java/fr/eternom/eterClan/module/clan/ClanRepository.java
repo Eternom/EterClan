@@ -45,8 +45,8 @@ public class ClanRepository {
                 Column.of("name", Column.Type.STRING).length(16).notNull(),
                 Column.of("joined_at", Column.Type.LONG).notNull(),
                 Column.of("account", Column.Type.DOUBLE).notNull(),
-                Column.of("permissions", Column.Type.STRING).length(255).notNull());
-        database.addColumn(MEMBERS, Column.of("show_rank", Column.Type.BOOLEAN));
+                Column.of("permissions", Column.Type.STRING).length(255).notNull(),
+                Column.of("show_rank", Column.Type.BOOLEAN));
     }
 
     // ---------- Lecture ----------
