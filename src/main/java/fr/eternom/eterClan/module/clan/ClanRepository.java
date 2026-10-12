@@ -51,6 +51,27 @@ public class ClanRepository {
 
     // ---------- Lecture ----------
 
+    /** Une ligne du classement des clans : le clan, son chef et ses chunks. */
+    public record LandRank(long id, String name, String tag, UUID owner, int chunks) {
+    }
+
+    /** Les clans qui ont le plus de chunks (classement). */
+    public List<LandRank> topByChunks(int limit) {
+        return database.query("SELECT c.id, c.name, c.tag, c.owner, COUNT(k.clan_id) AS chunks FROM " + database.table(CLANS) + " c"
+                        + " LEFT JOIN " + database.table(CLAIMS) + " k ON k.clan_id = c.id GROUP BY c.id, c.name, c.tag, c.owner"
+                        + " ORDER BY chunks DESC LIMIT ?", limit).stream()
+                .map(row -> new LandRank(row.getLong("id"), row.getString("name"), row.getString("tag"), row.getUUID("owner"),
+                        row.getInt("chunks")))
+                .toList();
+    }
+
+    /** Place d'un clan qui a ces chunks (1 = premier). */
+    public int rankOfChunks(int chunks) {
+        return (int) database.query("SELECT COUNT(*) AS above FROM (SELECT COUNT(k.clan_id) AS chunks FROM " + database.table(CLANS)
+                + " c LEFT JOIN " + database.table(CLAIMS) + " k ON k.clan_id = c.id GROUP BY c.id) AS lands WHERE chunks > ?", chunks)
+                .getFirst().getLong("above") + 1;
+    }
+
     public Optional<Clan> byId(long id) {
         return database.getFirst(CLANS, Map.of("id", id)).map(this::toClan);
     }

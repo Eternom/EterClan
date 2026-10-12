@@ -10,7 +10,7 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
 
 ## Prérequis
 
-- **EterLib 1.10.0+** (`depend`) : base, Redis (invitations, bus réseau), langues, menus (cadre, Dialogs), étiquettes.
+- **EterLib 1.13.0+** (`depend`) : base, Redis (invitations, bus réseau), langues, menus (cadre, Dialogs), étiquettes.
 - **EterEconomy 2.2.2+** (`softdepend`, son API `EconomyApi`) : création payante, banque, chunks, loyers.
 - **EterEssential 1.0.6+** : la perte d'argent à la mort (5 %) ne touche que le porte-monnaie, pas la banque du clan.
 
@@ -73,9 +73,10 @@ Guerre et points entre clans (les terrains resteront hors d'atteinte) : pas enco
 
 `fr.eternom.eterClan.api.ClanApi` (`ClanApi.get()`) : personne d'autre ne lit les tables `eterclan_*`.
 
-- `clanOf(uuid)` : le clan d'un joueur, connecté ou non, et ses membres (bloquant) ;
+- `clanOf(uuid)` : le clan d'un joueur, connecté ou non, ses membres et son territoire (`chunks`) (bloquant) ;
 - `isClaimed(position)`, `canBuild(joueur, position)` : la protection du terrain, en mémoire (thread principal) ;
-- `openMenu(joueur)` : le menu `/clan`.
+- `openMenu(joueur)` : le menu `/clan` ;
+- source de classement `clans` (EterLib `RankingSource`) : les clans par territoire, pour `/classement` d'EterReward.
 
 L'argent passe par l'API d'EterEconomy, avec sa source : « EterClan · clan » (création, comptes rendus), « · banque »,
 « · loyer ».

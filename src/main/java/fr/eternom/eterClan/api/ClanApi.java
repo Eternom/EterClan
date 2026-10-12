@@ -18,8 +18,8 @@ import java.util.UUID;
  */
 public interface ClanApi {
 
-    /** Un clan et ses membres. */
-    record ClanInfo(long id, String name, String tag, UUID owner, List<UUID> members) {
+    /** Un clan, ses membres et la taille de son territoire (chunks, tous serveurs). */
+    record ClanInfo(long id, String name, String tag, UUID owner, List<UUID> members, int chunks) {
     }
 
     /** L'API d'EterClan si le plugin tourne sur ce serveur. */

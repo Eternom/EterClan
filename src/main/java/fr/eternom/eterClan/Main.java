@@ -32,7 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : Redis obligatoire (invitations) et complétion des pseudos réseau depuis 1.8.0. */
-    private static final String REQUIRED_ETERLIB = "1.10.0";
+    private static final String REQUIRED_ETERLIB = "1.13.0";
     /** Préfixe des tables : eterclan_clans, eterclan_members, eterclan_claims, eterclan_zones. */
     private static final String TABLE_PREFIX = "eterclan_";
 
@@ -84,6 +84,9 @@ public final class Main extends JavaPlugin {
         // API pour les autres plugins (ClanApi.get())
         getServer().getServicesManager().register(ClanApi.class, new ClanApiService(clanRepository, access, gui), this,
                 ServicePriority.Normal);
+        // Classement des clans (territoire), lu par EterReward sans dépendre d'EterClan (EterLib RankingSource)
+        getServer().getServicesManager().register(fr.eternom.eterLib.helper.ranking.RankingSource.class,
+                new fr.eternom.eterClan.module.clan.ClanRanking(clanRepository), this, ServicePriority.Normal);
 
         new Commands(this);
         new Events(this);

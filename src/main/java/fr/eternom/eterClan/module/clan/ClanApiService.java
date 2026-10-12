@@ -25,7 +25,7 @@ public class ClanApiService implements ClanApi {
     @Override
     public Optional<ClanInfo> clanOf(UUID player) {
         return clans.byMember(player).map(clan -> new ClanInfo(clan.id(), clan.name(), clan.tag(), clan.owner(),
-                clan.members().stream().map(Clan.Member::uuid).toList()));
+                clan.members().stream().map(Clan.Member::uuid).toList(), clan.chunks()));
     }
 
     @Override
