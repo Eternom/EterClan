@@ -1,5 +1,6 @@
 package fr.eternom.eterClan;
 
+import fr.eternom.eterClan.api.ClanApi;
 import fr.eternom.eterClan.listeners.Commands;
 import fr.eternom.eterClan.listeners.Events;
 import fr.eternom.eterClan.module.bank.BankService;
@@ -8,6 +9,8 @@ import fr.eternom.eterClan.module.claim.Access;
 import fr.eternom.eterClan.module.claim.ClaimRepository;
 import fr.eternom.eterClan.module.claim.ClaimService;
 import fr.eternom.eterClan.module.claim.Pricing;
+import fr.eternom.eterClan.module.clan.ClanApiService;
+import fr.eternom.eterClan.module.clan.ClanRanking;
 import fr.eternom.eterClan.module.clan.ClanRepository;
 import fr.eternom.eterClan.module.clan.ClanService;
 import fr.eternom.eterClan.module.menu.ClanGui;
@@ -17,9 +20,8 @@ import fr.eternom.eterClan.module.zone.ZoneSelection;
 import fr.eternom.eterClan.module.zone.ZoneService;
 import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.message.Messages;
+import fr.eternom.eterLib.helper.ranking.RankingSource;
 import fr.eternom.eterLib.helper.sql.Database;
-import fr.eternom.eterClan.api.ClanApi;
-import fr.eternom.eterClan.module.clan.ClanApiService;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -85,8 +87,8 @@ public final class Main extends JavaPlugin {
         getServer().getServicesManager().register(ClanApi.class, new ClanApiService(clanRepository, access, gui), this,
                 ServicePriority.Normal);
         // Classement des clans (territoire), lu par EterReward sans dépendre d'EterClan (EterLib RankingSource)
-        getServer().getServicesManager().register(fr.eternom.eterLib.helper.ranking.RankingSource.class,
-                new fr.eternom.eterClan.module.clan.ClanRanking(clanRepository), this, ServicePriority.Normal);
+        getServer().getServicesManager().register(RankingSource.class,
+                new ClanRanking(clanRepository), this, ServicePriority.Normal);
 
         new Commands(this);
         new Events(this);
