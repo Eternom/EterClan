@@ -34,7 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
 
     /** Version minimale d'EterLib : Redis obligatoire (invitations) et complétion des pseudos réseau depuis 1.8.0. */
-    private static final String REQUIRED_ETERLIB = "1.13.0";
+    private static final String REQUIRED_ETERLIB = "1.15.0";
     /** Préfixe des tables : eterclan_clans, eterclan_members, eterclan_claims, eterclan_zones. */
     private static final String TABLE_PREFIX = "eterclan_";
 

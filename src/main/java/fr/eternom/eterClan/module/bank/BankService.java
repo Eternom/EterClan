@@ -7,6 +7,7 @@ import fr.eternom.eterClan.module.clan.ClanService;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterLib.helper.economy.Money;
 import fr.eternom.eterLib.helper.message.Messages;
+import fr.eternom.eterLib.helper.gui.Sounds;
 import fr.eternom.eterLib.helper.task.Tasks;
 import fr.eternom.eterEconomy.api.EconomyApi;
 import org.bukkit.Sound;
@@ -126,8 +127,11 @@ public class BankService {
             return key;
         }, key -> {
             messages.send(player, key, "amount", Money.format(rounded));
-            player.playSound(player, key.startsWith("bank.not") || key.endsWith("not-enough")
-                    ? Sound.ENTITY_VILLAGER_NO : Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.6f, 1.2f);
+            if (key.startsWith("bank.not") || key.endsWith("not-enough")) {
+                Sounds.refuse(player);
+            } else {
+                player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.6f, 1.2f);
+            }
             after.run();
         }, () -> messages.send(player, "error.generic"));
     }
