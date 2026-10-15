@@ -8,17 +8,22 @@ import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterClan.module.zone.ZoneSelection;
 import fr.eternom.eterClan.module.zone.ZoneService;
+import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.economy.Money;
 import fr.eternom.eterLib.helper.gui.BackButton;
 import fr.eternom.eterLib.helper.gui.Dialogs;
 import fr.eternom.eterLib.helper.message.Messages;
+import fr.eternom.eterLib.helper.task.Tasks;
+import fr.eternom.eterLib.module.player.PlayerDirectory;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -88,9 +93,15 @@ public class ClanGui {
                 () -> openZones(player)));
     }
 
+    /** Les noms des joueurs autorisés sont lus dans l'annuaire du réseau (EterLib) : un joueur jamais venu ici a son nom. */
     void openTrust(Player player, long zoneId) {
-        zone(zoneId).ifPresentOrElse(zone -> player.openInventory(new TrustMenu(this, player, zone).getInventory()),
-                () -> openZones(player));
+        zone(zoneId).ifPresentOrElse(zone -> Tasks.async(plugin, player, () -> {
+            Map<UUID, String> names = new LinkedHashMap<>();
+            zone.trusted().forEach(uuid -> names.put(uuid, EterLib.get().getPlayers().get(uuid)
+                    .map(PlayerDirectory.NetworkPlayer::name).orElse("?")));
+            return names;
+        }, names -> player.openInventory(new TrustMenu(this, player, zone, names).getInventory()),
+                () -> messages.send(player, "error.generic")), () -> openZones(player));
     }
 
     /** Nouvelle parcelle : deux coins cliqués dans le monde, puis le nom ; Annuler rouvre la liste des parcelles. */
