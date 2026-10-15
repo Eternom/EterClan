@@ -40,6 +40,7 @@ clan:
 
 bank:
   amount-invalid: "<error>Montant invalide."
+  too-new: "<error>Tu pourras donner à la réserve après <accent><hours> h</accent> de jeu : encore <accent><time></accent>."
   not-enough: "<error>Tu n'as pas <accent><amount></accent> sur toi."
   account-not-enough: "<error>Ton compte n'a pas <accent><amount></accent>."
   reserve-not-enough: "<error>La réserve n'a pas <accent><amount></accent>."
@@ -246,6 +247,21 @@ menu:
   title: "<primary><clan> <dark_gray>[<tag>]"
   locked: "<error>● <info>Ton clan ne t'a pas donné cette permission"
   back-to-clan: "<accent>« Retour au clan"
+  open: "<accent>Clic</accent> <info>: ouvrir"
+  bank:
+    name: "<accent>Banque"
+  land:
+    name: "<accent>Terrain"
+    chunks: "<dark_gray>▸ <info>Chunks : <accent><count>"
+    zones: "<dark_gray>▸ <info>Parcelles : <accent><count>"
+  rules:
+    name: "<accent>Règles du territoire"
+    lore: "<info>Ce que tu peux faire sur le terrain du clan et dans ses parcelles"
+  league:
+    name: "<accent>Classement du mois"
+    place: "<dark_gray>▸ <info>Place : <accent><place></accent> <info>sur <accent><count>"
+    score: "<dark_gray>▸ <info>Score : <accent><score></accent> <info>points"
+    unranked: "<info>Pas encore classé : jouez, faites des quêtes, versez à la réserve, agrandissez le terrain"
   head:
     name: "<accent><player>"
     account: "<info>Ton compte : <accent><amount></accent> <dark_gray>(à l'abri de la mort)"
@@ -392,3 +408,102 @@ trust:
   add:
     name: "<accent>Ajouter un joueur"
     lore: "<info>Son pseudo, dans une fenêtre"
+
+bank-menu:
+  title: "<primary>Banque <dark_gray>·</dark_gray> <clan>"
+  info:
+    name: "<accent>La banque du clan"
+  give-locked: "<error>🔒 <info>Après <accent><hours> h</accent> de jeu : encore <accent><time>"
+  give-league: "<dark_gray>▸ <info>Compte au classement du mois (trésor)"
+
+land-menu:
+  title: "<primary>Terrain <dark_gray>·</dark_gray> <clan>"
+  back: "<accent>« Terrain"
+  info:
+    name: "<accent>Le terrain du clan"
+    next-price: "<dark_gray>▸ <info>Prochain chunk : <accent><price>"
+    league: "<dark_gray>▸ <info>Chaque chunk gagné ce mois compte au classement (expansion)"
+
+# Règles du territoire : ce que chacun peut faire, et pourquoi
+rules:
+  title: "<primary>Règles <dark_gray>·</dark_gray> <clan>"
+  allowed: "<success>✔ <info>Tu peux"
+  denied: "<error>✘ <info>Tu ne peux pas <dark_gray>(demande à qui gère les permissions)"
+  always: "<success>✔ <info>Toujours, sur tout terrain de clan"
+  land:
+    build: "<info>Poser et casser des blocs, seaux, panneaux"
+    containers: "<info>Ouvrir coffres, fours, tonneaux..."
+    doors: "<info>Ouvrir portes, trappes et portillons"
+    redstone: "<info>Boutons, leviers, plaques de pression"
+    crops: "<info>Semer et récolter"
+    animals: "<info>Nourrir, tondre, attacher, frapper les animaux"
+  land-info:
+    name: "<accent>Sur le terrain du clan"
+    lore: "<info>Chaque membre a ses permissions, réglées par le clan."
+    owner: "<info>Le chef a tout. Les autres joueurs : rien."
+  protected:
+    name: "<accent>Toujours protégé"
+    lore: "<info>Ce qui suit vaut sur tout terrain de clan, pour tous."
+  protection:
+    pvp:
+      name: "<accent>Pas de combat"
+      lore: "<info>Les joueurs ne peuvent pas se frapper"
+    explosions:
+      name: "<accent>Pas d'explosion"
+      lore: "<info>Creepers, TNT, lits : aucun bloc détruit"
+    fire:
+      name: "<accent>Pas d'incendie"
+      lore: "<info>Le feu ne se propage pas et ne brûle rien"
+    outside:
+      name: "<accent>Rien ne vient de dehors"
+      lore: "<info>Pistons, liquides, distributeurs, arbres qui poussent depuis l'extérieur"
+    mobs:
+      name: "<accent>Créatures sans dégâts"
+      lore: "<info>Endermen, ravageurs, wither... ne changent aucun bloc"
+    visitors:
+      name: "<accent>Visiteurs"
+      lore: "<info>Les joueurs d'autres clans ne touchent à rien"
+  zones:
+    name: "<accent>Les parcelles louées"
+    lore: "<info>Une parcelle louée a <accent>ses propres règles</accent> :"
+    lore2: "<info>seuls son locataire et ceux qu'il autorise y agissent, jamais les permissions du clan."
+    mine: "<dark_gray>▸ <info>Tu loues <accent><rented></accent> <info>parcelle(s), tu as accès à <accent><trusted></accent> <info>autre(s)"
+  here:
+    name: "<accent>Ici"
+    wild: "<info>Nature sauvage : pas de clan, rien n'est protégé."
+    own: "<info>Terrain de ton clan <accent><clan>"
+    other: "<info>Terrain du clan <accent><clan></accent> : tu n'y touches à rien."
+    zone: "<info>Parcelle <accent><zone></accent>, louée par <accent><tenant>"
+    zone-rule: "<dark_gray>Ses règles passent avant celles du clan."
+    yes: "<success>✔ <info><action>"
+    no: "<error>✘ <info><action>"
+    refresh: "<accent>Clic</accent> <info>: mettre à jour (si tu as bougé)"
+
+# Classement des clans du mois
+league:
+  title: "<primary>Classement des clans"
+  won: "<success>Bravo !</success> <info>Ton clan finit <accent><place>e</accent> du classement du mois : <accent><amount></accent> versés à sa réserve !"
+  info:
+    name: "<accent>Comment ça marche"
+    how: "<info>4 critères du mois : dans chacun, une note sur 100"
+    how2: "<info>selon la place du clan ; le score est leur moyenne."
+    ends: "<dark_gray>▸ <info>Fin du mois dans <accent><time>"
+    rewards: "<dark_gray>▸ <info>Le top 3 gagne, versé dans la réserve :"
+    reward: "  <accent><place>.</accent> <info><amount>"
+  criterion:
+    value: "<dark_gray>▸ <info>Ce mois-ci : <accent><value>"
+    activity:
+      name: "<accent>Activité"
+      lore: "<info>Le temps de jeu actif des membres (sans AFK)"
+    work:
+      name: "<accent>Travail"
+      lore: "<info>Les quêtes de métier et les défis des membres"
+    treasury:
+      name: "<accent>Trésor"
+      lore: "<info>L'argent donné à la réserve, moins ce qui en est repris"
+    expansion:
+      name: "<accent>Expansion"
+      lore: "<info>Les chunks pris, moins ceux rendus ou perdus"
+  top:
+    name: "<accent><place>. <info>[<tag>] <clan>"
+    empty: "<dark_gray><place>. personne"

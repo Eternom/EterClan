@@ -65,7 +65,7 @@ class ZonesMenu implements Menu {
             gui.newZone(player);
         } else if (slot == BACK) {
             Sounds.page(player);
-            gui.open(player);
+            gui.openLand(player);
         }
     }
 
@@ -89,7 +89,7 @@ class ZonesMenu implements Menu {
         boolean can = clan.can(viewer.getUniqueId(), ClanPermission.ZONES);
         inventory.setItem(NEW, Items.item(can ? Material.GOLDEN_SHOVEL : Material.GRAY_DYE, messages.get(viewer, "zones.new.name"),
                 List.of(messages.get(viewer, can ? "zones.new.lore" : "menu.locked"))));
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-clan"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "land-menu.back"), List.of()));
     }
 
     private Material icon(Zone zone) {

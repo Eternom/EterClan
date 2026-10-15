@@ -14,6 +14,8 @@ import fr.eternom.eterClan.module.clan.ClanRanking;
 import fr.eternom.eterClan.module.clan.ClanRepository;
 import fr.eternom.eterClan.module.clan.ClanService;
 import fr.eternom.eterClan.module.menu.ClanGui;
+import fr.eternom.eterClan.module.ranking.ClanLeague;
+import fr.eternom.eterClan.module.ranking.LeagueStore;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.ZoneRepository;
 import fr.eternom.eterClan.module.zone.ZoneSelection;
@@ -47,6 +49,7 @@ public final class Main extends JavaPlugin {
     private Access access;
     private ZoneSelection selection;
     private ClanGui gui;
+    private ClanLeague league;
 
     @Override
     public void onEnable() {
@@ -74,21 +77,24 @@ public final class Main extends JavaPlugin {
                 claimRepository, zoneRepository);
         sync.start();
         clans = new ClanService(this, clanRepository, zoneRepository, sync, lib.getRedis(), messages);
-        bank = new BankService(this, clanRepository, sync, clans, messages);
-        land = new ClaimService(this, claimRepository, zoneRepository, clanRepository, sync, clans, messages, pricing);
+        // Classement des clans du mois : calculé là où il y a du terrain (la survie), lu partout
+        league = new ClanLeague(this, new LeagueStore(database), clanRepository, sync, getConfig().getBoolean("land.enabled", false));
+        bank = new BankService(this, clanRepository, sync, clans, messages, league);
+        land = new ClaimService(this, claimRepository, zoneRepository, clanRepository, sync, clans, messages, pricing, league);
         zones = new ZoneService(this, zoneRepository, clanRepository, sync, clans, messages);
         access = new Access(sync);
         selection = new ZoneSelection(this, messages, zones);
         gui = new ClanGui(this, sync, clans, bank, land, zones, selection, messages,
-                lib.backButton(getConfig().getString("menus.clan.back-command", "")));
-        new WeeklyCycle(this, clanRepository, claimRepository, zoneRepository, sync, pricing).start();
+                lib.backButton(getConfig().getString("menus.clan.back-command", "")), league, access);
+        new WeeklyCycle(this, clanRepository, claimRepository, zoneRepository, sync, pricing, league).start();
+        league.start();
 
         // API pour les autres plugins (ClanApi.get())
         getServer().getServicesManager().register(ClanApi.class, new ClanApiService(clanRepository, access, gui), this,
                 ServicePriority.Normal);
-        // Classement des clans (territoire), lu par EterReward sans dépendre d'EterClan (EterLib RankingSource)
+        // Classement des clans du mois, lu par EterReward sans dépendre d'EterClan (EterLib RankingSource)
         getServer().getServicesManager().register(RankingSource.class,
-                new ClanRanking(clanRepository), this, ServicePriority.Normal);
+                new ClanRanking(league, clanRepository), this, ServicePriority.Normal);
 
         new Commands(this);
         new Events(this);

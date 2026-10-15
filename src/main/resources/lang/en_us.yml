@@ -40,6 +40,7 @@ clan:
 
 bank:
   amount-invalid: "<error>Invalid amount."
+  too-new: "<error>You can give to the reserve after <accent><hours> h</accent> of play: <accent><time></accent> to go."
   not-enough: "<error>You don't have <accent><amount></accent> on you."
   account-not-enough: "<error>Your account doesn't have <accent><amount></accent>."
   reserve-not-enough: "<error>The reserve doesn't have <accent><amount></accent>."
@@ -246,6 +247,21 @@ menu:
   title: "<primary><clan> <dark_gray>[<tag>]"
   locked: "<error>● <info>Your clan didn't give you this permission"
   back-to-clan: "<accent>« Back to the clan"
+  open: "<accent>Click</accent> <info>: open"
+  bank:
+    name: "<accent>Bank"
+  land:
+    name: "<accent>Land"
+    chunks: "<dark_gray>▸ <info>Chunks: <accent><count>"
+    zones: "<dark_gray>▸ <info>Plots: <accent><count>"
+  rules:
+    name: "<accent>Land rules"
+    lore: "<info>What you can do on the clan land and in its plots"
+  league:
+    name: "<accent>Monthly ranking"
+    place: "<dark_gray>▸ <info>Place: <accent><place></accent> <info>of <accent><count>"
+    score: "<dark_gray>▸ <info>Score: <accent><score></accent> <info>points"
+    unranked: "<info>Not ranked yet: play, do quests, give to the reserve, grow your land"
   head:
     name: "<accent><player>"
     account: "<info>Your account: <accent><amount></accent> <dark_gray>(safe from death)"
@@ -392,3 +408,102 @@ trust:
   add:
     name: "<accent>Add a player"
     lore: "<info>Their name, in a window"
+
+bank-menu:
+  title: "<primary>Bank <dark_gray>·</dark_gray> <clan>"
+  info:
+    name: "<accent>The clan bank"
+  give-locked: "<error>🔒 <info>After <accent><hours> h</accent> of play: <accent><time></accent> to go"
+  give-league: "<dark_gray>▸ <info>Counts for the monthly ranking (treasury)"
+
+land-menu:
+  title: "<primary>Land <dark_gray>·</dark_gray> <clan>"
+  back: "<accent>« Land"
+  info:
+    name: "<accent>The clan land"
+    next-price: "<dark_gray>▸ <info>Next chunk: <accent><price>"
+    league: "<dark_gray>▸ <info>Each chunk gained this month counts for the ranking (expansion)"
+
+# Land rules: what everyone can do, and why
+rules:
+  title: "<primary>Rules <dark_gray>·</dark_gray> <clan>"
+  allowed: "<success>✔ <info>You can"
+  denied: "<error>✘ <info>You can't <dark_gray>(ask whoever manages permissions)"
+  always: "<success>✔ <info>Always, on any clan land"
+  land:
+    build: "<info>Place and break blocks, buckets, signs"
+    containers: "<info>Open chests, furnaces, barrels..."
+    doors: "<info>Open doors, trapdoors and gates"
+    redstone: "<info>Buttons, levers, pressure plates"
+    crops: "<info>Sow and harvest"
+    animals: "<info>Feed, shear, leash, hit animals"
+  land-info:
+    name: "<accent>On the clan land"
+    lore: "<info>Each member has their own permissions, set by the clan."
+    owner: "<info>The leader has everything. Other players: nothing."
+  protected:
+    name: "<accent>Always protected"
+    lore: "<info>The following applies on any clan land, for everyone."
+  protection:
+    pvp:
+      name: "<accent>No fighting"
+      lore: "<info>Players can't hit each other"
+    explosions:
+      name: "<accent>No explosions"
+      lore: "<info>Creepers, TNT, beds: no block destroyed"
+    fire:
+      name: "<accent>No fire"
+      lore: "<info>Fire doesn't spread or burn anything"
+    outside:
+      name: "<accent>Nothing comes from outside"
+      lore: "<info>Pistons, liquids, dispensers, trees growing from outside"
+    mobs:
+      name: "<accent>Harmless creatures"
+      lore: "<info>Endermen, ravagers, wither... change no block"
+    visitors:
+      name: "<accent>Visitors"
+      lore: "<info>Players from other clans touch nothing"
+  zones:
+    name: "<accent>Rented plots"
+    lore: "<info>A rented plot has <accent>its own rules</accent>:"
+    lore2: "<info>only its tenant and those they allow act there, never the clan permissions."
+    mine: "<dark_gray>▸ <info>You rent <accent><rented></accent> <info>plot(s), you can access <accent><trusted></accent> <info>other(s)"
+  here:
+    name: "<accent>Here"
+    wild: "<info>Wilderness: no clan, nothing is protected."
+    own: "<info>Your clan land <accent><clan>"
+    other: "<info>Land of clan <accent><clan></accent>: you touch nothing."
+    zone: "<info>Plot <accent><zone></accent>, rented by <accent><tenant>"
+    zone-rule: "<dark_gray>Its rules come before the clan's."
+    yes: "<success>✔ <info><action>"
+    no: "<error>✘ <info><action>"
+    refresh: "<accent>Click</accent> <info>: update (if you moved)"
+
+# Monthly clan ranking
+league:
+  title: "<primary>Clan ranking"
+  won: "<success>Well done!</success> <info>Your clan finishes <accent>#<place></accent> in the monthly ranking: <accent><amount></accent> added to its reserve!"
+  info:
+    name: "<accent>How it works"
+    how: "<info>4 monthly criteria: in each, a score out of 100"
+    how2: "<info>from the clan's place; the score is their average."
+    ends: "<dark_gray>▸ <info>Month ends in <accent><time>"
+    rewards: "<dark_gray>▸ <info>The top 3 wins, paid into the reserve:"
+    reward: "  <accent><place>.</accent> <info><amount>"
+  criterion:
+    value: "<dark_gray>▸ <info>This month: <accent><value>"
+    activity:
+      name: "<accent>Activity"
+      lore: "<info>Members' active playtime (no AFK)"
+    work:
+      name: "<accent>Work"
+      lore: "<info>Members' job quests and challenges"
+    treasury:
+      name: "<accent>Treasury"
+      lore: "<info>Money given to the reserve, minus what is taken back"
+    expansion:
+      name: "<accent>Expansion"
+      lore: "<info>Chunks claimed, minus those given back or lost"
+  top:
+    name: "<accent><place>. <info>[<tag>] <clan>"
+    empty: "<dark_gray><place>. nobody"

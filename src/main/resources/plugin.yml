@@ -7,6 +7,8 @@ load: POSTWORLD
 authors: [ NadTum ]
 description: 'Clans du réseau : guildes, banque, terrain en chunks et parcelles à louer.'
 depend: [EterLib, EterEconomy]
+# EterReward : activité du mois des membres (classement des clans). Pas EterSuccess : il dépend déjà d'EterClan.
+softdepend: [EterReward]
 
 commands:
   clan:

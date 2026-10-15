@@ -6,6 +6,8 @@ import fr.eternom.eterClan.module.claim.Pricing;
 import fr.eternom.eterClan.module.clan.Clan;
 import fr.eternom.eterClan.module.clan.Clan.Member;
 import fr.eternom.eterClan.module.clan.ClanRepository;
+import fr.eternom.eterClan.module.ranking.ClanLeague;
+import fr.eternom.eterClan.module.ranking.LeagueStore;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterClan.module.zone.ZoneRepository;
@@ -40,9 +42,12 @@ public class WeeklyCycle {
     private final ZoneRepository zones;
     private final ClanSync sync;
     private final Pricing pricing;
+    /** Chunks perdus faute d'entretien : retirés du classement du mois (expansion). */
+    private final ClanLeague league;
 
     public WeeklyCycle(JavaPlugin plugin, ClanRepository clans, ClaimRepository claims, ZoneRepository zones, ClanSync sync,
-                       Pricing pricing) {
+                       Pricing pricing, ClanLeague league) {
+        this.league = league;
         this.plugin = plugin;
         this.clans = clans;
         this.claims = claims;
@@ -148,6 +153,7 @@ public class WeeklyCycle {
         sync.claimsChanged();
         sync.zonesChanged();
         int count = lost.size();
+        league.add(clan.id(), LeagueStore.Stat.EXPANSION, -count);
         Bukkit.getScheduler().runTask(plugin, () -> clan.members().forEach(member ->
                 sync.bus().notify(member.uuid(), "bank.chunks-lost", true, "count", String.valueOf(count))));
     }

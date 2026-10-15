@@ -5,6 +5,8 @@ import fr.eternom.eterClan.module.clan.Clan;
 import fr.eternom.eterClan.module.clan.ClanPermission;
 import fr.eternom.eterClan.module.clan.ClanRepository;
 import fr.eternom.eterClan.module.clan.ClanService;
+import fr.eternom.eterClan.module.ranking.ClanLeague;
+import fr.eternom.eterClan.module.ranking.LeagueStore;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterClan.module.zone.ZoneRepository;
@@ -43,12 +45,15 @@ public class ClaimService {
     private final ClanService clanService;
     private final Messages messages;
     private final Pricing pricing;
+    /** Chunks pris et rendus : comptent au classement du mois (expansion). */
+    private final ClanLeague league;
     private final List<String> worlds;
     /** Terrain possible sur ce serveur (land.enabled : la survie, pas les lobbys ni les mondes ressources). */
     private final boolean enabled;
 
     public ClaimService(JavaPlugin plugin, ClaimRepository claims, ZoneRepository zones, ClanRepository clans, ClanSync sync,
-                        ClanService clanService, Messages messages, Pricing pricing) {
+                        ClanService clanService, Messages messages, Pricing pricing, ClanLeague league) {
+        this.league = league;
         this.plugin = plugin;
         this.claims = claims;
         this.zones = zones;
@@ -94,6 +99,7 @@ public class ClaimService {
                 }
                 sync.claimsChanged();
                 sync.clanChanged(clan.id());
+                league.add(clan.id(), LeagueStore.Stat.EXPANSION, 1);
                 return new Result("claim.claimed", price);
             }, result -> {
                 messages.send(player, result.key(), "price", Money.format(result.price()),
@@ -126,6 +132,7 @@ public class ClaimService {
             Tasks.async(plugin, player, () -> {
                 boolean removed = claims.unclaim(sync.server(), chunk.world(), chunk.x(), chunk.z(), clan.id());
                 if (removed) {
+                    league.add(clan.id(), LeagueStore.Stat.EXPANSION, -1);
                     onChunk.forEach(zone -> zones.delete(zone.id()));
                     sync.claimsChanged();
                     sync.zonesChanged();

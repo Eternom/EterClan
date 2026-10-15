@@ -1,24 +1,24 @@
 package fr.eternom.eterClan.module.clan;
 
+import fr.eternom.eterClan.module.ranking.ClanLeague;
 import fr.eternom.eterLib.helper.ranking.RankingSource;
 import org.bukkit.Material;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Classement des clans par territoire (chunks), offert aux autres plugins par EterLib (EterReward l'affiche dans
- * /classement). Une ligne porte le chef du clan ; son nom affiché est celui du clan.
+ * Le classement des clans du mois (ClanLeague : activité, travail, trésor, expansion), offert aux autres plugins par
+ * EterLib : EterReward l'affiche dans /classement. Une ligne porte le chef du clan ; son nom affiché est celui du clan.
+ * Valeur : le score en dixièmes (875 = 87,5 points).
  */
 public class ClanRanking implements RankingSource {
 
+    private final ClanLeague league;
     private final ClanRepository clans;
-    /** Nom affiché de chaque chef de clan du dernier top : « [TAG] Nom ». */
-    private final Map<UUID, String> labels = new ConcurrentHashMap<>();
 
-    public ClanRanking(ClanRepository clans) {
+    public ClanRanking(ClanLeague league, ClanRepository clans) {
+        this.league = league;
         this.clans = clans;
     }
 
@@ -29,22 +29,22 @@ public class ClanRanking implements RankingSource {
 
     @Override
     public List<Ranked> top(int limit) {
-        return clans.topByChunks(limit).stream().map(rank -> {
-            labels.put(rank.owner(), "[" + rank.tag() + "] " + rank.name());
-            return new Ranked(rank.owner(), rank.chunks());
-        }).toList();
+        return league.current().stream().limit(limit)
+                .map(named -> new Ranked(named.owner(), named.standing().score())).toList();
     }
 
-    /** Le clan du joueur : sa place et ses chunks ; {0, 0} sans clan. */
+    /** Le clan du joueur : sa place et son score du mois ; {0, 0} sans clan ou pas encore classé. */
     @Override
     public long[] of(UUID player) {
-        return clans.byMember(player).map(clan -> new long[]{clans.rankOfChunks(clan.chunks()), clan.chunks()})
+        return clans.byMember(player).flatMap(clan -> league.of(clan.id()))
+                .map(named -> new long[]{named.standing().place(), named.standing().score()})
                 .orElse(new long[]{0, 0});
     }
 
     @Override
     public String label(Ranked entry) {
-        return labels.get(entry.player());
+        return league.current().stream().filter(named -> named.owner().equals(entry.player())).findFirst()
+                .map(named -> "[" + named.tag() + "] " + named.name()).orElse(null);
     }
 
     @Override

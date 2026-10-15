@@ -35,8 +35,9 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
     liquides, distributeurs, arbres, monstres qui changent des blocs) ; pas de PvP sur un terrain. Staff :
     `eterclan.bypass.claims`.
   - Action bar en changeant de terrain ou de parcelle (`LandListener`) ; bords en particules (`/clan here`).
-- **`bank`** : un **compte par membre** (lui seul y touche, rendu s'il part) et la **réserve** (y donner : tout membre ;
-  en prendre : `RESERVE`). Tout mouvement est une requête relative conditionnelle (jamais d'argent créé).
+- **`bank`** : un **compte par membre** (lui seul y touche, rendu s'il part) et la **réserve** (y donner : tout membre qui a
+  `bank.min-give-playtime-hours` (5) heures de jeu actif, `GiveGate`, source `playtime_total` d'EterSuccess lue par
+  EterLib : un second compte ne peut pas y verser ses récompenses pour le principal ; en prendre : `RESERVE`). Tout mouvement est une requête relative conditionnelle (jamais d'argent créé).
   **Passage hebdomadaire** (`WeeklyCycle`, vérifié toutes les 10 min sur chaque serveur, réservé en base par le
   premier) : l'**intérêt** (taux réglé par `INTEREST`, 0 à `bank.max-interest`) passe des comptes à la réserve ;
   l'**entretien** est payé par la réserve, puis les comptes au prorata ; sinon les chunks les plus récents sont perdus
@@ -49,9 +50,21 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   (fin de location), jamais accéder. Une parcelle louée ne se supprime pas ; un membre qui part perd ses locations.
 - **`sync`** (`ClanSync`) : clans, chunks et parcelles utiles à ce serveur, en mémoire ; relus après chaque changement
   puis annoncés aux autres serveurs (bus réseau `eterclan`).
+- **`ranking`** (`ClanLeague`, `LeagueStore`) : le **classement des clans du mois**, comme le général des joueurs : 4
+  critères, dans chacun une note sur 100 selon la place, le score est leur moyenne (en dixièmes). **Activité** : minutes
+  de jeu actif des membres ; **travail** : quêtes et défis des membres (sources `monthly_*` d'EterReward, lues par
+  EterLib) ; **trésor** : versé moins repris dans la réserve (`eterclan_monthly`, en centimes) ; **expansion** : chunks
+  pris moins rendus ou perdus. En net : donner puis reprendre, ou prendre puis rendre des chunks gratuits, ne rapporte
+  rien. Calculé toutes les 5 min là où `land.enabled` (la survie), photographié dans `eterclan_league`, lu partout ; le
+  mois fini, le top 3 reçoit `ranking.rewards` dans sa réserve, une seule fois (`eterclan_league_rewards`), et ses
+  membres sont prévenus. Offert à `/classement` d'EterReward (source `clans`, « Clans du mois »).
 - **`menu`** : **tout se fait dans l'interface** (`/clan` est la seule commande). Sans clan : expliquer, créer (fenêtre
-  avec nom, tag et prix affiché avant de payer), accepter une invitation. Avec : le clan, la banque, le terrain, les
-  membres (inviter, fiche : permissions, exclure, céder), les parcelles (créer, louer, accès, loyer, supprimer). Les
+  avec nom, tag et prix affiché avant de payer), accepter une invitation. Avec : un accueil (moi, le clan, sa place du
+  mois) et des sous-menus : **banque** (le don à la réserve affiche le temps de jeu qui manque), **membres** (inviter,
+  fiche : permissions, exclure, céder), **terrain** (prendre, voir, rendre, parcelles : créer, louer, accès, loyer,
+  supprimer), **classement** (les 4 critères du clan, le top 5, les prix) et **règles du territoire** (`RulesMenu` : ce
+  que le joueur peut faire sur le terrain du clan, ce qu'il peut faire là où il se tient, calculé par `Access` donc
+  parcelle louée comprise, les protections toujours actives, et la règle des parcelles qui passent avant le clan). Les
   saisies et les confirmations passent par des Dialogs ; Annuler rouvre le menu d'où l'on vient.
 
 ## Commandes et permissions

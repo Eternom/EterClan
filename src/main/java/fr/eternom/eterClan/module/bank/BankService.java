@@ -4,7 +4,10 @@ import fr.eternom.eterClan.module.clan.Clan;
 import fr.eternom.eterClan.module.clan.ClanPermission;
 import fr.eternom.eterClan.module.clan.ClanRepository;
 import fr.eternom.eterClan.module.clan.ClanService;
+import fr.eternom.eterClan.module.ranking.ClanLeague;
+import fr.eternom.eterClan.module.ranking.LeagueStore;
 import fr.eternom.eterClan.module.sync.ClanSync;
+import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.economy.Money;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.gui.Sounds;
@@ -14,6 +17,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.UUID;
 import java.util.function.BiFunction;
 
 /**
@@ -30,8 +34,13 @@ public class BankService {
     private final ClanService clanService;
     private final Messages messages;
     private final double maxInterest;
+    private final ClanLeague league;
+    private final GiveGate giveGate;
 
-    public BankService(JavaPlugin plugin, ClanRepository clans, ClanSync sync, ClanService clanService, Messages messages) {
+    public BankService(JavaPlugin plugin, ClanRepository clans, ClanSync sync, ClanService clanService, Messages messages,
+                       ClanLeague league) {
+        this.league = league;
+        this.giveGate = new GiveGate(plugin.getConfig().getDouble("bank.min-give-playtime-hours", 5));
         this.plugin = plugin;
         this.clans = clans;
         this.sync = sync;
@@ -62,15 +71,33 @@ public class BankService {
         }));
     }
 
-    /** Porte-monnaie -> réserve du clan (tout membre peut donner). */
+    /** Porte-monnaie -> réserve du clan (tout membre qui a assez joué : GiveGate). Compte au classement du mois (trésor). */
     public void giveToReserve(Player player, double amount, Runnable after) {
-        clanService.clanOf(player).ifPresent(clan -> move(player, clan, amount, after, (economy, sum) -> {
-            if (!economy.withdraw(player.getUniqueId(), sum, "EterClan · banque")) {
-                return "bank.not-enough";
+        clanService.clanOf(player).ifPresent(clan -> Tasks.async(plugin, player, () -> giveGate.minutesLeft(player.getUniqueId()), wait -> {
+            if (wait > 0) {
+                messages.send(player, "bank.too-new", "hours", String.valueOf(giveGate.minHours()),
+                        "time", EterLib.get().formatDuration(player, wait * 60));
+                Sounds.refuse(player);
+                return;
             }
-            clans.addReserve(clan.id(), sum);
-            return "bank.reserve-given";
-        }));
+            move(player, clan, amount, after, (economy, sum) -> {
+                if (!economy.withdraw(player.getUniqueId(), sum, "EterClan · banque")) {
+                    return "bank.not-enough";
+                }
+                clans.addReserve(clan.id(), sum);
+                league.add(clan.id(), LeagueStore.Stat.TREASURY, Math.round(sum * 100));
+                return "bank.reserve-given";
+            });
+        }, () -> messages.send(player, "error.generic")));
+    }
+
+    /** Minutes de jeu encore nécessaires avant de donner à la réserve (0 : permis). Bloquant. */
+    public long giveWait(UUID player) {
+        return giveGate.minutesLeft(player);
+    }
+
+    public long giveMinHours() {
+        return giveGate.minHours();
     }
 
     /** Réserve -> porte-monnaie (permission RESERVE). */
@@ -79,6 +106,7 @@ public class BankService {
             if (!clans.takeReserve(clan.id(), sum)) {
                 return "bank.reserve-not-enough";
             }
+            league.add(clan.id(), LeagueStore.Stat.TREASURY, -Math.round(sum * 100)); // repris : ne compte plus au trésor
             economy.deposit(player.getUniqueId(), sum, "EterClan · banque");
             return "bank.reserve-taken";
         }));

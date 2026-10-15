@@ -1,9 +1,11 @@
 package fr.eternom.eterClan.module.menu;
 
 import fr.eternom.eterClan.module.bank.BankService;
+import fr.eternom.eterClan.module.claim.Access;
 import fr.eternom.eterClan.module.claim.ClaimService;
 import fr.eternom.eterClan.module.clan.Clan;
 import fr.eternom.eterClan.module.clan.ClanService;
+import fr.eternom.eterClan.module.ranking.ClanLeague;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterClan.module.zone.ZoneSelection;
@@ -45,9 +47,13 @@ public class ClanGui {
     private final ZoneSelection selection;
     private final Messages messages;
     private final BackButton back;
+    private final ClanLeague league;
+    private final Access access;
 
     public ClanGui(JavaPlugin plugin, ClanSync sync, ClanService clans, BankService bank, ClaimService land, ZoneService zones,
-                   ZoneSelection selection, Messages messages, BackButton back) {
+                   ZoneSelection selection, Messages messages, BackButton back, ClanLeague league, Access access) {
+        this.league = league;
+        this.access = access;
         this.plugin = plugin;
         this.sync = sync;
         this.clans = clans;
@@ -66,6 +72,25 @@ public class ClanGui {
         sync.cache().of(player.getUniqueId()).ifPresentOrElse(
                 clan -> player.openInventory(new ClanMenu(this, player, clan).getInventory()),
                 () -> player.openInventory(new NoClanMenu(this, player).getInventory()));
+    }
+
+    /** La banque : le temps de jeu qui manque pour donner à la réserve est lu d'abord (affiché sur le bouton). */
+    void openBank(Player player) {
+        clans.clanOf(player).ifPresent(clan -> Tasks.async(plugin, player, () -> bank.giveWait(player.getUniqueId()),
+                wait -> player.openInventory(new BankMenu(this, player, clan, wait).getInventory()),
+                () -> messages.send(player, "error.generic")));
+    }
+
+    void openLand(Player player) {
+        clans.clanOf(player).ifPresent(clan -> player.openInventory(new LandMenu(this, player, clan).getInventory()));
+    }
+
+    void openRules(Player player) {
+        clans.clanOf(player).ifPresent(clan -> player.openInventory(new RulesMenu(this, player, clan).getInventory()));
+    }
+
+    void openLeague(Player player) {
+        clans.clanOf(player).ifPresent(clan -> player.openInventory(new LeagueMenu(this, player, clan).getInventory()));
     }
 
     void openMembers(Player player) {
@@ -178,6 +203,18 @@ public class ClanGui {
 
     List<Zone> zonesOf(Clan clan) {
         return sync.zones().ofClan(clan.id());
+    }
+
+    ClanSync sync() {
+        return sync;
+    }
+
+    ClanLeague league() {
+        return league;
+    }
+
+    Access access() {
+        return access;
     }
 
     ClanService clans() {

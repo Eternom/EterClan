@@ -17,6 +17,9 @@ clan:
   default-permissions: [doors, crops, animals]
 
 bank:
+  # Donner à la réserve seulement après ce temps de jeu actif (heures, /stats d'EterSuccess) : un second compte entré
+  # dans le clan ne peut pas y verser ses récompenses pour que le compte principal les reprenne. 0 : pas de limite.
+  min-give-playtime-hours: 5
   # Intérêt d'un nouveau clan, en % par semaine : pris sur le compte de chaque membre et versé à la réserve.
   default-interest: 2
   # Taux maximum qu'un clan peut régler.
@@ -44,6 +47,14 @@ zones:
 
 # Menu /clan : bouton en bas. Avec une commande (sans le /), il la lance pour le joueur et relie les menus
 # entre eux ; vide, il ferme le menu.
+# Classement des clans du mois (/classement d'EterReward et menu du clan) : activité et travail des membres (EterReward),
+# trésor (versé moins repris dans la réserve), expansion (chunks pris moins rendus ou perdus). Calculé sur le serveur
+# qui a du terrain (land.enabled), toutes les 5 minutes. Le mois change à minuit dans time-zone.
+ranking:
+  time-zone: Europe/Paris
+  # Prix du top 3 du mois fini (1er, 2e, 3e), versés dans la réserve du clan.
+  rewards: [3000, 2000, 1000]
+
 menus:
   clan:
     back-command: ""
