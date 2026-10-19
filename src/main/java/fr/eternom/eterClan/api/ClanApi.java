@@ -36,6 +36,12 @@ public interface ClanApi {
     /** Le joueur peut construire là (hors terrain : oui ; sinon selon ses permissions de clan). Thread principal. */
     boolean canBuild(Player player, Location location);
 
+    /**
+     * Le joueur peut avoir un home là (hors terrain : oui ; sur le terrain : permission de clan « homes » ; dans une
+     * parcelle louée : son locataire et ceux qu'il a choisis). Thread principal, sans base. Depuis 1.4.0.
+     */
+    boolean canHome(Player player, Location location);
+
     /** Le menu /clan. Thread principal. */
     void openMenu(Player player);
 }

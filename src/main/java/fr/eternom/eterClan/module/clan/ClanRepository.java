@@ -25,6 +25,8 @@ public class ClanRepository {
     private static final String CLAIMS = "claims";
     /** Parcelles des clans : supprimées avec le clan ; gérées par ZoneRepository. */
     private static final String ZONES = "zones";
+    /** Changements de données déjà faits (une ligne par changement) : chacun une seule fois, même avec plusieurs serveurs. */
+    private static final String UPGRADES = "upgrades";
 
     private final Database database;
 
@@ -47,6 +49,12 @@ public class ClanRepository {
                 Column.of("account", Column.Type.DOUBLE).notNull(),
                 Column.of("permissions", Column.Type.STRING).length(255).notNull(),
                 Column.of("show_rank", Column.Type.BOOLEAN));
+        database.createTable(UPGRADES, Column.of("name", Column.Type.STRING).length(64).primaryKey());
+        // 1.4.0 : la permission « homes » donnée aux membres déjà là (avant elle, tout membre pouvait poser un home)
+        if (database.execute("INSERT IGNORE INTO " + database.table(UPGRADES) + " (name) VALUES ('homes')") > 0) {
+            database.execute("UPDATE " + database.table(MEMBERS) + " SET permissions = IF(permissions = '', 'homes',"
+                    + " CONCAT(permissions, ',homes')) WHERE FIND_IN_SET('homes', permissions) = 0");
+        }
     }
 
     // ---------- Lecture ----------

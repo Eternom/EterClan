@@ -20,6 +20,7 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   invitations gardées 5 min dans Redis, départ, exclusion, cession, dissolution (comptes rendus, réserve perdue).
   **Pas de rôles** : chaque membre a sa liste de permissions (`ClanPermission`, en base `build,doors,...`), réglée dans
   le menu par qui a `PERMISSIONS` ; le chef a tout. Défaut d'un nouveau membre : `clan.default-permissions`.
+  `HOMES` (1.4.0) : avoir des homes sur le terrain ; donnée une fois à tous les membres déjà là (table `eterclan_upgrades`).
   Étiquettes EterLib : `clan` (le tag, `<tag_clan>` dans EterTab) et **`badge`** (le tag mis en forme, lang/ > `badge`),
   qui **remplace le grade** dans le Tab, le pseudo, la sidebar (EterTab) et le chat (EterChat). Pas de badge (donc le
   grade) pour le staff (`eter.display.staff`) et pour qui préfère son grade (clic sur sa tête dans le menu ; colonne
@@ -87,7 +88,8 @@ Guerre et points entre clans (les terrains resteront hors d'atteinte) : pas enco
 `fr.eternom.eterClan.api.ClanApi` (`ClanApi.get()`) : personne d'autre ne lit les tables `eterclan_*`.
 
 - `clanOf(uuid)` : le clan d'un joueur, connecté ou non, ses membres et son territoire (`chunks`) (bloquant) ;
-- `isClaimed(position)`, `canBuild(joueur, position)` : la protection du terrain, en mémoire (thread principal) ;
+- `isClaimed(position)`, `canBuild(joueur, position)`, `canHome(joueur, position)` (1.4.0, permission `homes` : EterHome refuse un
+  home sur le terrain d'un autre clan) : la protection du terrain, en mémoire (thread principal) ;
 - `openMenu(joueur)` : le menu `/clan` ;
 - source de classement `clans` (EterLib `RankingSource`) : les clans par territoire, pour `/classement` d'EterReward.
 

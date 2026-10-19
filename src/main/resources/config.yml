@@ -13,8 +13,8 @@ clan:
   # Prix de création d'un clan (un joueur seul est un clan d'une personne).
   creation-price: 1000
   # Permissions d'un nouveau membre (le chef a tout ; les autres se donnent dans le menu des membres) :
-  # build, containers, doors, redstone, crops, animals, invite, kick, claim, zones, reserve, interest, permissions
-  default-permissions: [doors, crops, animals]
+  # build, containers, doors, redstone, crops, animals, homes, invite, kick, claim, zones, reserve, interest, permissions
+  default-permissions: [doors, crops, animals, homes]
 
 bank:
   # Donner à la réserve seulement après ce temps de jeu actif (heures, /stats d'EterSuccess) : un second compte entré

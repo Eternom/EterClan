@@ -23,7 +23,7 @@ import java.util.List;
  */
 class PermissionsMenu implements Menu {
 
-    private static final List<Integer> SLOTS = List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24);
+    private static final List<Integer> SLOTS = List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25);
     private static final int BACK = 40;
 
     private final ClanGui gui;

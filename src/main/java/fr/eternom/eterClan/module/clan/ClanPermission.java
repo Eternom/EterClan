@@ -22,6 +22,7 @@ public enum ClanPermission {
     REDSTONE(Material.LEVER),
     CROPS(Material.WHEAT),
     ANIMALS(Material.LEAD),
+    HOMES(Material.RED_BED),
     // Gestion
     INVITE(Material.WRITABLE_BOOK),
     KICK(Material.IRON_DOOR),

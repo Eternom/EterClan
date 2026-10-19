@@ -39,6 +39,11 @@ public class ClanApiService implements ClanApi {
     }
 
     @Override
+    public boolean canHome(Player player, Location location) {
+        return access.allows(player, location, ClanPermission.HOMES);
+    }
+
+    @Override
     public void openMenu(Player player) {
         gui.open(player);
     }
