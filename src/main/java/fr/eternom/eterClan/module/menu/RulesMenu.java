@@ -24,12 +24,13 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 /**
- * Règles du territoire, 6 lignes : ce que le joueur peut faire, et pourquoi.
+ * Règles du territoire, 6 lignes : ce que le joueur peut faire, et pourquoi. Lecture seule : les permissions se règlent
+ * membre par membre (Membres -> un membre -> Permissions) ; un clic sur une permission y mène qui peut les gérer.
  * <pre>
  *  ▣ ▣ ▢ ▢ ⌖ ▢ ▢ ▣ ▣     ⌖ = ici : où il se tient, et ce qu'il peut y faire (parcelle comprise)
  *  ▣ · · · · · · · ▣
  *  ▢ B C P · R K A ▢     sur le terrain du clan : construire, coffres, portes, redstone, cultures, animaux (✔ / ✘)
- *  ▣ · · · · · · · ▣
+ *  ▣ · · · H · · · ▣     H = avoir des homes sur le terrain
  *  ▢ ⚔ ✹ ♨ ⛨ ☠ ✖ · ▢     toujours protégé : combat, explosions, feu, l'extérieur, créatures, visiteurs
  *  ▣ ▣ ▢ ▤ ← ▢ ▢ ▣ ▣     ▤ = la règle des parcelles louées
  * </pre>
@@ -39,8 +40,8 @@ class RulesMenu implements Menu {
 
     /** Les permissions de terrain, dans l'ordre affiché. */
     private static final List<ClanPermission> LAND = List.of(ClanPermission.BUILD, ClanPermission.CONTAINERS, ClanPermission.DOORS,
-            ClanPermission.REDSTONE, ClanPermission.CROPS, ClanPermission.ANIMALS);
-    private static final int[] LAND_SLOTS = {19, 20, 21, 23, 24, 25};
+            ClanPermission.REDSTONE, ClanPermission.CROPS, ClanPermission.ANIMALS, ClanPermission.HOMES);
+    private static final int[] LAND_SLOTS = {19, 20, 21, 23, 24, 25, 31};
     private static final String[] PROTECTIONS = {"pvp", "explosions", "fire", "outside", "mobs", "visitors"};
     private static final Material[] PROTECTION_ICONS = {Material.IRON_SWORD, Material.TNT, Material.FLINT_AND_STEEL,
             Material.PISTON, Material.ZOMBIE_HEAD, Material.BARRIER};
@@ -72,6 +73,9 @@ class RulesMenu implements Menu {
         } else if (slot == HERE) {
             Sounds.click(player);
             gui.openRules(player); // se rafraîchit : le joueur a pu bouger
+        } else if (isLandSlot(slot) && canManage()) {
+            Sounds.page(player);
+            gui.openMembers(player); // les permissions se règlent membre par membre
         }
     }
 
@@ -86,11 +90,16 @@ class RulesMenu implements Menu {
         for (int i = 0; i < LAND.size(); i++) {
             ClanPermission permission = LAND.get(i);
             boolean can = clan.can(viewer.getUniqueId(), permission);
+            List<Component> lore = new ArrayList<>(List.of(
+                    text("rules.land." + permission.id()),
+                    Component.empty(),
+                    text(clan.isOwner(viewer.getUniqueId()) ? "rules.allowed-owner" : can ? "rules.allowed" : "rules.denied"),
+                    text("rules.read-only")));
+            if (canManage()) {
+                lore.add(text("rules.manage"));
+            }
             inventory.setItem(LAND_SLOTS[i], Items.item(can ? permission.icon() : Material.GRAY_DYE,
-                    text("permission." + permission.id()), List.of(
-                            text("rules.land." + permission.id()),
-                            Component.empty(),
-                            text(can ? "rules.allowed" : "rules.denied"))));
+                    text("permission." + permission.id()), lore));
         }
         inventory.setItem(22, Items.item(Material.WHITE_BANNER, text("rules.land-info.name"), List.of(
                 text("rules.land-info.lore"), text("rules.land-info.owner"))));
@@ -134,6 +143,19 @@ class RulesMenu implements Menu {
         lore.add(Component.empty());
         lore.add(text("rules.here.refresh"));
         return Items.item(Material.COMPASS, text("rules.here.name"), lore);
+    }
+
+    private boolean canManage() {
+        return clan.can(viewer.getUniqueId(), ClanPermission.PERMISSIONS);
+    }
+
+    private static boolean isLandSlot(int slot) {
+        for (int landSlot : LAND_SLOTS) {
+            if (landSlot == slot) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Component text(String key, String... placeholders) {

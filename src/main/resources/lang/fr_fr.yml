@@ -430,6 +430,9 @@ land-menu:
 rules:
   title: "<primary>Règles <dark_gray>·</dark_gray> <clan>"
   allowed: "<success>✔ <info>Tu peux"
+  allowed-owner: "<success>✔ <info>Tu peux <dark_gray>(chef : toutes les permissions)"
+  read-only: "<dark_gray>Ce que TOI tu peux faire ; se règle par membre"
+  manage: "<accent>Clic</accent> <info>: régler les permissions des membres"
   denied: "<error>✘ <info>Tu ne peux pas <dark_gray>(demande à qui gère les permissions)"
   always: "<success>✔ <info>Toujours, sur tout terrain de clan"
   land:
@@ -439,6 +442,7 @@ rules:
     redstone: "<info>Boutons, leviers, plaques de pression"
     crops: "<info>Semer et récolter"
     animals: "<info>Nourrir, tondre, attacher, frapper les animaux"
+    homes: "<info>Avoir des homes sur le terrain (/sethome, /home)"
   land-info:
     name: "<accent>Sur le terrain du clan"
     lore: "<info>Chaque membre a ses permissions, réglées par le clan."
