@@ -34,6 +34,10 @@ public class ClanSync {
     private static final String TAG = "clan";
     /** Étiquette qui remplace le grade (EterTab, EterChat) : le tag du clan mis en forme, ou rien. */
     private static final String BADGE = "badge";
+    /** Le badge par défaut (1.6.0) : crochets gris clair, tag dans la couleur du clan. */
+    private static final String BADGE_FORMAT = "<gray>[<tag>]</gray> ";
+    /** Le badge par défaut d'avant les couleurs, remplacé s'il est encore dans un lang/ du serveur. */
+    private static final String OLD_BADGE = "<accent>[<tag>]</accent> ";
     /** Le staff garde toujours son grade. */
     public static final String STAFF = "eter.display.staff";
 
@@ -146,10 +150,13 @@ public class ClanSync {
         boolean showRank = player.hasPermission(STAFF)
                 || clan.get().member(player.getUniqueId()).map(Clan.Member::showRank).orElse(false);
         String format = messages.raw(player, "badge");
+        if (format != null && format.equals(OLD_BADGE)) {
+            format = BADGE_FORMAT; // ancien texte par défaut resté dans lang/ : crochets gris clair et tag en couleur
+        }
         if (showRank || format == null) {
             tags.remove(player, BADGE);
         } else {
-            tags.set(player, BADGE, format.replace("<tag>", clan.get().tag()));
+            tags.set(player, BADGE, format.replace("<tag>", clan.get().color().paint(clan.get().tag())));
         }
     }
 

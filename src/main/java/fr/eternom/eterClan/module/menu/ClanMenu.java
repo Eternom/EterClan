@@ -2,6 +2,7 @@ package fr.eternom.eterClan.module.menu;
 
 import fr.eternom.eterClan.module.bank.BankService;
 import fr.eternom.eterClan.module.clan.Clan;
+import fr.eternom.eterClan.module.clan.ClanPermission;
 import fr.eternom.eterClan.module.ranking.ClanLeague;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterLib.EterLib;
@@ -28,7 +29,7 @@ import java.util.Optional;
  * Menu du clan, 5 lignes : l'accueil, d'où partent les sous-menus.
  * <pre>
  *  ▣ ▣ ▢ ▢ ▢ ▢ ▢ ▣ ▣
- *  ▣ ☺ · · ⚑ · · ♛ ▣     ☺ = moi (mon compte ; clic : grade ou tag) · ⚑ = le clan · ♛ = classement du mois
+ *  ▣ ☺ · · ⚑ · · ♛ ▣     ☺ = moi (mon compte ; clic : grade ou tag) · ⚑ = le clan (clic : couleur du tag) · ♛ = classement du mois
  *  ▢ · $ · ♟ · ▦ · ▢     $ = banque · ♟ = membres · ▦ = terrain et parcelles
  *  ▣ · · · ✎ · · · ▣     ✎ = règles du territoire (ce que chacun peut y faire)
  *  ✖ ▣ ▢ ▢ ← ▢ ▢ ▣ ▣     ✖ = quitter (ou dissoudre pour le chef)
@@ -67,6 +68,11 @@ class ClanMenu implements Menu {
             case HEAD -> {
                 Sounds.click(player);
                 gui.clans().toggleDisplay(player, () -> gui.open(player));
+            }
+            case INFO -> {
+                if (clan.can(player.getUniqueId(), ClanPermission.PERMISSIONS)) {
+                    page(player, () -> gui.openTagColor(player));
+                }
             }
             case LEAGUE -> page(player, () -> gui.openLeague(player));
             case BANK -> page(player, () -> gui.openBank(player));
@@ -118,7 +124,9 @@ class ClanMenu implements Menu {
                 text("menu.info.accounts", "amount", Money.format(clan.accounts())),
                 text("menu.info.interest", "rate", BankService.percent(clan.interest())),
                 text("menu.info.upkeep", "amount", Money.format(gui.land().pricing().upkeepOf(clan.chunks()))),
-                text("menu.info.next", "time", EterLib.get().formatDuration(viewer, seconds)))));
+                text("menu.info.next", "time", EterLib.get().formatDuration(viewer, seconds)),
+                text("menu.info.color", "color", messages.plain(viewer, "tag-color." + clan.color().id())),
+                text(clan.can(viewer.getUniqueId(), ClanPermission.PERMISSIONS) ? "menu.info.color-click" : "menu.info.color-none"))));
         inventory.setItem(LEAGUE, leagueItem());
         inventory.setItem(BANK, Items.item(Material.GOLD_INGOT, text("menu.bank.name"), List.of(
                 text("menu.head.account", "amount", Money.format(account)),

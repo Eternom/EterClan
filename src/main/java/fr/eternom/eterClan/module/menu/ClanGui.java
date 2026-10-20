@@ -85,6 +85,10 @@ public class ClanGui {
         clans.clanOf(player).ifPresent(clan -> player.openInventory(new LandMenu(this, player, clan).getInventory()));
     }
 
+    void openTagColor(Player player) {
+        clans.clanOf(player).ifPresent(clan -> player.openInventory(new TagColorMenu(this, player, clan).getInventory()));
+    }
+
     void openRules(Player player) {
         clans.clanOf(player).ifPresent(clan -> player.openInventory(new RulesMenu(this, player, clan).getInventory()));
     }

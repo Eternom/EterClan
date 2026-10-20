@@ -33,7 +33,8 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   hebdomadaire suit la même courbe depuis `upkeep`). Rendre un chunk : sans remboursement, pas sous une parcelle louée.
   - **Protection** (`ProtectionListener`, `Access`, tout en mémoire) : chaque action demande sa permission (blocs,
     conteneurs, portes, redstone, cultures, animaux, entités) ; le monde n'entre pas (explosions, feu, pistons,
-    liquides, distributeurs, arbres, monstres qui changent des blocs) ; pas de PvP sur un terrain. **Combat, explosions et
+    liquides, distributeurs, arbres, monstres qui changent des blocs) ; pas de PvP sur un terrain. **Tag en couleur** (1.6.0, `TagColor`, colonne `tag_color`) : crochets gris clair, tag dans une des 12 couleurs, choisie
+    depuis la bannière du menu du clan (chef ou `PERMISSIONS`). **Combat, explosions et
     feu** sont protégés par défaut, mais un clan peut les **autoriser** sur son terrain (`ClanRule`, colonne `rules` des
     clans, 1.5.0) : menu Règles du territoire, clic par le chef ou qui a `PERMISSIONS`. Staff :
     `eterclan.bypass.claims`.

@@ -239,6 +239,22 @@ public class ClanService {
     }
 
     /** Donne ou retire une permission à un membre (pas au chef, qui a tout). */
+    /** Change la couleur du tag du clan ; chef et PERMISSIONS. */
+    public void setTagColor(Player player, Clan clan, TagColor color, Runnable after) {
+        if (!clan.can(player.getUniqueId(), ClanPermission.PERMISSIONS)) {
+            messages.send(player, "clan.no-permission");
+            return;
+        }
+        Tasks.async(plugin, player, () -> {
+            clans.setTagColor(clan.id(), color);
+            sync.clanChanged(clan.id());
+            return true;
+        }, done -> {
+            messages.send(player, "tag-color.set", "color", messages.plain(player, "tag-color." + color.id()));
+            after.run();
+        }, () -> messages.send(player, "error.generic"));
+    }
+
     /** Autorise ou protège de nouveau une règle du terrain (combat, explosions, feu) ; chef et PERMISSIONS. */
     public void toggleRule(Player player, Clan clan, ClanRule rule, Runnable after) {
         if (!clan.can(player.getUniqueId(), ClanPermission.PERMISSIONS)) {

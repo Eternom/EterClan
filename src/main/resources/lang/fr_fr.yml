@@ -6,7 +6,7 @@
 # Tout se fait dans le menu /clan : les textes parlent de ses boutons, pas de commandes.
 
 # Badge qui remplace le grade (Tab, chat, pseudo) pour les membres d'un clan : <tag> = le tag du clan.
-badge: "<accent>[<tag>]</accent> "
+badge: "<gray>[<tag>]</gray> "
 
 clan:
   none: "<error>Tu n'as pas de clan : ouvre <accent><click:run_command:'/clan'>/clan</click></accent> pour en créer un ou accepter une invitation."
@@ -281,6 +281,9 @@ menu:
     interest: "<dark_gray>▸ <info>Intérêt : <accent><rate> %</accent> par semaine"
     upkeep: "<dark_gray>▸ <info>Entretien : <accent><amount></accent> par semaine"
     next: "<dark_gray>▸ <info>Prochain passage dans <accent><time>"
+    color: "<dark_gray>▸ <info>Couleur du tag : <accent><color>"
+    color-click: "<accent>Clic</accent> <info>: changer la couleur du tag"
+    color-none: ""
   members:
     name: "<accent>Membres"
     lore: "<info><count> membre(s) : inviter, permissions, comptes"
@@ -522,3 +525,23 @@ league:
   top:
     name: "<accent><place>. <info>[<tag>] <clan>"
     empty: "<dark_gray><place>. personne"
+
+# Couleur du tag du clan (menu du clan : clic sur la bannière). Les crochets restent gris clair.
+tag-color:
+  title: "<primary>Couleur du tag"
+  item: "<preview> <info><color>"
+  current: "<success>✔ <info>Couleur actuelle"
+  choose: "<accent>Clic</accent> <info>: choisir cette couleur"
+  set: "<info>Le tag du clan est maintenant <accent><color></accent><info>."
+  orange: "orange"
+  red: "rouge"
+  pink: "rose"
+  magenta: "magenta"
+  purple: "violet"
+  blue: "bleu"
+  light_blue: "bleu ciel"
+  cyan: "cyan"
+  green: "vert"
+  lime: "vert clair"
+  yellow: "jaune"
+  white: "blanc"
