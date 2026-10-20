@@ -239,6 +239,29 @@ public class ClanService {
     }
 
     /** Donne ou retire une permission à un membre (pas au chef, qui a tout). */
+    /** Autorise ou protège de nouveau une règle du terrain (combat, explosions, feu) ; chef et PERMISSIONS. */
+    public void toggleRule(Player player, Clan clan, ClanRule rule, Runnable after) {
+        if (!clan.can(player.getUniqueId(), ClanPermission.PERMISSIONS)) {
+            messages.send(player, "clan.no-permission");
+            return;
+        }
+        Set<ClanRule> rules = EnumSet.noneOf(ClanRule.class);
+        rules.addAll(clan.rules());
+        boolean allow = !rules.remove(rule);
+        if (allow) {
+            rules.add(rule);
+        }
+        Tasks.async(plugin, player, () -> {
+            clans.setRules(clan.id(), rules);
+            sync.clanChanged(clan.id());
+            return true;
+        }, done -> {
+            messages.send(player, allow ? "rules.rule-allowed" : "rules.rule-protected", "rule",
+                    messages.plain(player, "rules.protection." + rule.id() + ".short"));
+            after.run();
+        }, () -> messages.send(player, "error.generic"));
+    }
+
     public void togglePermission(Player player, Clan clan, UUID member, ClanPermission permission, Runnable after) {
         if (!clan.can(player.getUniqueId(), ClanPermission.PERMISSIONS)) {
             messages.send(player, "clan.no-permission");

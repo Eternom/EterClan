@@ -429,6 +429,12 @@ land-menu:
 # Land rules: what everyone can do, and why
 rules:
   title: "<primary>Rules <dark_gray>·</dark_gray> <clan>"
+  rule-off: "<success>✔ <info>Protected on your land"
+  rule-on: "<error>✘ <info>Allowed on your land"
+  rule-click-allow: "<accent>Click</accent> <info>: allow it on the clan's land"
+  rule-click-protect: "<accent>Click</accent> <info>: protect the land again"
+  rule-allowed: "<info>On the clan's land, <accent><rule></accent> <info>is now <error>allowed</error><info>."
+  rule-protected: "<info>The clan's land is protected again: <accent><rule></accent><info>."
   allowed: "<success>✔ <info>You can"
   allowed-owner: "<success>✔ <info>You can <dark_gray>(leader: every permission)"
   read-only: "<dark_gray>What YOU can do; set per member"
@@ -448,18 +454,21 @@ rules:
     lore: "<info>Each member has their own permissions, set by the clan."
     owner: "<info>The leader has everything. Other players: nothing."
   protected:
-    name: "<accent>Always protected"
-    lore: "<info>The following applies on any clan land, for everyone."
+    name: "<accent>Land protections"
+    lore: "<info>Combat, explosions and fire: the clan can allow them. The rest always applies."
   protection:
     pvp:
       name: "<accent>No fighting"
       lore: "<info>Players can't hit each other"
+      short: "player combat"
     explosions:
       name: "<accent>No explosions"
       lore: "<info>Creepers, TNT, beds: no block destroyed"
+      short: "explosions"
     fire:
       name: "<accent>No fire"
       lore: "<info>Fire doesn't spread or burn anything"
+      short: "fire"
     outside:
       name: "<accent>Nothing comes from outside"
       lore: "<info>Pistons, liquids, dispensers, trees growing from outside"

@@ -1,6 +1,7 @@
 package fr.eternom.eterClan.module.claim;
 
 import fr.eternom.eterClan.module.clan.ClanPermission;
+import fr.eternom.eterClan.module.clan.ClanRule;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.Zone;
 import org.bukkit.Location;
@@ -34,6 +35,12 @@ public class Access {
             return zone.get().allows(player.getUniqueId());
         }
         return sync.cache().get(owner.getAsLong()).map(clan -> clan.can(player.getUniqueId(), permission)).orElse(false);
+    }
+
+    /** Terrain d'un clan qui n'autorise pas cette règle (combat, explosions, feu) : protégé. Nature sauvage : non. */
+    public boolean protects(Location location, ClanRule rule) {
+        OptionalLong owner = sync.claims().owner(location);
+        return owner.isPresent() && !sync.cache().get(owner.getAsLong()).map(clan -> clan.allows(rule)).orElse(false);
     }
 
     /** Terrain d'un clan (n'importe lequel) : hors d'atteinte de l'extérieur. */

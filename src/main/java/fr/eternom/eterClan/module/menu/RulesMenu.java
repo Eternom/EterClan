@@ -3,6 +3,7 @@ package fr.eternom.eterClan.module.menu;
 import fr.eternom.eterClan.module.claim.Access;
 import fr.eternom.eterClan.module.clan.Clan;
 import fr.eternom.eterClan.module.clan.ClanPermission;
+import fr.eternom.eterClan.module.clan.ClanRule;
 import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterLib.helper.gui.Frame;
 import fr.eternom.eterLib.helper.gui.Items;
@@ -31,7 +32,8 @@ import java.util.OptionalLong;
  *  ▣ · · · · · · · ▣
  *  ▢ B C P · R K A ▢     sur le terrain du clan : construire, coffres, portes, redstone, cultures, animaux (✔ / ✘)
  *  ▣ · · · H · · · ▣     H = avoir des homes sur le terrain
- *  ▢ ⚔ ✹ ♨ ⛨ ☠ ✖ · ▢     toujours protégé : combat, explosions, feu, l'extérieur, créatures, visiteurs
+ *  ▢ ⚔ ✹ ♨ ⛨ ☠ ✖ · ▢     combat, explosions, feu : protégés sauf si le clan les autorise (clic : chef et PERMISSIONS) ;
+ *                        l'extérieur, créatures, visiteurs : toujours protégés
  *  ▣ ▣ ▢ ▤ ← ▢ ▢ ▣ ▣     ▤ = la règle des parcelles louées
  * </pre>
  * Une parcelle louée obéit à ses propres règles : son locataire et ceux qu'il a choisis, jamais les permissions du clan.
@@ -46,6 +48,8 @@ class RulesMenu implements Menu {
     private static final Material[] PROTECTION_ICONS = {Material.IRON_SWORD, Material.TNT, Material.FLINT_AND_STEEL,
             Material.PISTON, Material.ZOMBIE_HEAD, Material.BARRIER};
     private static final int[] PROTECTION_SLOTS = {37, 38, 39, 41, 42, 43};
+    /** Les trois premières protections se règlent (dans l'ordre de PROTECTIONS) ; les autres sont toujours actives. */
+    private static final ClanRule[] RULES = {ClanRule.PVP, ClanRule.EXPLOSIONS, ClanRule.FIRE};
     private static final int HERE = 4;
     private static final int ZONES = 48;
     private static final int BACK = 49;
@@ -73,6 +77,9 @@ class RulesMenu implements Menu {
         } else if (slot == HERE) {
             Sounds.click(player);
             gui.openRules(player); // se rafraîchit : le joueur a pu bouger
+        } else if (ruleAt(slot) != null && canManage()) {
+            Sounds.click(player);
+            gui.clans().toggleRule(player, clan, ruleAt(slot), () -> gui.openRules(player));
         } else if (isLandSlot(slot) && canManage()) {
             Sounds.page(player);
             gui.openMembers(player); // les permissions se règlent membre par membre
@@ -104,8 +111,19 @@ class RulesMenu implements Menu {
         inventory.setItem(22, Items.item(Material.WHITE_BANNER, text("rules.land-info.name"), List.of(
                 text("rules.land-info.lore"), text("rules.land-info.owner"))));
         for (int i = 0; i < PROTECTIONS.length; i++) {
-            inventory.setItem(PROTECTION_SLOTS[i], Items.item(PROTECTION_ICONS[i], text("rules.protection." + PROTECTIONS[i] + ".name"),
-                    List.of(text("rules.protection." + PROTECTIONS[i] + ".lore"), Component.empty(), text("rules.always"))));
+            List<Component> lore = new ArrayList<>(List.of(text("rules.protection." + PROTECTIONS[i] + ".lore"), Component.empty()));
+            boolean allowed = false;
+            if (i < RULES.length) {
+                allowed = clan.allows(RULES[i]);
+                lore.add(text(allowed ? "rules.rule-on" : "rules.rule-off"));
+                if (canManage()) {
+                    lore.add(text(allowed ? "rules.rule-click-protect" : "rules.rule-click-allow"));
+                }
+            } else {
+                lore.add(text("rules.always"));
+            }
+            inventory.setItem(PROTECTION_SLOTS[i], Items.item(allowed ? Material.GRAY_DYE : PROTECTION_ICONS[i],
+                    text("rules.protection." + PROTECTIONS[i] + ".name"), lore, !allowed));
         }
         inventory.setItem(40, Items.item(Material.SHIELD, text("rules.protected.name"), List.of(text("rules.protected.lore"))));
         long rented = gui.zonesOf(clan).stream().filter(zone -> viewer.getUniqueId().equals(zone.tenant())).count();
@@ -147,6 +165,16 @@ class RulesMenu implements Menu {
 
     private boolean canManage() {
         return clan.can(viewer.getUniqueId(), ClanPermission.PERMISSIONS);
+    }
+
+    /** La règle réglable à cette case, null sinon. */
+    private static ClanRule ruleAt(int slot) {
+        for (int i = 0; i < RULES.length; i++) {
+            if (PROTECTION_SLOTS[i] == slot) {
+                return RULES[i];
+            }
+        }
+        return null;
     }
 
     private static boolean isLandSlot(int slot) {

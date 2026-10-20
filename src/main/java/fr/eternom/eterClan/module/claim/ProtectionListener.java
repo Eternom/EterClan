@@ -1,6 +1,7 @@
 package fr.eternom.eterClan.module.claim;
 
 import fr.eternom.eterClan.module.clan.ClanPermission;
+import fr.eternom.eterClan.module.clan.ClanRule;
 import fr.eternom.eterLib.helper.message.Messages;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -165,8 +166,9 @@ public class ProtectionListener implements Listener {
             return;
         }
         if (victim instanceof Player) {
-            // Pas de PvP sur un terrain, ni pour celui qui y est ni pour celui qui tire depuis
-            if (victim != attacker && (access.isClaimed(victim.getLocation()) || access.isClaimed(attacker.getLocation()))) {
+            // Pas de PvP sur un terrain (sauf si son clan l'autorise), ni pour celui qui y est ni pour celui qui tire depuis
+            if (victim != attacker && (access.protects(victim.getLocation(), ClanRule.PVP)
+                    || access.protects(attacker.getLocation(), ClanRule.PVP))) {
                 event.setCancelled(true);
             }
             return;
@@ -213,24 +215,24 @@ public class ProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event) {
-        event.blockList().removeIf(block -> access.isClaimed(block.getLocation()));
+        event.blockList().removeIf(block -> access.protects(block.getLocation(), ClanRule.EXPLOSIONS));
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBlockExplode(BlockExplodeEvent event) {
-        event.blockList().removeIf(block -> access.isClaimed(block.getLocation()));
+        event.blockList().removeIf(block -> access.protects(block.getLocation(), ClanRule.EXPLOSIONS));
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBurn(BlockBurnEvent event) {
-        if (access.isClaimed(event.getBlock().getLocation())) {
+        if (access.protects(event.getBlock().getLocation(), ClanRule.FIRE)) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onSpread(BlockSpreadEvent event) {
-        if (event.getSource().getType() == Material.FIRE && access.isClaimed(event.getBlock().getLocation())) {
+        if (event.getSource().getType() == Material.FIRE && access.protects(event.getBlock().getLocation(), ClanRule.FIRE)) {
             event.setCancelled(true);
         }
     }
@@ -240,8 +242,8 @@ public class ProtectionListener implements Listener {
         Location location = event.getBlock().getLocation();
         if (event.getPlayer() != null) {
             deny(event.getPlayer(), location, ClanPermission.BUILD, event);
-        } else if (access.isClaimed(location)) {
-            event.setCancelled(true); // feu qui se propage, lave, foudre, flèche, boule de feu
+        } else if (access.protects(location, ClanRule.FIRE)) {
+            event.setCancelled(true); // feu qui se propage, lave, foudre, flèche, boule de feu (sauf si le clan l'autorise)
         }
     }
 

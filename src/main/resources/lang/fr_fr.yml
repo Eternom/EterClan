@@ -429,6 +429,12 @@ land-menu:
 # Règles du territoire : ce que chacun peut faire, et pourquoi
 rules:
   title: "<primary>Règles <dark_gray>·</dark_gray> <clan>"
+  rule-off: "<success>✔ <info>Protégé sur votre terrain"
+  rule-on: "<error>✘ <info>Autorisé sur votre terrain"
+  rule-click-allow: "<accent>Clic</accent> <info>: l'autoriser sur le terrain du clan"
+  rule-click-protect: "<accent>Clic</accent> <info>: protéger de nouveau le terrain"
+  rule-allowed: "<info>Sur le terrain du clan, <accent><rule></accent> <info>est maintenant <error>autorisé</error><info>."
+  rule-protected: "<info>Le terrain du clan est de nouveau protégé : <accent><rule></accent><info>."
   allowed: "<success>✔ <info>Tu peux"
   allowed-owner: "<success>✔ <info>Tu peux <dark_gray>(chef : toutes les permissions)"
   read-only: "<dark_gray>Ce que TOI tu peux faire ; se règle par membre"
@@ -448,18 +454,21 @@ rules:
     lore: "<info>Chaque membre a ses permissions, réglées par le clan."
     owner: "<info>Le chef a tout. Les autres joueurs : rien."
   protected:
-    name: "<accent>Toujours protégé"
-    lore: "<info>Ce qui suit vaut sur tout terrain de clan, pour tous."
+    name: "<accent>Protections du terrain"
+    lore: "<info>Combat, explosions et feu : le clan peut les autoriser. Le reste vaut toujours."
   protection:
     pvp:
       name: "<accent>Pas de combat"
       lore: "<info>Les joueurs ne peuvent pas se frapper"
+      short: "le combat entre joueurs"
     explosions:
       name: "<accent>Pas d'explosion"
       lore: "<info>Creepers, TNT, lits : aucun bloc détruit"
+      short: "les explosions"
     fire:
       name: "<accent>Pas d'incendie"
       lore: "<info>Le feu ne se propage pas et ne brûle rien"
+      short: "le feu"
     outside:
       name: "<accent>Rien ne vient de dehors"
       lore: "<info>Pistons, liquides, distributeurs, arbres qui poussent depuis l'extérieur"

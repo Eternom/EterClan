@@ -49,6 +49,8 @@ public class ClanRepository {
                 Column.of("account", Column.Type.DOUBLE).notNull(),
                 Column.of("permissions", Column.Type.STRING).length(255).notNull(),
                 Column.of("show_rank", Column.Type.BOOLEAN));
+        // 1.5.0 : ce que le clan autorise sur son terrain (vide : tout est protégé)
+        database.addColumn(CLANS, Column.of("rules", Column.Type.STRING).length(64));
         database.createTable(UPGRADES, Column.of("name", Column.Type.STRING).length(64).primaryKey());
         // 1.4.0 : la permission « homes » donnée aux membres déjà là (avant elle, tout membre pouvait poser un home)
         if (database.execute("INSERT IGNORE INTO " + database.table(UPGRADES) + " (name) VALUES ('homes')") > 0) {
@@ -133,6 +135,10 @@ public class ClanRepository {
         database.update(CLANS, Map.of("owner", owner), Map.of("id", clanId));
     }
 
+    public void setRules(long clanId, Set<ClanRule> rules) {
+        database.update(CLANS, Map.of("rules", ClanRule.format(rules)), Map.of("id", clanId));
+    }
+
     public void setInterest(long clanId, double interest) {
         database.update(CLANS, Map.of("interest", interest), Map.of("id", clanId));
     }
@@ -191,6 +197,6 @@ public class ClanRepository {
         int chunks = database.query("SELECT COUNT(*) AS chunks FROM " + database.table(CLAIMS) + " WHERE clan_id = ?", id)
                 .stream().findFirst().map(count -> count.getInt("chunks")).orElse(0);
         return new Clan(id, row.getString("name"), row.getString("tag"), row.getUUID("owner"), row.getDouble("reserve"),
-                row.getDouble("interest"), row.getLong("next_cycle"), chunks, members);
+                row.getDouble("interest"), row.getLong("next_cycle"), chunks, members, ClanRule.parse(row.getString("rules")));
     }
 }

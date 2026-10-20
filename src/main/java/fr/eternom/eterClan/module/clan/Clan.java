@@ -9,10 +9,11 @@ import java.util.UUID;
 /**
  * Un clan et ses membres, tel que lu en base. reserve : la caisse commune ; interest : pourcentage pris chaque semaine
  * sur le compte de chaque membre et versé à la réserve ; nextCycle : date du prochain passage hebdomadaire (intérêt,
- * entretien). chunks : nombre de chunks du clan sur tout le réseau.
+ * entretien). chunks : nombre de chunks du clan sur tout le réseau. rules : ce que le clan autorise sur son terrain
+ * (combat, explosions, feu ; protégé sinon).
  */
 public record Clan(long id, String name, String tag, UUID owner, double reserve, double interest, long nextCycle,
-                   int chunks, List<Member> members) {
+                   int chunks, List<Member> members, Set<ClanRule> rules) {
 
     /**
      * Un membre : son compte en banque (protégé de la mort), ses permissions, et showRank : il affiche son grade plutôt
@@ -40,6 +41,11 @@ public record Clan(long id, String name, String tag, UUID owner, double reserve,
             return EnumSet.allOf(ClanPermission.class);
         }
         return member(player).map(Member::permissions).orElse(Set.of());
+    }
+
+    /** Le clan autorise cela sur son terrain (combat, explosions, feu). */
+    public boolean allows(ClanRule rule) {
+        return rules.contains(rule);
     }
 
     public double accounts() {
