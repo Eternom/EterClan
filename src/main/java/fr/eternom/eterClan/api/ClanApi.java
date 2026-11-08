@@ -10,7 +10,7 @@ import java.util.UUID;
 
 /**
  * Ce qu'EterClan offre aux autres plugins : le clan d'un joueur et la protection de son terrain (ex : un /rtp qui
- * évite d'arriver dans une base, une prison qui oppose les clans...). Personne d'autre ne lit les tables eterclan_* :
+ * évite d'arriver dans une base, un événement qui oppose les clans...). Personne d'autre ne lit les tables eterclan_* :
  * on demande ici.
  * <pre>
  *     // compileOnly("com.github.Eternom:EterClan:&lt;tag&gt;") ; plugin.yml : softdepend: [EterClan]
