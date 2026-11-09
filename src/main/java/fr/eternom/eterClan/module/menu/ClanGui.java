@@ -2,6 +2,8 @@ package fr.eternom.eterClan.module.menu;
 
 import fr.eternom.eterClan.module.bank.BankService;
 import fr.eternom.eterClan.module.claim.Access;
+import fr.eternom.eterClan.module.claim.AccessService;
+import fr.eternom.eterClan.module.clan.Journal;
 import fr.eternom.eterClan.module.claim.ClaimService;
 import fr.eternom.eterClan.module.clan.Clan;
 import fr.eternom.eterClan.module.clan.ClanService;
@@ -38,6 +40,10 @@ import java.util.function.DoubleConsumer;
  */
 public class ClanGui {
 
+    /** Les cases d'une liste (menus de 54) : 4 lignes de 7, dans le cadre. */
+    static final List<Integer> LIST = java.util.stream.IntStream.rangeClosed(1, 4)
+            .flatMap(row -> java.util.stream.IntStream.rangeClosed(row * 9 + 1, row * 9 + 7)).boxed().toList();
+
     private final JavaPlugin plugin;
     private final ClanSync sync;
     private final ClanService clans;
@@ -49,9 +55,14 @@ public class ClanGui {
     private final BackButton back;
     private final ClanLeague league;
     private final Access access;
+    private final AccessService accessService;
+    private final Journal journal;
 
     public ClanGui(JavaPlugin plugin, ClanSync sync, ClanService clans, BankService bank, ClaimService land, ZoneService zones,
-                   ZoneSelection selection, Messages messages, BackButton back, ClanLeague league, Access access) {
+                   ZoneSelection selection, Messages messages, BackButton back, ClanLeague league, Access access,
+                   AccessService accessService, Journal journal) {
+        this.accessService = accessService;
+        this.journal = journal;
         this.league = league;
         this.access = access;
         this.plugin = plugin;
@@ -83,6 +94,44 @@ public class ClanGui {
 
     void openLand(Player player) {
         clans.clanOf(player).ifPresent(clan -> player.openInventory(new LandMenu(this, player, clan).getInventory()));
+    }
+
+    /** La carte du terrain autour du joueur ; selected : les chunks choisis pour être pris d'un coup. */
+    void openMap(Player player, java.util.Set<fr.eternom.eterClan.module.claim.LandPlan.Plot> selected) {
+        clans.clanOf(player).ifPresent(clan -> player.openInventory(new MapMenu(this, player, clan, selected).getInventory()));
+    }
+
+    void openAccess(Player player) {
+        clans.clanOf(player).ifPresent(clan -> player.openInventory(new AccessMenu(this, player, clan).getInventory()));
+    }
+
+    void openPasses(Player player) {
+        clans.clanOf(player).ifPresent(clan -> player.openInventory(new PassesMenu(this, player, clan).getInventory()));
+    }
+
+    /** Le journal du clan (CLAN) ou de la réserve (BANK) : les 15 dernières lignes, dans le chat. */
+    void showJournal(Player player, Journal.Category category) {
+        clans.clanOf(player).ifPresent(clan -> {
+            player.closeInventory();
+            Tasks.async(plugin, player, () -> journal.last(clan.id(), category, 15), entries -> {
+                messages.send(player, entries.isEmpty() ? "journal.empty" : "journal.header-" + category.name().toLowerCase());
+                java.time.format.DateTimeFormatter date = java.time.format.DateTimeFormatter.ofPattern("dd/MM HH:mm")
+                        .withZone(java.time.ZoneId.systemDefault());
+                for (Journal.Entry entry : entries.reversed()) {
+                    String[] values = new String[entry.values().size() * 2 + 4];
+                    values[0] = "actor";
+                    values[1] = entry.actor().isEmpty() ? messages.plain(player, "journal.system") : entry.actor();
+                    values[2] = "date";
+                    values[3] = date.format(java.time.Instant.ofEpochMilli(entry.createdAt()));
+                    for (int i = 0; i < entry.values().size(); i++) {
+                        values[4 + i * 2] = "v" + i;
+                        values[5 + i * 2] = entry.values().get(i);
+                    }
+                    messages.send(player, "journal.line", "date", values[3], "text",
+                            messages.plain(player, "journal." + entry.key(), values));
+                }
+            }, () -> messages.send(player, "error.generic"));
+        });
     }
 
     void openTagColor(Player player) {
@@ -219,6 +268,10 @@ public class ClanGui {
 
     Access access() {
         return access;
+    }
+
+    AccessService accessService() {
+        return accessService;
     }
 
     ClanService clans() {

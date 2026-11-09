@@ -9,6 +9,9 @@ import fr.eternom.eterClan.module.claim.Access;
 import fr.eternom.eterClan.module.claim.ClaimRepository;
 import fr.eternom.eterClan.module.claim.ClaimService;
 import fr.eternom.eterClan.module.claim.Pricing;
+import fr.eternom.eterClan.module.claim.LandRules;
+import fr.eternom.eterClan.module.claim.AccessService;
+import fr.eternom.eterClan.module.clan.Journal;
 import fr.eternom.eterClan.module.clan.ClanApiService;
 import fr.eternom.eterClan.module.clan.ClanRanking;
 import fr.eternom.eterClan.module.clan.ClanRepository;
@@ -50,6 +53,10 @@ public final class Main extends JavaPlugin {
     private ZoneSelection selection;
     private ClanGui gui;
     private ClanLeague league;
+    private AccessService accessService;
+    private Journal journal;
+    private ClanRepository clanRepository;
+    private ClaimRepository claimRepository;
 
     @Override
     public void onEnable() {
@@ -72,21 +79,27 @@ public final class Main extends JavaPlugin {
         ZoneRepository zoneRepository = new ZoneRepository(database);
         ClanRepository clanRepository = new ClanRepository(database);
         Pricing pricing = Pricing.load(getConfig().getConfigurationSection("land"));
+        LandRules rules = LandRules.load(getConfig().getConfigurationSection("land"));
+        journal = new Journal(this, database);
+        this.clanRepository = clanRepository;
+        this.claimRepository = claimRepository;
 
         sync = new ClanSync(this, messages, lib.network(this, "eterclan", messages), lib.getServerName(), clanRepository,
                 claimRepository, zoneRepository);
         sync.start();
         clans = new ClanService(this, clanRepository, zoneRepository, sync, lib.getRedis(), messages);
+        clans.setJournal(journal);
         // Classement des clans du mois : calculé là où il y a du terrain (la survie), lu partout
         league = new ClanLeague(this, new LeagueStore(database), clanRepository, sync, getConfig().getBoolean("land.enabled", false));
-        bank = new BankService(this, clanRepository, sync, clans, messages, league);
-        land = new ClaimService(this, claimRepository, zoneRepository, clanRepository, sync, clans, messages, pricing, league);
+        bank = new BankService(this, clanRepository, sync, clans, messages, league, journal);
+        land = new ClaimService(this, claimRepository, zoneRepository, clanRepository, sync, clans, messages, pricing, rules, journal, league);
         zones = new ZoneService(this, zoneRepository, clanRepository, sync, clans, messages);
         access = new Access(sync);
+        accessService = new AccessService(this, clanRepository, zoneRepository, sync, clans, journal, messages);
         selection = new ZoneSelection(this, messages, zones);
         gui = new ClanGui(this, sync, clans, bank, land, zones, selection, messages,
-                lib.backButton(getConfig().getString("menus.clan.back-command", "")), league, access);
-        new WeeklyCycle(this, clanRepository, claimRepository, zoneRepository, sync, pricing, league).start();
+                lib.backButton(getConfig().getString("menus.clan.back-command", "")), league, access, accessService, journal);
+        new WeeklyCycle(this, clanRepository, claimRepository, zoneRepository, sync, pricing, rules, journal, league).start();
         league.start();
 
         // API pour les autres plugins (ClanApi.get())
@@ -134,5 +147,21 @@ public final class Main extends JavaPlugin {
 
     public ClanGui getGui() {
         return gui;
+    }
+
+    public AccessService getAccessService() {
+        return accessService;
+    }
+
+    public Journal getJournal() {
+        return journal;
+    }
+
+    public ClanRepository getClanRepository() {
+        return clanRepository;
+    }
+
+    public ClaimRepository getClaimRepository() {
+        return claimRepository;
     }
 }

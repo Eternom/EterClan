@@ -27,7 +27,7 @@ import java.util.Map;
 class ZoneMenu implements Menu {
 
     private static final int INFO = 4;
-    private static final List<Integer> ACTIONS = List.of(11, 12, 13, 14, 15);
+    private static final List<Integer> ACTIONS = List.of(10, 11, 12, 13, 14, 15, 16);
     private static final int BACK = 22;
 
     private final ClanGui gui;
@@ -72,7 +72,9 @@ class ZoneMenu implements Menu {
         inventory.setItem(INFO, Items.item(Material.OAK_SIGN, messages.get(viewer, "zones.name", "zone", zone.name()), List.of(
                 messages.get(viewer, "zones.area", "area", String.valueOf(zone.area())),
                 messages.get(viewer, "zone-menu.status.line", "status", status),
-                messages.get(viewer, "zone-menu.rent", "rent", Money.format(zone.rent())))));
+                messages.get(viewer, "zone-menu.rent", "rent", Money.format(zone.rent())),
+                messages.get(viewer, "zone-menu.mode-line", "mode", messages.plain(viewer, "zone.mode." + zone.mode().name().toLowerCase())),
+                messages.get(viewer, zone.publicRent() ? "zone-menu.public-line" : "zone-menu.members-line"))));
 
         Runnable reopen = () -> gui.openZone(viewer, zone.id());
         boolean tenant = viewer.getUniqueId().equals(zone.tenant());
@@ -91,6 +93,21 @@ class ZoneMenu implements Menu {
                     rent -> gui.zones().setRent(viewer, zone, rent, reopen), reopen));
             next = add(next, Material.LAVA_BUCKET, "zone-menu.delete", () -> gui.confirm(viewer, "zone-delete",
                     () -> gui.zones().delete(viewer, zone, () -> gui.openZones(viewer)), reopen, "zone", zone.name()));
+        }
+        if (manager) {
+            next = add(next, Material.IRON_BARS, "zone-menu.mode", () -> gui.accessService().cycleZoneMode(viewer, clan, zone, reopen));
+            if (zone.mode() == Zone.Mode.PASS) {
+                next = add(next, Material.GOLDEN_HELMET, "zone-menu.pass", () -> gui.askAmount(viewer, "pass-price",
+                        price -> gui.askAmount(viewer, "pass-days", days -> gui.accessService().setZonePass(viewer, clan, zone, price,
+                                (int) days, reopen), reopen), reopen));
+            }
+            if (zone.mode() == Zone.Mode.RESERVED && !zone.isRented()) {
+                next = add(next, Material.PLAYER_HEAD, "zone-menu.reserved", () -> gui.openTrust(viewer, zone.id()));
+            }
+            if (!zone.isRented()) {
+                next = add(next, zone.publicRent() ? Material.ENDER_EYE : Material.ENDER_PEARL, "zone-menu.public",
+                        () -> gui.accessService().togglePublicRent(viewer, clan, zone, reopen));
+            }
         }
         if (manager && zone.isRented() && !tenant) {
             add(next, Material.SHEARS, "zone-menu.evict", () -> gui.confirm(viewer, "zone-evict",

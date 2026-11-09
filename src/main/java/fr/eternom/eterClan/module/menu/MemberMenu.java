@@ -27,6 +27,7 @@ class MemberMenu implements Menu {
     private static final int HEAD = 10;
     private static final int PERMISSIONS = 12;
     private static final int KICK = 14;
+    private static final int ROLE = 13;
     private static final int TRANSFER = 16;
     private static final int BACK = 22;
 
@@ -58,6 +59,17 @@ class MemberMenu implements Menu {
                     gui.openPermissions(player, member.uuid());
                 }
             }
+            case ROLE -> {
+                if (allowed(player, ClanPermission.PERMISSIONS) && !owner) {
+                    java.util.List<String> roles = new java.util.ArrayList<>(gui.clans().roles().keySet());
+                    if (!roles.isEmpty()) {
+                        int current = roles.indexOf(roleOf());
+                        String next = roles.get((current + 1) % roles.size());
+                        Sounds.click(player);
+                        gui.clans().applyRole(player, gui.refreshed(clan), member.uuid(), next, back);
+                    }
+                }
+            }
             case KICK -> {
                 if (allowed(player, ClanPermission.KICK) && !owner) {
                     gui.confirm(player, "kick", () -> gui.clans().kick(player, member.uuid(), () -> gui.openMembers(player)), back,
@@ -77,6 +89,12 @@ class MemberMenu implements Menu {
             default -> {
             }
         }
+    }
+
+    /** Le rôle dont les permissions sont exactement celles du membre ; null : réglées à la main. */
+    private String roleOf() {
+        return gui.clans().roles().entrySet().stream().filter(entry -> entry.getValue().equals(member.permissions()))
+                .map(java.util.Map.Entry::getKey).findFirst().orElse(null);
     }
 
     @Override
@@ -106,6 +124,11 @@ class MemberMenu implements Menu {
         } else {
             inventory.setItem(PERMISSIONS, button(Material.NAME_TAG, "member.permissions-button", ClanPermission.PERMISSIONS));
             inventory.setItem(KICK, button(Material.IRON_DOOR, "member.kick", ClanPermission.KICK));
+            String role = roleOf();
+            boolean canRole = clan.can(viewer.getUniqueId(), ClanPermission.PERMISSIONS);
+            inventory.setItem(ROLE, Items.item(canRole ? Material.LEATHER_HELMET : Material.GRAY_DYE, messages.get(viewer, "member.role.name",
+                    "role", role == null ? messages.plain(viewer, "role.custom") : messages.plain(viewer, "role." + role)),
+                    List.of(messages.get(viewer, canRole ? "member.role.lore" : "menu.locked"))));
             if (clan.isOwner(viewer.getUniqueId())) {
                 inventory.setItem(TRANSFER, Items.item(Material.GOLDEN_HELMET, messages.get(viewer, "member.transfer.name"),
                         List.of(messages.get(viewer, "member.transfer.lore"))));

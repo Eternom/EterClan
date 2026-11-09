@@ -29,6 +29,8 @@ public class ClaimRepository {
                 Column.of("z", Column.Type.INT).primaryKey(),
                 Column.of("clan_id", Column.Type.LONG).notNull(),
                 Column.of("claimed_at", Column.Type.LONG).notNull());
+        // 1.7.0 : ce que le chunk a coûté (remboursé en partie quand il est rendu)
+        database.addColumn(TABLE, Column.of("paid", Column.Type.DOUBLE));
     }
 
     /** Tous les chunks de ce serveur (index en mémoire). */
@@ -39,10 +41,16 @@ public class ClaimRepository {
                 .toList();
     }
 
-    /** false si le chunk est déjà pris. */
-    public boolean claim(String server, String world, int x, int z, long clanId, long now) {
-        return database.execute("INSERT IGNORE INTO " + database.table(TABLE) + " (server, world, x, z, clan_id, claimed_at)"
-                + " VALUES (?, ?, ?, ?, ?, ?)", server, world, x, z, clanId, now) > 0;
+    /** false si le chunk est déjà pris. paid : ce qu'il a coûté. */
+    public boolean claim(String server, String world, int x, int z, long clanId, long now, double paid) {
+        return database.execute("INSERT IGNORE INTO " + database.table(TABLE) + " (server, world, x, z, clan_id, claimed_at, paid)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?)", server, world, x, z, clanId, now, paid) > 0;
+    }
+
+    /** Ce qu'un chunk du clan a coûté (0 : gratuit, ou pris avant 1.7.0). */
+    public double paidOf(String server, String world, int x, int z, long clanId) {
+        return database.getFirst(TABLE, Map.of("server", server, "world", world, "x", x, "z", z, "clan_id", clanId))
+                .map(row -> row.getDouble("paid")).orElse(0.0);
     }
 
     public boolean unclaim(String server, String world, int x, int z, long clanId) {

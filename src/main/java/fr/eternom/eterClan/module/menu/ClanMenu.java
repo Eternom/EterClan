@@ -119,11 +119,11 @@ class ClanMenu implements Menu {
         long seconds = Math.max(0, (clan.nextCycle() - System.currentTimeMillis()) / 1000);
         inventory.setItem(INFO, Items.item(Material.WHITE_BANNER, text("menu.info.name", "clan", clan.name(), "tag", clan.tag()), List.of(
                 text("menu.info.members", "count", String.valueOf(clan.members().size())),
-                text("menu.info.chunks", "count", String.valueOf(clan.chunks()), "free", String.valueOf(gui.land().pricing().free())),
+                text("menu.info.chunks", "count", String.valueOf(clan.chunks()), "level", String.valueOf(gui.land().level(clan))),
                 text("menu.info.reserve", "amount", Money.format(clan.reserve())),
                 text("menu.info.accounts", "amount", Money.format(clan.accounts())),
                 text("menu.info.interest", "rate", BankService.percent(clan.interest())),
-                text("menu.info.upkeep", "amount", Money.format(gui.land().pricing().upkeepOf(clan.chunks()))),
+                text("menu.info.upkeep", "amount", Money.format(gui.land().upkeep(clan).total())),
                 text("menu.info.next", "time", EterLib.get().formatDuration(viewer, seconds)),
                 text("menu.info.color", "color", messages.plain(viewer, "tag-color." + clan.color().id())),
                 text(clan.can(viewer.getUniqueId(), ClanPermission.PERMISSIONS) ? "menu.info.color-click" : "menu.info.color-none"))));

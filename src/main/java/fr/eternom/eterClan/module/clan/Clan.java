@@ -13,7 +13,12 @@ import java.util.UUID;
  * (combat, explosions, feu ; protégé sinon). color : la couleur du tag.
  */
 public record Clan(long id, String name, String tag, UUID owner, double reserve, double interest, long nextCycle,
-                   int chunks, List<Member> members, Set<ClanRule> rules, TagColor color) {
+                   int chunks, List<Member> members, Set<ClanRule> rules, TagColor color, Land land) {
+
+    /** Membre du clan (le chef compris). */
+    public boolean isMember(UUID player) {
+        return isOwner(player) || member(player).isPresent();
+    }
 
     /**
      * Un membre : son compte en banque (protégé de la mort), ses permissions, et showRank : il affiche son grade plutôt

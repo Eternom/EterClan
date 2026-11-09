@@ -131,10 +131,18 @@ public class ZoneService {
         }, "zone", zone.name(), "rent", Money.format(price));
     }
 
-    /** Louer une parcelle de son clan : le premier loyer est payé tout de suite (porte-monnaie -> réserve). */
+    /**
+     * Louer une parcelle : un membre du clan, ou n'importe quel joueur si elle est ouverte à tous (publicRent, 1.7.0) et
+     * qu'il n'est pas sur la liste noire. Le premier loyer est payé tout de suite (porte-monnaie -> réserve).
+     */
     public void take(Player player, Zone zone, Runnable after) {
-        Clan clan = clanService.clanOf(player).filter(found -> found.id() == zone.clanId()).orElse(null);
+        Clan clan = sync.cache().get(zone.clanId()).orElse(null);
         if (clan == null) {
+            return;
+        }
+        boolean member = clan.isMember(player.getUniqueId());
+        if (!member && (!zone.publicRent() || clan.land().banned().contains(player.getUniqueId()))) {
+            messages.send(player, "zone.members-only", "zone", zone.name());
             return;
         }
         if (zone.isRented() || zone.rent() <= 0) {
@@ -180,9 +188,12 @@ public class ZoneService {
         }
     }
 
-    /** Le locataire autorise un joueur (par son pseudo) dans sa parcelle. */
+    /**
+     * Le locataire autorise un joueur (par son pseudo) dans sa parcelle ; dans une parcelle réservée (1.7.0), c'est qui a
+     * ZONES qui choisit.
+     */
     public void trust(Player player, Zone zone, String targetName, Runnable after) {
-        if (!player.getUniqueId().equals(zone.tenant())) {
+        if (!canTrust(player, zone)) {
             messages.send(player, "zone.not-tenant", "zone", zone.name());
             return;
         }
@@ -191,9 +202,17 @@ public class ZoneService {
 
     /** Le locataire retire l'accès d'un joueur. */
     public void untrust(Player player, Zone zone, UUID target, String targetName, Runnable after) {
-        if (player.getUniqueId().equals(zone.tenant())) {
+        if (canTrust(player, zone)) {
             setAccess(player, zone, target, targetName, false, after);
         }
+    }
+
+    private boolean canTrust(Player player, Zone zone) {
+        if (zone.isRented()) {
+            return player.getUniqueId().equals(zone.tenant());
+        }
+        return zone.mode() == Zone.Mode.RESERVED && sync.cache().get(zone.clanId())
+                .map(clan -> clan.can(player.getUniqueId(), ClanPermission.ZONES)).orElse(false);
     }
 
     public int maxArea() {

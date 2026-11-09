@@ -9,6 +9,7 @@
 badge: "<gray>[<tag>]</gray> "
 
 clan:
+  role-applied: "<info><accent><player></accent> now has the role <accent><role></accent>."
   none: "<error>You have no clan: open <accent><click:run_command:'/clan'>/clan</click></accent> to create one or accept an invite."
   create-usage: "<error>Name of 3 to 24 characters, tag of 2 to 5 letters or digits."
   already: "<error>You are already in a clan."
@@ -39,6 +40,9 @@ clan:
   display-staff: "<info>Choice saved, but as staff you always keep your <accent>rank</accent>."
 
 bank:
+  upkeep-warning: "<error>Land upkeep in 3 days: <accent><amount></accent>, the reserve only has <accent><reserve></accent>.</error> <info>Fill it up!"
+  debt-warning: "<error>Your clan is in debt (<accent><debt></accent>): chunks will be lost in <accent><days></accent> day(s).</error>"
+  debt-started: "<error>Upkeep unpaid: debt of <accent><debt></accent>.</error> <info>You have <accent><days></accent> days before losing chunks."
   amount-invalid: "<error>Invalid amount."
   too-new: "<error>You can give to the reserve after <accent><hours> h</accent> of play: <accent><time></accent> to go."
   not-enough: "<error>You don't have <accent><amount></accent> on you."
@@ -53,6 +57,19 @@ bank:
   chunks-lost: "<error>Your clan couldn't pay its land upkeep: <accent><count></accent> chunk(s) lost."
 
 claim:
+  claimed-many: "<success>Land claimed: <accent><count></accent> chunk(s)</success> <info>for <accent><price></accent> (paid by the reserve)."
+  outposts-merge: "<error>This chunk would join two outposts: pick another one."
+  outpost-full: "<error>This outpost already has <accent><size></accent> chunks, the maximum."
+  outposts-max: "<error>Your clan already has <accent><max></accent> outpost(s): level up to get more."
+  forbidden-area: "<error>No land can be claimed here (reserved area)."
+  too-close: "<error>Too close to another clan's land: keep <accent><buffer></accent> chunk(s) away."
+  core-locked: "<error>The core (3 × 3 around the main chunk) can't be given up piece by piece: the leader can give up all the land."
+  abandoned: "<info>All the land is given up. Refunded: <accent><refund></accent> to the reserve."
+  heart-not-base: "<error>The core moves to a chunk of your base (linked to the current core)."
+  heart-wait: "<error>The core moved recently: <accent><days></accent> more day(s)."
+  heart-moved: "<success>The core is here.</success> <info>Paid <accent><price></accent> by the reserve."
+  here-quote: "<info>Your clan: <accent><chunks></accent> chunk(s), upkeep <accent><upkeep></accent>/week. Here: <accent><kind></accent>, <accent><price></accent>."
+  announce: "<info><accent><player></accent> claimed <accent><count></accent> chunk(s) for the clan."
   denied: "<error>You don't have permission here: <accent><permission>"
   world-forbidden: "<error>Land can't be taken in this world."
   disabled-here: "<error>Land can't be taken on this server."
@@ -65,18 +82,37 @@ claim:
   claimed: "<success>Chunk taken!</success> <info>Paid <accent><price></accent> by the reserve; land upkeep: <accent><upkeep></accent> per week."
   not-yours: "<error>This chunk isn't your clan's."
   rented-zone: "<error>A rented plot is on this chunk: the rental must end first."
-  unclaimed: "<info>Chunk given up (no refund)."
+  unclaimed: "<info>Chunk given up. Refunded: <accent><refund></accent> to the reserve."
   here: "<info>Here: land of the clan <accent><clan></accent>."
   here-wild: "<info>Here: <accent>wilderness</accent>, nobody owns this chunk."
   next-price: "<info>Your clan has <accent><chunks></accent> chunk(s) (<accent><free></accent> free). Next one: <accent><price></accent>; current upkeep: <accent><upkeep></accent> per week."
 
 land:
+  title: "<accent><clan>"
+  subtitle: "<info>Land <dark_gray>·</dark_gray> <mode>"
   wild: "<info>Wilderness"
   clan: "<info>Land of <accent><clan>"
   zone: "<info>Plot <accent><zone></accent> <dark_gray>·</dark_gray> <info><clan>"
   zone-rented: "<info><accent><tenant></accent>'s plot <accent><zone></accent> <dark_gray>·</dark_gray> <info><clan>"
 
 zone:
+  mode-set: "<info>Plot <accent><zone></accent>: <accent><mode></accent>."
+  public-on: "<info>Plot <accent><zone></accent>: anyone can rent it (<accent>[Rent]</accent> sign)."
+  public-off: "<info>Plot <accent><zone></accent>: members only can rent it."
+  members-only: "<error>Plot <accent><zone></accent> is only rented to clan members."
+  rent-reminder: "<info>The rent of <accent><zone></accent> (<accent><rent></accent>) will be taken in 2 days."
+  rent-late: "<error>Rent of <accent><zone></accent> unpaid.</error> <info>One week of grace: next week, <accent><rent></accent> at once, or the rental ends."
+  lost-refunded: "<info>Plot <accent><zone></accent> was lost by its clan. Refunded: <accent><refund></accent>."
+  sign-not-allowed: "<error>A rental sign goes in a plot for rent open to everyone, placed by someone who manages plots."
+  mode:
+    inherit: "like the land"
+    reserved: "reserved"
+    closed: "closed"
+    pass: "with a pass"
+  sign:
+    title: "<dark_green><bold>[Rent]"
+    rent: "<black><rent> / week"
+    week: "<dark_gray>Right-click"
   other-world: "<error>Both corners must be in the same world."
   name-invalid: "<error>Plot name: 2 to 24 letters, digits, - or _."
   too-big: "<error>Plot too big: <accent><max></accent> blocks at most."
@@ -113,6 +149,7 @@ selection:
 
 # Name of each permission (menus, messages) and its description
 permission:
+  access: "Manage land access"
   build: "Build and break"
   containers: "Chests and containers"
   doors: "Doors and gates"
@@ -128,6 +165,7 @@ permission:
   interest: "Set the interest"
   permissions: "Manage permissions"
 permission-lore:
+  access: "<info>Open, closed or with a pass; pass price; blacklist"
   build: "<info>Place and break blocks on the land"
   containers: "<info>Open chests, furnaces, barrels..."
   doors: "<info>Open doors, trapdoors, gates"
@@ -145,6 +183,23 @@ permission-lore:
 
 # Input windows
 dialogs:
+  pass-price:
+    title: "<primary>Pass price"
+    body: "The price in Heloks (0: no pass for sale)."
+  pass-days:
+    title: "<primary>Pass length"
+    body: "How many days it lasts (1 to 30)."
+  guest-name:
+    title: "<primary>Invite to the land"
+    body: "The player can enter and use what the pass allows, for free, for a few hours."
+    label: "Name"
+  guest-hours:
+    title: "<primary>Invitation length"
+    body: "In hours (1 to 168)."
+  banned-name:
+    title: "<primary>Blacklist"
+    body: "The player won't enter anywhere on the land. The same name removes them."
+    label: "Name"
   confirm: "Confirm"
   amount: "Amount"
   deposit:
@@ -180,13 +235,29 @@ dialogs:
 
 # Confirmations: title, text, button
 confirm:
+  claim-many:
+    title: "<primary>Claim <count> chunk(s)"
+    body: "Paid <price> by the clan reserve. Each paid chunk also adds to the weekly upkeep."
+    button: "Claim (<price>)"
+  heart:
+    title: "<primary>Move the core here"
+    body: "The chunk you stand in becomes the main chunk: the 3 × 3 square around it becomes free with no upkeep. Cost: <price>, once every <days> days."
+    button: "Move (<price>)"
+  abandon:
+    title: "<primary>Give up all the land"
+    body: "The clan's <count> chunks become free (core included), and its plots are deleted. Part of the price of paid chunks returns to the reserve."
+    button: "Give up everything"
+  revoke:
+    title: "<primary>Remove <player>'s access"
+    body: "They can no longer enter or act on the land. What was left of their pass is given back, taken from the reserve."
+    button: "Remove"
   claim:
     title: "<primary>Take this chunk"
-    body: "Paid <price> by the clan reserve. Your land upkeep will become <upkeep> per week. A clan has a single territory: the first chunk goes anywhere, the next ones next to it."
+    body: "Here: <kind>. Paid <price> by the clan reserve. The first chunk becomes the core: the 3 × 3 chunks around it are claimed with it, free with no upkeep."
     button: "Take (<price>)"
   unclaim:
     title: "<primary>Give up this chunk"
-    body: "The chunk you stand in becomes free again, with no refund. Non-rented plots on it are deleted."
+    body: "The chunk you stand in becomes free again; part of its price returns to the reserve. Non-rented plots on it are deleted."
     button: "Give up"
   disband:
     title: "<primary>Disband <clan>"
@@ -246,6 +317,29 @@ no-clan:
     lore: "<info>Join the clan that invited you (5 minutes)"
 
 menu:
+  map:
+    name: "<accent>Land map"
+    lore: "<info>The chunks around you; claim several at once."
+  access:
+    name: "<accent>Land access"
+    lore: "<info>Now: <accent><mode></accent>. Passes, guests, blacklist."
+  home:
+    name: "<accent>Clan home"
+    lore: "<info>Go there (teleport countdown and delay)."
+    none: "<error>No home yet: set it with the button next to it."
+  sethome:
+    name: "<accent>Set the home here"
+    lore: "<info>Where you stand, on the clan land."
+  heart:
+    name: "<accent>Move the core here"
+    lore: "<info><price>, once every <days> days (the leader)."
+  owner-only: "<dark_gray>Leader only"
+  journal:
+    name: "<accent>Clan journal"
+    lore: "<info>The last 15 actions, in the chat."
+  abandon:
+    name: "<error>Give up all the land"
+    lore: "<info>Core included; <accent><refund> %</accent> of the price of paid chunks comes back (the leader)."
   title: "<primary><clan> <dark_gray>[<tag>]"
   locked: "<error>● <info>Your clan didn't give you this permission"
   back-to-clan: "<accent>« Back to the clan"
@@ -275,7 +369,7 @@ menu:
   info:
     name: "<accent><clan> <dark_gray>[<tag>]"
     members: "<dark_gray>▸ <info>Members: <accent><count>"
-    chunks: "<dark_gray>▸ <info>Chunks: <accent><count></accent> <dark_gray>(<free> free)"
+    chunks: "<dark_gray>▸ <info>Chunks: <accent><count></accent> <dark_gray>(level <level>)"
     reserve: "<dark_gray>▸ <info>Reserve: <accent><amount>"
     accounts: "<dark_gray>▸ <info>Members' accounts: <accent><amount>"
     interest: "<dark_gray>▸ <info>Interest: <accent><rate> %</accent> per week"
@@ -337,6 +431,9 @@ members:
     lore: "<info>Their name, in a window"
 
 member:
+  role:
+    name: "<accent>Role: <role>"
+    lore: "<info>Click: next role (its permissions replace the member's)."
   title: "<primary><player>"
   is-owner: "<success>● <info>Clan leader"
   permissions: "<dark_gray>▸ <info><count> permission(s)"
@@ -379,6 +476,21 @@ zones:
     lore: "<info>Click its two corners in the world"
 
 zone-menu:
+  mode-line: "<dark_gray>▸ <info>Access: <accent><mode>"
+  public-line: "<dark_gray>▸ <info>Anyone can rent it"
+  members-line: "<dark_gray>▸ <info>Members can rent it"
+  mode:
+    name: "<accent>Plot access"
+    lore: "<info>Like the land → reserved → closed → with a pass."
+  pass:
+    name: "<accent>Plot pass price"
+    lore: "<info>Price and length."
+  reserved:
+    name: "<accent>Who can act here"
+    lore: "<info>Reserved plot: only them (and the leader)."
+  public:
+    name: "<accent>Rental open to everyone"
+    lore: "<info>Yes / no. Open: place a <accent>[Rent]</accent> sign inside."
   title: "<primary>Plot <zone>"
   rent: "<dark_gray>▸ <info>Rent: <accent><rent></accent>/week"
   back: "<accent>« Plots"
@@ -415,6 +527,15 @@ trust:
     lore: "<info>Their name, in a window"
 
 bank-menu:
+  upkeep:
+    title: "<accent>This week's upkeep"
+    line: "<dark_gray>▸ <info>Core <accent><core></accent> (free) · extensions <accent><extensions></accent> · outposts <accent><outposts></accent>"
+    total: "<dark_gray>▸ <info>Total: <accent><amount></accent> <dark_gray>(ranking discount: <discount> %)"
+    debt: "<dark_gray>▸ <error>Debt: <accent><debt></accent>"
+    no-debt: "<dark_gray>▸ <info>No debt"
+  history:
+    name: "<accent>Reserve history"
+    lore: "<info>The last 15 movements, in the chat."
   title: "<primary>Bank <dark_gray>·</dark_gray> <clan>"
   info:
     name: "<accent>The clan bank"
@@ -426,8 +547,15 @@ land-menu:
   back: "<accent>« Land"
   info:
     name: "<accent>The clan land"
-    next-price: "<dark_gray>▸ <info>Next chunk: <accent><price>"
-    league: "<dark_gray>▸ <info>Each chunk gained this month counts for the ranking (expansion)"
+    chunks: "<dark_gray>▸ <info>Core <accent><core></accent> · extensions <accent><extensions></accent> · outposts <accent><outposts></accent>"
+    outposts: "<dark_gray>▸ <info>Outposts: <accent><count></accent>/<max> <dark_gray>(<size> chunks each at most)"
+    upkeep: "<dark_gray>▸ <info>Upkeep: <accent><amount></accent> per week"
+    discount: "<dark_gray>▸ <success>Ranking discount: <discount> %"
+    debt: "<dark_gray>▸ <error>Debt: <accent><debt></accent>"
+    level: "<dark_gray>▸ <info>Level <accent><level></accent>"
+    next-level: "<dark_gray>▸ <info>Next level: <members> members and <chunks> chunks (<outposts> outposts)"
+    here-price: "<dark_gray>▸ <info>Here: <accent><kind></accent>, <accent><price></accent>"
+    here-refused: "<dark_gray>▸ <info>Here: <error><reason>"
 
 # Land rules: what everyone can do, and why
 rules:
@@ -545,3 +673,169 @@ tag-color:
   lime: "lime"
   yellow: "yellow"
   white: "white"
+
+# The clan home (/clan home, /clan sethome)
+home:
+  not-on-land: "<error>The clan home goes on its land."
+  set: "<success>Clan home set here.</success> <info>The whole clan goes there with <accent>/clan home</accent>."
+  none: "<error>Your clan has no home: <accent>/clan sethome</accent> on its land."
+
+kind:
+  core: "core (free)"
+  extension: "extension"
+  outpost: "outpost"
+
+# Who enters a clan's land
+access:
+  mode:
+    open: "open"
+    closed: "closed"
+    pass: "with a pass"
+  mode-set: "<info>Land access: <accent><mode></accent>."
+  bad-offer: "<error>A price of 0 or more, a length of 1 to 30 days."
+  offer-set: "<info>Pass: <accent><price></accent> for <accent><days></accent> day(s)."
+  ban-member: "<error>A clan member can't be blacklisted."
+  banned-added: "<info><accent><player></accent> is blacklisted."
+  banned-removed: "<info><accent><player></accent> is no longer blacklisted."
+  not-for-sale: "<error>No pass for sale here."
+  member-no-pass: "<error>A clan member doesn't need a pass."
+  banned: "<error>This clan doesn't want you on its land."
+  bought: "<success>Pass bought:</success> <info><accent><clan></accent>'s land, <accent><days></accent> day(s), <accent><price></accent>."
+  sold: "<info><accent><player></accent> bought a pass (<accent><price></accent>, to the reserve)."
+  no-money: "<error>You need <accent><price></accent>."
+  guest-added: "<info><accent><player></accent> is invited on the land for <accent><hours></accent> h."
+  guest-received: "<info>Clan <accent><clan></accent> invites you on its land for <accent><hours></accent> h."
+  revoked: "<info><accent><player></accent>'s access removed (refunded: <accent><refund></accent>)."
+  revoked-player: "<info>Your access to <accent><clan></accent>'s land was removed (refunded: <accent><refund></accent>)."
+  closed-land: "<error>Closed land: <accent><clan></accent>"
+  closed-zone: "<error>Closed plot"
+  pass-land: "<error>A pass is needed to enter: <accent><clan></accent>"
+  pass-zone: "<error>A pass is needed for this plot"
+  buy-offer: "<info>Pass for <accent><clan></accent>: <accent><price></accent>, <accent><days></accent> day(s)."
+  buy-button: "<success><bold>[Buy]</bold></success>"
+  sign-not-allowed: "<error>A pass sign goes on your clan's land, placed by someone who manages access."
+  sign-created: "<success>Sign ready:</success> <info>right-click to buy."
+  sign:
+    title: "<dark_blue><bold>[Pass]"
+    place: "<black><place>"
+    price: "<black><price>"
+    days: "<dark_gray><days> day(s)"
+
+map:
+  title: "<primary>Map <dark_gray>·</dark_gray> <clan>"
+  take:
+    name: "<success>Claim the selection (<count>)"
+    lore: "<info>Total: <accent><price></accent>"
+  clear: "<accent>Clear the selection"
+  legend:
+    name: "<accent>Legend"
+    core: "<gold>■</gold> <info>the core (free, no upkeep)"
+    base: "<green>■</green> <info>the base (extensions)"
+    outpost: "<aqua>■</aqua> <info>an outpost"
+    other: "<red>■</red> <info>another clan"
+    free: "<gray>■</gray> <info>free"
+    clicks: "<dark_gray>Free: click to pick · your clan's: right-click to give up"
+  coords: "<dark_gray>x <x> · z <z>"
+  you-are-here: "<accent>You are here"
+  own: "<accent>Your clan's <dark_gray>(<kind>)"
+  core-locked: "<dark_gray>The core can't be given up piece by piece"
+  click-unclaim: "<dark_gray>Right-click: give up"
+  other: "<error><clan>"
+  selected: "<yellow>Picked"
+  price: "<info><kind>: <accent><price>"
+  refused: "<error><reason>"
+  click-unselect: "<dark_gray>Click: unpick"
+  free: "<gray>Free"
+  click-select: "<dark_gray>Click: pick"
+
+access-menu:
+  title: "<primary>Access <dark_gray>·</dark_gray> <clan>"
+  mode:
+    name: "<accent>Land: <mode>"
+    open: "<info>Everyone enters; acting needs a permission."
+    closed: "<info>Only members and guests enter."
+    pass: "<info>A bought pass or an invitation is needed to enter."
+    click: "<dark_gray>Click: open → closed → with a pass"
+  offer:
+    name: "<accent>The pass"
+    price: "<info><accent><price></accent> for <accent><days></accent> day(s)"
+    none: "<info>No pass for sale"
+    click: "<dark_gray>Click: price and length · <accent>[Pass]</accent> sign: a counter"
+  passes:
+    name: "<accent>Active passes (<count>)"
+    lore: "<info>Who has access, until when; remove them."
+  guest:
+    name: "<accent>Invite a player"
+    lore: "<info>Free access for a few hours."
+  banned:
+    name: "<error>Blacklist"
+    count: "<info><accent><count></accent> player(s)"
+    click: "<dark_gray>Click: add or remove a name"
+  right: "<accent>The pass allows: <permission>"
+  right-on: "<success>Yes"
+  right-off: "<error>No"
+  right-click: "<dark_gray>Click: change (never building)"
+
+passes:
+  title: "<primary>Passes <dark_gray>(<count>)"
+  land: "the land"
+  name: "<accent><player>"
+  guest: "<accent><player> <dark_gray>(guest)"
+  place: "<dark_gray>▸ <info>For: <accent><place>"
+  until: "<dark_gray>▸ <info>Until <accent><date>"
+  paid: "<dark_gray>▸ <info>Paid: <accent><price>"
+  click: "<dark_gray>Click: remove"
+  empty: "<success>No active pass."
+
+role:
+  custom: "custom"
+  recrue: "Recruit"
+  membre: "Member"
+  officier: "Officer"
+
+staff:
+  inactive-warning: "<error>[Clans]</error> <info>Clan <accent><clan></accent> has been inactive for <accent><days></accent> days: land freed at <accent><limit></accent> days."
+  inactive-freed: "<error>[Clans]</error> <info>Inactive clan <accent><clan></accent>: <accent><count></accent> chunk(s) freed."
+
+admin:
+  usage: "<error>/clan admin info <clan> · /clan admin unclaim · /clan admin transfer <clan> <member>"
+  unknown: "<error>Clan or member not found: <accent><clan>"
+  unclaimed: "<success>Chunk freed."
+  transferred: "<success><accent><player></accent> leads <accent><clan></accent>."
+  info: "<accent><clan> [<tag>]</accent> <dark_gray>·</dark_gray> <info><members> members, reserve <accent><reserve></accent>, debt <accent><debt></accent><newline><info>Land: <accent><chunks></accent> chunks (<extensions> extensions, <outposts> in <outpost-groups> outpost(s)), upkeep <accent><upkeep></accent>/week, level <accent><level></accent><newline><info>Core: <accent><heart>"
+
+journal:
+  empty: "<info>Nothing in the journal."
+  header-clan: "<info>Clan journal:"
+  header-bank: "<info>Reserve history:"
+  system: "the server"
+  line: "<dark_gray><date></dark_gray> <info><text>"
+  claim: "<actor> claimed <v0> <v1> <v2> (<v3>, <v4>)"
+  unclaim: "<actor> gave up <v0> <v1> <v2>"
+  abandon: "<actor> gave up all the land (<v0> chunks)"
+  heart: "<actor> moved the core to <v0> <v1> <v2>"
+  home: "<actor> set the home at <v0> <v1> <v2> <v3>"
+  access-mode: "<actor> set access to « <v0> »"
+  ban: "<actor> blacklisted <v0>"
+  unban: "<actor> removed <v0> from the blacklist"
+  guest: "<actor> invited <v0> for <v1> h"
+  pass-revoked: "<actor> removed <v0>'s pass"
+  lost: "<v0> chunk(s) lost (<v1>)"
+  invite: "<actor> invited <v0> to the clan"
+  kick: "<actor> kicked <v0>"
+  permission-on: "<actor> gave « <v1> » to <v0>"
+  permission-off: "<actor> removed « <v1> » from <v0>"
+  role: "<actor> gave the role <v1> to <v0>"
+  admin-unclaim: "staff (<actor>) freed <v0> <v1> <v2>"
+  admin-transfer: "staff (<actor>) made <v0> the leader"
+  bank-claim: "<actor>: land, -<v0>"
+  bank-refund: "<actor>: chunk given up, +<v0>"
+  bank-heart: "<actor>: core moved, -<v0>"
+  bank-pass: "<actor>: pass bought, +<v0>"
+  bank-pass-refund: "<actor>: <v1>'s pass removed, -<v0>"
+  bank-interest: "account interest, +<v0>"
+  bank-upkeep: "upkeep, -<v0>"
+  bank-debt: "upkeep unpaid, debt <v0>"
+  bank-rent: "<actor>: rent of <v1>, +<v0>"
+  bank-given: "<actor> gave <v0>"
+  bank-taken: "<actor> took back <v0>"

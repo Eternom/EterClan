@@ -1,11 +1,16 @@
 package fr.eternom.eterClan.module.clan;
 
 import fr.eternom.eterClan.module.clan.Clan.Member;
+import fr.eternom.eterClan.module.claim.LandPlan.Plot;
+import fr.eternom.eterClan.module.clan.Land.Home;
+import fr.eternom.eterClan.module.clan.Land.Pass;
+import fr.eternom.eterClan.module.clan.Land.PassOffer;
 import fr.eternom.eterLib.helper.sql.Column;
 import fr.eternom.eterLib.helper.sql.Database;
 import fr.eternom.eterLib.helper.sql.Row;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +32,10 @@ public class ClanRepository {
     private static final String ZONES = "zones";
     /** Changements de données déjà faits (une ligne par changement) : chacun une seule fois, même avec plusieurs serveurs. */
     private static final String UPGRADES = "upgrades";
+    /** Accès au terrain vendus ou offerts à des joueurs hors du clan (1.7.0). */
+    private static final String PASSES = "passes";
+    /** Joueurs refusés sur le terrain d'un clan (1.7.0). */
+    private static final String BANNED = "banned";
 
     private final Database database;
 
@@ -53,7 +62,49 @@ public class ClanRepository {
         database.addColumn(CLANS, Column.of("rules", Column.Type.STRING).length(64));
         // 1.6.0 : la couleur du tag (vide : orange)
         database.addColumn(CLANS, Column.of("tag_color", Column.Type.STRING).length(16));
+        // 1.7.0 : le terrain (chunk primaire, home, dette, accès)
+        database.addColumn(CLANS, Column.of("heart_server", Column.Type.STRING).length(64));
+        database.addColumn(CLANS, Column.of("heart_world", Column.Type.STRING).length(64));
+        database.addColumn(CLANS, Column.of("heart_x", Column.Type.INT));
+        database.addColumn(CLANS, Column.of("heart_z", Column.Type.INT));
+        database.addColumn(CLANS, Column.of("heart_moved_at", Column.Type.LONG));
+        database.addColumn(CLANS, Column.of("home_server", Column.Type.STRING).length(64));
+        database.addColumn(CLANS, Column.of("home_world", Column.Type.STRING).length(64));
+        database.addColumn(CLANS, Column.of("home_x", Column.Type.DOUBLE));
+        database.addColumn(CLANS, Column.of("home_y", Column.Type.DOUBLE));
+        database.addColumn(CLANS, Column.of("home_z", Column.Type.DOUBLE));
+        database.addColumn(CLANS, Column.of("home_yaw", Column.Type.DOUBLE));
+        database.addColumn(CLANS, Column.of("home_pitch", Column.Type.DOUBLE));
+        database.addColumn(CLANS, Column.of("debt", Column.Type.DOUBLE));
+        database.addColumn(CLANS, Column.of("debt_since", Column.Type.LONG));
+        database.addColumn(CLANS, Column.of("land_mode", Column.Type.STRING).length(8));
+        database.addColumn(CLANS, Column.of("pass_price", Column.Type.DOUBLE));
+        database.addColumn(CLANS, Column.of("pass_days", Column.Type.INT));
+        database.addColumn(CLANS, Column.of("pass_rights", Column.Type.STRING).length(128));
+        database.createTable(PASSES,
+                Column.of("id", Column.Type.LONG).autoIncrement(),
+                Column.of("clan_id", Column.Type.LONG).notNull(),
+                Column.of("zone_id", Column.Type.LONG).notNull(),
+                Column.of("player", Column.Type.UUID).notNull(),
+                Column.of("name", Column.Type.STRING).length(16).notNull(),
+                Column.of("expires_at", Column.Type.LONG).notNull(),
+                Column.of("paid", Column.Type.DOUBLE).notNull(),
+                Column.of("guest", Column.Type.BOOLEAN).notNull());
+        database.createTable(BANNED,
+                Column.of("clan_id", Column.Type.LONG).primaryKey(),
+                Column.of("player", Column.Type.UUID).primaryKey(),
+                Column.of("name", Column.Type.STRING).length(16).notNull());
         database.createTable(UPGRADES, Column.of("name", Column.Type.STRING).length(64).primaryKey());
+        // 1.7.0 : le chunk primaire des clans qui ont déjà du terrain : leur chunk le plus ancien
+        if (database.execute("INSERT IGNORE INTO " + database.table(UPGRADES) + " (name) VALUES ('heart')") > 0) {
+            for (Row claim : database.query("SELECT c.clan_id, c.server, c.world, c.x, c.z FROM " + database.table(CLAIMS) + " c"
+                    + " JOIN (SELECT clan_id, MIN(claimed_at) AS first FROM " + database.table(CLAIMS) + " GROUP BY clan_id) f"
+                    + " ON f.clan_id = c.clan_id AND f.first = c.claimed_at")) {
+                database.execute("UPDATE " + database.table(CLANS) + " SET heart_server = ?, heart_world = ?, heart_x = ?, heart_z = ?"
+                                + " WHERE id = ? AND heart_server IS NULL", claim.getString("server"), claim.getString("world"),
+                        claim.getInt("x"), claim.getInt("z"), claim.getLong("clan_id"));
+            }
+        }
         // 1.4.0 : la permission « homes » donnée aux membres déjà là (avant elle, tout membre pouvait poser un home)
         if (database.execute("INSERT IGNORE INTO " + database.table(UPGRADES) + " (name) VALUES ('homes')") > 0) {
             database.execute("UPDATE " + database.table(MEMBERS) + " SET permissions = IF(permissions = '', 'homes',"
@@ -156,6 +207,8 @@ public class ClanRepository {
 
     /** Dissout le clan (membres, chunks, parcelles) : rend ce que contient chaque compte (membre -> montant) ; la réserve est perdue. */
     public Map<UUID, Double> delete(long clanId) {
+        database.delete(PASSES, Map.of("clan_id", clanId));
+        database.delete(BANNED, Map.of("clan_id", clanId));
         Map<UUID, Double> refunds = new HashMap<>();
         database.get(MEMBERS, Map.of("clan_id", clanId)).forEach(row -> refunds.put(row.getUUID("uuid"), row.getDouble("account")));
         database.delete(MEMBERS, Map.of("clan_id", clanId));
@@ -200,10 +253,98 @@ public class ClanRepository {
                         member.getDouble("account"), ClanPermission.parse(member.getString("permissions")),
                         member.getBoolean("show_rank")))
                 .toList();
-        int chunks = database.query("SELECT COUNT(*) AS chunks FROM " + database.table(CLAIMS) + " WHERE clan_id = ?", id)
-                .stream().findFirst().map(count -> count.getInt("chunks")).orElse(0);
+        Set<Plot> plots = new HashSet<>();
+        database.get(CLAIMS, Map.of("clan_id", id)).forEach(claim -> plots.add(new Plot(claim.getString("server"),
+                claim.getString("world"), claim.getInt("x"), claim.getInt("z"))));
         return new Clan(id, row.getString("name"), row.getString("tag"), row.getUUID("owner"), row.getDouble("reserve"),
-                row.getDouble("interest"), row.getLong("next_cycle"), chunks, members, ClanRule.parse(row.getString("rules")),
-                TagColor.parse(row.getString("tag_color")));
+                row.getDouble("interest"), row.getLong("next_cycle"), plots.size(), members, ClanRule.parse(row.getString("rules")),
+                TagColor.parse(row.getString("tag_color")), land(id, row, Set.copyOf(plots)));
+    }
+
+    private Land land(long id, Row row, Set<Plot> plots) {
+        String heartServer = row.getString("heart_server");
+        Plot heart = heartServer == null ? null : new Plot(heartServer, row.getString("heart_world"), row.getInt("heart_x"),
+                row.getInt("heart_z"));
+        String homeServer = row.getString("home_server");
+        Home home = homeServer == null ? null : new Home(homeServer, row.getString("home_world"), row.getDouble("home_x"),
+                row.getDouble("home_y"), row.getDouble("home_z"), (float) row.getDouble("home_yaw"), (float) row.getDouble("home_pitch"));
+        String rights = row.getString("pass_rights");
+        Set<ClanPermission> passRights = rights == null ? PassOffer.NONE.rights() : ClanPermission.parse(rights);
+        passRights.retainAll(PassOffer.ALLOWED);
+        int days = row.getInt("pass_days");
+        PassOffer offer = new PassOffer(row.getDouble("pass_price"), days <= 0 ? 7 : days, passRights);
+        long now = System.currentTimeMillis();
+        List<Pass> passes = database.query("SELECT * FROM " + database.table(PASSES) + " WHERE clan_id = ? AND expires_at > ?", id, now)
+                .stream().map(pass -> new Pass(pass.getLong("id"), pass.getLong("zone_id"), pass.getUUID("player"),
+                        pass.getString("name"), pass.getLong("expires_at"), pass.getDouble("paid"), pass.getBoolean("guest"))).toList();
+        Set<UUID> banned = new HashSet<>();
+        database.get(BANNED, Map.of("clan_id", id)).forEach(ban -> banned.add(ban.getUUID("player")));
+        return new Land(plots, heart, home, row.getDouble("debt"), row.getLong("debt_since"), row.getLong("heart_moved_at"),
+                Land.AccessMode.parse(row.getString("land_mode")), offer, passes, Set.copyOf(banned));
+    }
+
+    // ---------- Terrain (1.7.0) ----------
+
+    public void setHeart(long clanId, Plot heart, boolean moved) {
+        Map<String, Object> values = new HashMap<>(Map.of("heart_server", heart.server(), "heart_world", heart.world(),
+                "heart_x", heart.x(), "heart_z", heart.z()));
+        if (moved) {
+            values.put("heart_moved_at", System.currentTimeMillis());
+        }
+        database.update(CLANS, values, Map.of("id", clanId));
+    }
+
+    /** Plus de terrain : plus de cœur ni de home (le prochain chunk pris devient le cœur). */
+    public void clearHeart(long clanId) {
+        database.execute("UPDATE " + database.table(CLANS) + " SET heart_server = NULL, heart_world = NULL, heart_x = NULL,"
+                + " heart_z = NULL, home_server = NULL WHERE id = ?", clanId);
+    }
+
+    public void setHome(long clanId, Home home) {
+        database.update(CLANS, Map.of("home_server", home.server(), "home_world", home.world(), "home_x", home.x(),
+                "home_y", home.y(), "home_z", home.z(), "home_yaw", (double) home.yaw(), "home_pitch", (double) home.pitch()),
+                Map.of("id", clanId));
+    }
+
+    public void setDebt(long clanId, double debt, long since) {
+        database.update(CLANS, Map.of("debt", debt, "debt_since", since), Map.of("id", clanId));
+    }
+
+    public void setAccess(long clanId, Land.AccessMode mode, PassOffer offer) {
+        database.update(CLANS, Map.of("land_mode", mode.name(), "pass_price", offer.price(), "pass_days", offer.days(),
+                "pass_rights", ClanPermission.format(offer.rights())), Map.of("id", clanId));
+    }
+
+    public void addPass(long clanId, long zoneId, UUID player, String name, long expiresAt, double paid, boolean guest) {
+        // Un nouveau pass du même joueur pour le même endroit remplace l'ancien (prolongé)
+        database.execute("DELETE FROM " + database.table(PASSES) + " WHERE clan_id = ? AND zone_id = ? AND player = ?",
+                clanId, zoneId, player);
+        database.insert(PASSES, Map.of("clan_id", clanId, "zone_id", zoneId, "player", player, "name", name,
+                "expires_at", expiresAt, "paid", paid, "guest", guest));
+    }
+
+    /** Le pass retiré ; vide s'il n'existait plus. */
+    public Optional<Pass> removePass(long passId) {
+        Optional<Pass> pass = database.getFirst(PASSES, Map.of("id", passId)).map(row -> new Pass(row.getLong("id"),
+                row.getLong("zone_id"), row.getUUID("player"), row.getString("name"), row.getLong("expires_at"),
+                row.getDouble("paid"), row.getBoolean("guest")));
+        return pass.isPresent() && database.delete(PASSES, Map.of("id", passId)) > 0 ? pass : Optional.empty();
+    }
+
+    public void purgePasses(long now) {
+        database.execute("DELETE FROM " + database.table(PASSES) + " WHERE expires_at <= ?", now);
+    }
+
+    /** Ajoute à la liste noire, ou retire ; true s'il y est maintenant. */
+    public boolean toggleBanned(long clanId, UUID player, String name) {
+        if (database.delete(BANNED, Map.of("clan_id", clanId, "player", player)) > 0) {
+            return false;
+        }
+        database.insert(BANNED, Map.of("clan_id", clanId, "player", player, "name", name));
+        return true;
+    }
+
+    public List<String> bannedNames(long clanId) {
+        return database.get(BANNED, Map.of("clan_id", clanId)).stream().map(row -> row.getString("name")).sorted().toList();
     }
 }

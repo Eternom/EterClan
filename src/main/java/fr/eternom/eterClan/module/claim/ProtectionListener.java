@@ -305,6 +305,122 @@ public class ProtectionListener implements Listener {
     // ---------- Outils ----------
 
     /** Refuse (et prévient) si le joueur n'a pas la permission à cet endroit. */
+    // ---------- 1.7.0 : ce qui passait encore ----------
+
+    /** Supports d'armure : prendre ou poser une pièce d'armure (événement à part du clic sur une entité). */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onArmorStand(org.bukkit.event.player.PlayerArmorStandManipulateEvent event) {
+        deny(event.getPlayer(), event.getRightClicked().getLocation(), ClanPermission.BUILD, event);
+    }
+
+    /** Clic « précis » sur une entité (supports d'armure, cadres) : son propre événement. */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onInteractAt(org.bukkit.event.player.PlayerInteractAtEntityEvent event) {
+        Entity entity = event.getRightClicked();
+        if (entity instanceof Villager || entity instanceof Monster || entity instanceof Player) {
+            return;
+        }
+        deny(event.getPlayer(), entity.getLocation(), entity instanceof Animals ? ClanPermission.ANIMALS : ClanPermission.BUILD, event);
+    }
+
+    /**
+     * Une entité qui touche un bloc : une flèche sur un bouton, une plaque ou une cible (REDSTONE du tireur) ; un monstre
+     * ou un animal qui piétine une culture, une plaque (rien d'extérieur n'entre).
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onEntityInteract(org.bukkit.event.entity.EntityInteractEvent event) {
+        Location location = event.getBlock().getLocation();
+        Player shooter = playerOf(event.getEntity());
+        if (shooter != null) {
+            ClanPermission permission = event.getBlock().getType() == Material.FARMLAND ? ClanPermission.CROPS : ClanPermission.REDSTONE;
+            if (!access.allows(shooter, location, permission)) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+        if (access.isClaimed(location)) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** Un projectile qui casse un bloc (pot décoré, fruit de chorus, verre fragile...) ou touche une cible. */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onProjectileHit(org.bukkit.event.entity.ProjectileHitEvent event) {
+        Block block = event.getHitBlock();
+        Player shooter = playerOf(event.getEntity());
+        if (block == null || shooter == null) {
+            return;
+        }
+        Material type = block.getType();
+        boolean fragile = type == Material.DECORATED_POT || type == Material.CHORUS_FLOWER || type == Material.POINTED_DRIPSTONE
+                || type == Material.TARGET || Tag.CANDLES.isTagged(type) || type == Material.BELL;
+        if (fragile && !access.allows(shooter, block.getLocation(), type == Material.TARGET || type == Material.BELL
+                ? ClanPermission.REDSTONE : ClanPermission.BUILD)) {
+            event.setCancelled(true);
+        }
+    }
+
+    /** La canne à pêche qui tire un animal ou une entité hors d'un terrain. */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onFish(org.bukkit.event.player.PlayerFishEvent event) {
+        Entity caught = event.getCaught();
+        if (event.getState() == org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_ENTITY && caught != null
+                && !(caught instanceof Player) && !(caught instanceof Monster) && !(caught instanceof org.bukkit.entity.Item)) {
+            deny(event.getPlayer(), caught.getLocation(), caught instanceof Animals ? ClanPermission.ANIMALS : ClanPermission.BUILD, event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onLeash(org.bukkit.event.entity.PlayerLeashEntityEvent event) {
+        deny(event.getPlayer(), event.getEntity().getLocation(), ClanPermission.ANIMALS, event);
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onUnleash(org.bukkit.event.player.PlayerUnleashEntityEvent event) {
+        deny(event.getPlayer(), event.getEntity().getLocation(), ClanPermission.ANIMALS, event);
+    }
+
+    /** Monter dans un bateau, un wagonnet, sur un cheval d'un terrain. */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onVehicleEnter(org.bukkit.event.vehicle.VehicleEnterEvent event) {
+        if (event.getEntered() instanceof Player player) {
+            deny(player, event.getVehicle().getLocation(),
+                    event.getVehicle() instanceof Animals ? ClanPermission.ANIMALS : ClanPermission.BUILD, event);
+        }
+    }
+
+    /** Potions lancées : sans ANIMALS, elles ne touchent ni les animaux ni les villageois d'un terrain. */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPotion(org.bukkit.event.entity.PotionSplashEvent event) {
+        Player thrower = playerOf(event.getEntity());
+        if (thrower == null) {
+            return;
+        }
+        for (org.bukkit.entity.LivingEntity target : event.getAffectedEntities()) {
+            if ((target instanceof Animals || target instanceof Villager) && !access.allows(thrower, target.getLocation(), ClanPermission.ANIMALS)) {
+                event.setIntensity(target, 0);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onLingering(org.bukkit.event.entity.AreaEffectCloudApplyEvent event) {
+        if (!(event.getEntity().getSource() instanceof Player thrower)) {
+            return;
+        }
+        event.getAffectedEntities().removeIf(target -> (target instanceof Animals || target instanceof Villager)
+                && !access.allows(thrower, target.getLocation(), ClanPermission.ANIMALS));
+    }
+
+    /** L'éclair d'un trident (Canalisation) : pas sur un terrain qui n'autorise pas le feu. */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onLightning(org.bukkit.event.weather.LightningStrikeEvent event) {
+        if (event.getCause() == org.bukkit.event.weather.LightningStrikeEvent.Cause.TRIDENT
+                && access.protects(event.getLightning().getLocation(), ClanRule.FIRE)) {
+            event.setCancelled(true);
+        }
+    }
+
     private void deny(Player player, Location location, ClanPermission permission, Cancellable event) {
         if (!access.allows(player, location, permission)) {
             event.setCancelled(true);

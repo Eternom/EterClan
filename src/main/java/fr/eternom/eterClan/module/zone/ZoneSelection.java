@@ -122,6 +122,17 @@ public class ZoneSelection implements Listener {
         stop(event.getPlayer().getUniqueId());
     }
 
+    /** Changer de monde pendant la saisie : elle s'arrête (les deux coins doivent être dans le même monde). */
+    @EventHandler
+    public void onWorldChange(org.bukkit.event.player.PlayerChangedWorldEvent event) {
+        Selection selection = selections.get(event.getPlayer().getUniqueId());
+        if (selection != null) {
+            stop(event.getPlayer().getUniqueId());
+            messages.send(event.getPlayer(), "selection.cancelled");
+            selection.onCancel.run();
+        }
+    }
+
     private Component cancelButton(Player player) {
         return button(player, "selection.cancel", () -> {
             Selection selection = selections.get(player.getUniqueId());

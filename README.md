@@ -25,33 +25,57 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   qui **remplace le grade** dans le Tab, le pseudo, la sidebar (EterTab) et le chat (EterChat). Pas de badge (donc le
   grade) pour le staff (`eter.display.staff`) et pour qui préfère son grade (clic sur sa tête dans le menu ; colonne
   `show_rank`).
-- **`claim`** : chunks (`eterclan_claims`, clé serveur + monde + x + z : un seul clan par chunk). **Un clan a UN
-  territoire d'un seul tenant** (sa base) : le premier chunk se pose n'importe où, les suivants contre un de ses chunks
-  (donc sur le même serveur et dans le même monde) ; rendre un chunk ne doit pas couper le territoire en deux
-  (`ClaimIndex#staysConnected`), sauf le dernier (le clan peut alors s'installer ailleurs). Payés au serveur par la
-  **réserve** (`Pricing` : `free-chunks` gratuits, puis `price` × `growth`^(n-1), plafonné à `cap` fois ; l'entretien
-  hebdomadaire suit la même courbe depuis `upkeep`). Rendre un chunk : sans remboursement, pas sous une parcelle louée.
+- **`claim`** (refait en 1.7.0) : chunks (`eterclan_claims`, clé serveur + monde + x + z : un seul clan par chunk ;
+  `paid` : ce qu'il a coûté). La forme du terrain se calcule sans Bukkit (`LandPlan`, testé) :
+  - le **cœur** : le premier chunk devient le **chunk primaire** (colonnes `heart_*` du clan), et le carré de 3 × 3
+    autour est pris avec lui, **gratuit et sans entretien**. Il ne se rend pas en morceaux (le chef rend tout le terrain) ;
+  - les **extensions** : reliées au cœur (4 voisins, même serveur et monde), payées tout de suite par la réserve
+    (`Pricing` : `price` × `growth`^(n-1), plafonné à `cap` fois) ;
+  - les **avant-postes** : des groupes de chunks posés ailleurs, sans lien avec la base, `outpost-factor` fois plus
+    chers ; au plus `outpost-size` chunks chacun, et autant que le **niveau** du clan le permet (`LandRules#levels` :
+    paliers de membres et de chunks, +1 pour le top 3 du mois) ;
+  - pas de chunk dans `land.forbidden`, ni à moins de `land.buffer` chunks d'un autre clan ;
+  - rendre un chunk : jamais en coupant la base ou un avant-poste, `refund` (25 %) de son prix revient ;
+  - le cœur se déplace sur un chunk de la base (`heart-move-price`, une fois tous les `heart-move-days` jours) ;
+  - **carte** du terrain (`MapMenu`, 9 × 5 chunks, couleurs par sorte, plusieurs chunks pris d'un coup avec le prix de
+    chacun et le total), bords en particules (or : cœur, vert : base, bleu : avant-poste, rouge : un autre clan) ;
+  - **home du clan** : `/clan sethome` (permission CLAIM, sur son terrain), `/clan home` (EterLib : combat, attente, délai).
   - **Protection** (`ProtectionListener`, `Access`, tout en mémoire) : chaque action demande sa permission (blocs,
-    conteneurs, portes, redstone, cultures, animaux, entités) ; le monde n'entre pas (explosions, feu, pistons,
-    liquides, distributeurs, arbres, monstres qui changent des blocs) ; pas de PvP sur un terrain. **Tag en couleur** (1.6.0, `TagColor`, colonne `tag_color`) : crochets gris clair, tag dans une des 12 couleurs, choisie
-    depuis la bannière du menu du clan (chef ou `PERMISSIONS`). **Combat, explosions et
-    feu** sont protégés par défaut, mais un clan peut les **autoriser** sur son terrain (`ClanRule`, colonne `rules` des
-    clans, 1.5.0) : menu Règles du territoire, clic par le chef ou qui a `PERMISSIONS`. Staff :
-    `eterclan.bypass.claims`.
-  - Action bar en changeant de terrain ou de parcelle (`LandListener`) ; bords en particules (`/clan here`).
+    conteneurs, portes, redstone, cultures, animaux, entités, supports d'armure, laisses, véhicules, canne à pêche,
+    potions lancées) ; le monde n'entre pas (explosions, feu, pistons, liquides, distributeurs, arbres, monstres qui
+    changent des blocs ou piétinent, flèches sur les boutons et les blocs fragiles, éclair d'un trident) ; pas de PvP sur
+    un terrain. **Tag en couleur** (1.6.0, `TagColor`). **Combat, explosions et feu** sont protégés par défaut, mais un
+    clan peut les **autoriser** sur son terrain (`ClanRule`). Staff : `eterclan.bypass.claims`.
+  - **Accès** (1.7.0, `Access`, `AccessService`, permission `ACCESS`) : le terrain est **ouvert**, **fermé** (seuls les
+    membres et les invités entrent) ou **à pass** (un pass s'achète : prix et durée choisis par le clan, payé dans la
+    réserve, droits choisis parmi portes, redstone, cultures, animaux, coffres ; jamais construire). Un panneau
+    `[Pass]` devient un guichet. Les invités (INVITE) ont un accès gratuit de 1 h à 7 jours ; la **liste noire**
+    n'entre nulle part. Les passes se retirent (le reste est rendu au prorata). On est repoussé au bord d'un endroit
+    interdit, et aucune téléportation n'y mène (perle, chorus, tpa) ; un titre annonce le terrain d'un autre clan.
+  - **Journal** (`Journal`, `eterclan_journal`, 90 jours) : les actions du clan et les mouvements de la réserve.
 - **`bank`** : un **compte par membre** (lui seul y touche, rendu s'il part) et la **réserve** (y donner : tout membre qui a
   `bank.min-give-playtime-hours` (5) heures de jeu actif, `GiveGate`, source `playtime_total` d'EterSuccess lue par
   EterLib : un second compte ne peut pas y verser ses récompenses pour le principal ; en prendre : `RESERVE`). Tout mouvement est une requête relative conditionnelle (jamais d'argent créé).
   **Passage hebdomadaire** (`WeeklyCycle`, vérifié toutes les 10 min sur chaque serveur, réservé en base par le
   premier) : l'**intérêt** (taux réglé par `INTEREST`, 0 à `bank.max-interest`) passe des comptes à la réserve ;
-  l'**entretien** est payé par la réserve, puis les comptes au prorata ; sinon les chunks les plus récents sont perdus
-  (et leurs parcelles). Les **loyers** sont encaissés à leur date, sur le porte-monnaie du locataire, dans la réserve.
+  l'**entretien** (cœur gratuit, extensions sur `upkeep-growth`, avant-postes plus chers, réduit pour le top 3 du mois)
+  est payé par la réserve (et les comptes si `upkeep-from-accounts`) ; sinon une **dette**, et après `debt-grace-days`
+  jours des chunks perdus (`LandPlan#lossOrder` : avant-postes, puis les extensions les plus loin du cœur sans couper la
+  base ; jamais le cœur), leurs parcelles aussi (un locataire est remboursé du reste de sa semaine). Rappels : 3 jours
+  avant si la réserve ne suffit pas, puis 7, 3 et 1 jour(s) avant la perte. Clan inactif : chunks payants libérés après
+  `inactive-paid-days`, tout après `inactive-all-days` (le staff prévenu avant). Les **loyers** sont encaissés à leur
+  date, sur le porte-monnaie du locataire, dans la réserve ; rappel 2 jours avant ; impayé : une semaine de grâce.
+  Les rappels partent seulement du serveur qui a le terrain (`land.enabled`). **Rôles** prêts à l'emploi :
+  `clan.roles` (fiche d'un membre).
 - **`zone`** : parcelles (`eterclan_zones`) = rectangles au bloc près sur toute la hauteur, dans le terrain du clan
   (deux blocs cliqués dans le monde après « Nouvelle parcelle » : `ZoneSelection`, aperçu en particules,
   boutons du chat Valider / Recommencer / Annuler, abandon après 3 min), sans chevauchement, `zones.max-area` blocs au plus. `ZONES` les crée, supprime, met en
   location (loyer par semaine). Un membre la loue (première semaine payée tout de suite). **Louée, elle n'obéit plus
   aux permissions du clan** : seuls le locataire et ceux qu'il a choisis (`trust`) y agissent ; `ZONES` ne fait que gérer
   (fin de location), jamais accéder. Une parcelle louée ne se supprime pas ; un membre qui part perd ses locations.
+  **1.7.0** : chaque parcelle a un **mode d'accès** (comme le terrain, **réservée** : seuls ceux qu'elle a choisis y
+  agissent, un coffre d'officiers ; **fermée** ; **à pass**, avec son propre prix), et peut être **louée à tout le monde**
+  (`public_rent`, panneau `[Louer]` dedans : un guichet de location pour les joueurs hors du clan).
 - **`sync`** (`ClanSync`) : clans, chunks et parcelles utiles à ce serveur, en mémoire ; relus après chaque changement
   puis annoncés aux autres serveurs (bus réseau `eterclan`).
 - **`ranking`** (`ClanLeague`, `LeagueStore`) : le **classement des clans du mois**, comme le général des joueurs : 4
@@ -72,6 +96,9 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   saisies et les confirmations passent par des Dialogs ; Annuler rouvre le menu d'où l'on vient.
 
 ## Commandes et permissions
+
+`/clan home` · `/clan sethome` : le home du clan. Staff (`eterclan.admin`) : `/clan admin info <clan>`, `/clan admin unclaim`
+(le chunk où l'on est, quel que soit son clan), `/clan admin transfer <clan> <membre>`.
 
 `/clan` (alias `/clans`, `/guild`) : le menu, seule commande.
 

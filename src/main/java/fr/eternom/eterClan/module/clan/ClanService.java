@@ -43,6 +43,8 @@ public class ClanService {
     private final ClanSync sync;
     private final RedisCache redis;
     private final Messages messages;
+    private final Map<String, Set<ClanPermission>> roles;
+    private Journal journal;
     private final double creationPrice;
     private final double defaultInterest;
     private final Set<ClanPermission> defaultPermissions;
@@ -61,6 +63,16 @@ public class ClanService {
         Set<ClanPermission> permissions = EnumSet.noneOf(ClanPermission.class);
         config.getStringList("clan.default-permissions").forEach(id -> permissions.addAll(ClanPermission.parse(id)));
         this.defaultPermissions = permissions;
+        Map<String, Set<ClanPermission>> loaded = new java.util.LinkedHashMap<>();
+        var section = config.getConfigurationSection("clan.roles");
+        if (section != null) {
+            for (String role : section.getKeys(false)) {
+                Set<ClanPermission> set = EnumSet.noneOf(ClanPermission.class);
+                section.getStringList(role).forEach(id -> set.addAll(ClanPermission.parse(id)));
+                loaded.put(role, set);
+            }
+        }
+        this.roles = loaded;
     }
 
     public double creationPrice() {
@@ -138,6 +150,7 @@ public class ClanService {
             }
             Tasks.async(plugin, () -> redis.set(inviteKey(target.uuid()), String.valueOf(clan.id()), INVITE_TTL), "Invitation de clan");
             messages.send(player, "clan.invite-sent", "player", target.name());
+            log(clan, player, "invite", target.name());
             sync.bus().notify(target.uuid(), "clan.invited", true, "clan", clan.name(), "player", player.getName());
         }));
     }
@@ -183,6 +196,7 @@ public class ClanService {
             } else {
                 remove(clan, target.get().uuid(), () -> {
                     messages.send(player, "clan.kicked", "player", target.get().name());
+                    log(clan, player, "kick", target.get().name());
                     sync.bus().notify(target.get().uuid(), "clan.you-were-kicked", true, "clan", clan.name());
                     after.run();
                 });
@@ -297,8 +311,48 @@ public class ClanService {
                 clans.setPermissions(member, next);
                 sync.clanChanged(clan.id());
                 return true;
-            }, done -> after.run(), () -> messages.send(player, "error.generic"));
+            }, done -> {
+                log(clan, player, next.contains(permission) ? "permission-on" : "permission-off", target.name(), permission.id());
+                after.run();
+            }, () -> messages.send(player, "error.generic"));
         });
+    }
+
+    /** Les rôles prêts à l'emploi (config.yml > clan.roles) : nom -> permissions. */
+    public Map<String, Set<ClanPermission>> roles() {
+        return roles;
+    }
+
+    /** Donner à un membre toutes les permissions d'un rôle (et seulement elles). PERMISSIONS. */
+    public void applyRole(Player player, Clan clan, UUID member, String role, Runnable after) {
+        Set<ClanPermission> permissions = roles.get(role);
+        if (permissions == null || !clan.can(player.getUniqueId(), ClanPermission.PERMISSIONS)) {
+            messages.send(player, "clan.no-permission");
+            return;
+        }
+        if (clan.isOwner(member)) {
+            messages.send(player, "clan.owner-has-all");
+            return;
+        }
+        clan.member(member).ifPresent(target -> Tasks.async(plugin, player, () -> {
+            clans.setPermissions(member, permissions);
+            sync.clanChanged(clan.id());
+            return true;
+        }, done -> {
+            messages.send(player, "clan.role-applied", "player", target.name(), "role", messages.plain(player, "role." + role));
+            log(clan, player, "role", target.name(), role);
+            after.run();
+        }, () -> messages.send(player, "error.generic")));
+    }
+
+    public void setJournal(Journal journal) {
+        this.journal = journal;
+    }
+
+    private void log(Clan clan, Player player, String key, String... values) {
+        if (journal != null) {
+            journal.add(clan.id(), Journal.Category.CLAN, player.getName(), key, values);
+        }
     }
 
     /** Afficher son grade ou le tag du clan (Tab, chat, pseudo) ; le staff garde toujours son grade. */

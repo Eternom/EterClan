@@ -13,8 +13,13 @@ clan:
   # Prix de création d'un clan (un joueur seul est un clan d'une personne).
   creation-price: 1000
   # Permissions d'un nouveau membre (le chef a tout ; les autres se donnent dans le menu des membres) :
-  # build, containers, doors, redstone, crops, animals, homes, invite, kick, claim, zones, reserve, interest, permissions
+  # build, containers, doors, redstone, crops, animals, homes, invite, kick, claim, zones, access, reserve, interest, permissions
   default-permissions: [doors, crops, animals, homes]
+  # Rôles prêts à l'emploi (fiche d'un membre, clic : rôle suivant) : nom -> permissions. Nom affiché : lang/ > role.<nom>.
+  roles:
+    recrue: [doors, crops, animals]
+    membre: [build, containers, doors, redstone, crops, animals, homes]
+    officier: [build, containers, doors, redstone, crops, animals, homes, invite, kick, claim, zones, access]
 
 bank:
   # Donner à la réserve seulement après ce temps de jeu actif (heures, /stats d'EterSuccess) : un second compte entré
@@ -25,19 +30,50 @@ bank:
   # Taux maximum qu'un clan peut régler.
   max-interest: 10
 
-# Le terrain, payé au SERVEUR (évier de l'économie) : free-chunks gratuits, puis le premier chunk payant coûte
-# price, et chaque suivant growth fois plus que le précédent, jamais plus de cap fois le premier.
-# L'entretien hebdomadaire suit la même courbe à partir de upkeep (payé par la réserve, puis les comptes au
-# prorata ; sinon les chunks les plus récents sont perdus). Les chunks se comptent sur tout le réseau.
+# Le terrain, payé au SERVEUR (évier de l'économie). Les chunks se comptent sur tout le réseau.
+#  - Le CŒUR : le premier chunk pris devient le chunk primaire, et le carré de 3 × 3 autour est pris avec lui :
+#    gratuit, sans entretien. Il ne se rend pas en morceaux (le chef peut rendre tout le terrain).
+#  - Une EXTENSION (contre la base) coûte price, puis chaque suivante growth fois plus, jamais plus de cap fois price.
+#  - Un AVANT-POSTE (ailleurs, sans lien avec la base) coûte outpost-factor fois plus, à l'achat et à l'entretien.
+#  - L'entretien hebdomadaire : upkeep par chunk payant, puis upkeep-growth fois plus pour chaque suivant (plus doux
+#    que l'achat). Le top 3 du classement du mois paie league-discount % de moins.
+#  - Rendre un chunk payant rembourse refund (0.25 = 25 %) de son prix, dans la réserve.
+#  - Entretien impayé : une dette, puis des chunks perdus après debt-grace-days jours (avant-postes, puis les
+#    extensions les plus loin du cœur, sans couper la base ; jamais le cœur). La réserve paie seule, sauf si
+#    upkeep-from-accounts : les comptes des membres aussi, au prorata.
 land:
   # Terrain possible sur CE serveur : true sur la survie. Faux par défaut, pour les lobbys et les mondes ressources
   # (créés par l'orchestrateur avec la config du jar).
   enabled: false
-  free-chunks: 9
   price: 250
-  upkeep: 20
   growth: 1.07
   cap: 15
+  outpost-factor: 1.5
+  upkeep: 20
+  upkeep-growth: 1.04
+  refund: 0.25
+  league-discount: [30, 20, 10]
+  upkeep-from-accounts: false
+  debt-grace-days: 14
+  # Niveaux du clan : chaque palier atteint (membres ET chunks) donne un niveau ; le top 3 du mois en donne un de plus.
+  # outposts : les avant-postes permis à ce niveau. Un avant-poste a au plus outpost-size chunks.
+  levels:
+    - { members: 1, chunks: 0, outposts: 1 }
+    - { members: 3, chunks: 20, outposts: 2 }
+    - { members: 6, chunks: 40, outposts: 3 }
+  outpost-size: 4
+  # Pas de chunk à moins de buffer chunks du terrain d'un autre clan.
+  buffer: 1
+  # Zones où personne ne prend de terrain (le spawn, les zones du staff) : un rectangle en blocs par zone.
+  # Exemple : - { world: world, x1: -200, z1: -200, x2: 200, z2: 200 }
+  forbidden: []
+  # Déplacer le cœur : payé par la réserve, une fois tous les heart-move-days jours.
+  heart-move-price: 5000
+  heart-move-days: 30
+  # Clan dont aucun membre n'est venu : chunks payants libérés après inactive-paid-days jours, tout le terrain après
+  # inactive-all-days (le staff, eterclan.admin, est prévenu une semaine avant). 0 = jamais.
+  inactive-paid-days: 30
+  inactive-all-days: 60
   # Mondes où l'on peut prendre du terrain (vide = tous).
   worlds: []
 

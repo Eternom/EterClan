@@ -12,8 +12,8 @@ softdepend: [EterReward]
 
 commands:
   clan:
-    description: Le menu de ton clan (tout se fait dedans).
-    usage: /clan
+    description: Le menu de ton clan (tout se fait dedans) ; home, sethome ; admin (staff).
+    usage: /clan [home | sethome | admin]
     aliases: [clans, guild]
     permission: eterclan.use
 

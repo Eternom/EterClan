@@ -28,6 +28,8 @@ public enum ClanPermission {
     KICK(Material.IRON_DOOR),
     CLAIM(Material.GRASS_BLOCK),
     ZONES(Material.GOLDEN_HOE),
+    /** Régler qui entre sur le terrain : mode, pass, liste noire (1.7.0). */
+    ACCESS(Material.IRON_BARS),
     // Argent et réglages
     RESERVE(Material.GOLD_BLOCK),
     INTEREST(Material.GOLD_NUGGET),

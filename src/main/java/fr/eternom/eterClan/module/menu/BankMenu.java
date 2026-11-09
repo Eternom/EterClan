@@ -40,6 +40,7 @@ class BankMenu implements Menu {
     private static final int GIVE = 24;
     private static final int TAKE = 25;
     private static final int INTEREST = 31;
+    private static final int HISTORY = 22;
     private static final int BACK = 40;
 
     private final ClanGui gui;
@@ -74,6 +75,7 @@ class BankMenu implements Menu {
             }
             case TAKE -> allowed(player, ClanPermission.RESERVE,
                     () -> gui.askAmount(player, "take", amount -> gui.bank().takeFromReserve(player, amount, reopen), reopen));
+            case HISTORY -> gui.showJournal(player, fr.eternom.eterClan.module.clan.Journal.Category.BANK);
             case INTEREST -> allowed(player, ClanPermission.INTEREST,
                     () -> gui.askAmount(player, "interest", rate -> gui.bank().setInterest(player, rate, reopen), reopen));
             case BACK -> {
@@ -104,12 +106,19 @@ class BankMenu implements Menu {
         Frame.draw(inventory, Material.ORANGE_STAINED_GLASS_PANE);
         double account = clan.member(viewer.getUniqueId()).map(Clan.Member::account).orElse(0.0);
         long seconds = Math.max(0, (clan.nextCycle() - System.currentTimeMillis()) / 1000);
+        var upkeep = gui.land().upkeep(clan);
         inventory.setItem(INFO, Items.item(Material.GOLD_BLOCK, text("bank-menu.info.name"), List.of(
                 text("menu.head.account", "amount", Money.format(account)),
                 text("menu.info.reserve", "amount", Money.format(clan.reserve())),
                 text("menu.info.accounts", "amount", Money.format(clan.accounts())),
                 text("menu.info.interest", "rate", BankService.percent(clan.interest())),
-                text("menu.info.next", "time", EterLib.get().formatDuration(viewer, seconds)))));
+                text("menu.info.next", "time", EterLib.get().formatDuration(viewer, seconds)),
+                text("bank-menu.upkeep.title"),
+                text("bank-menu.upkeep.line", "core", String.valueOf(upkeep.core()), "extensions", String.valueOf(upkeep.extensions()),
+                        "outposts", String.valueOf(upkeep.outposts())),
+                text("bank-menu.upkeep.total", "amount", Money.format(upkeep.total()), "discount", String.valueOf(upkeep.discount())),
+                text(clan.land().debt() > 0 ? "bank-menu.upkeep.debt" : "bank-menu.upkeep.no-debt", "debt", Money.format(clan.land().debt())))));
+        inventory.setItem(HISTORY, Items.item(Material.BOOK, text("bank-menu.history.name"), List.of(text("bank-menu.history.lore"))));
         inventory.setItem(DEPOSIT, Items.item(Material.HOPPER, text("menu.deposit.name"), List.of(text("menu.deposit.lore"))));
         inventory.setItem(WITHDRAW, Items.item(Material.DISPENSER, text("menu.withdraw.name"), List.of(text("menu.withdraw.lore"))));
         inventory.setItem(GIVE, giveWait > 0

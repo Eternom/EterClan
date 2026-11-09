@@ -40,6 +40,12 @@ public class ZoneRepository {
                 Column.of("tenant_name", Column.Type.STRING).length(16),
                 Column.of("rent_due", Column.Type.LONG).notNull(),
                 Column.of("trusted", Column.Type.TEXT));
+        // 1.7.0 : accès à la parcelle, pass, location ouverte à tous
+        database.addColumn(TABLE, Column.of("mode", Column.Type.STRING).length(8));
+        database.addColumn(TABLE, Column.of("pass_price", Column.Type.DOUBLE));
+        database.addColumn(TABLE, Column.of("pass_days", Column.Type.INT));
+        database.addColumn(TABLE, Column.of("public_rent", Column.Type.BOOLEAN));
+        database.addColumn(TABLE, Column.of("rent_late", Column.Type.BOOLEAN));
         this.table = database.table(TABLE);
     }
 
@@ -99,6 +105,21 @@ public class ZoneRepository {
                 nextDue, id, due) > 0;
     }
 
+    /** Loyer en retard (une semaine de grâce, 1.7.0). */
+    public boolean isLate(long id) {
+        return database.getFirst(TABLE, Map.of("id", id)).map(row -> row.getBoolean("rent_late")).orElse(false);
+    }
+
+    public void setLate(long id, boolean late) {
+        database.update(TABLE, Map.of("rent_late", late), Map.of("id", id));
+    }
+
+    /** Le mode d'accès, le pass et la location ouverte à tous (1.7.0). */
+    public void setAccess(long id, Zone.Mode mode, double passPrice, int passDays, boolean publicRent) {
+        database.update(TABLE, Map.of("mode", mode.name(), "pass_price", passPrice, "pass_days", passDays, "public_rent", publicRent),
+                Map.of("id", id));
+    }
+
     public void setTrusted(long id, Set<UUID> trusted) {
         database.update(TABLE, Map.of("trusted", trusted.stream().map(UUID::toString).collect(Collectors.joining(","))),
                 Map.of("id", id));
@@ -111,6 +132,7 @@ public class ZoneRepository {
         return new Zone(row.getLong("id"), row.getLong("clan_id"), row.getString("server"), row.getString("world"),
                 row.getInt("min_x"), row.getInt("min_z"), row.getInt("max_x"), row.getInt("max_z"), row.getString("name"),
                 row.getDouble("rent"), row.get("tenant") == null ? null : row.getUUID("tenant"), row.getString("tenant_name"),
-                row.getLong("rent_due"), players);
+                row.getLong("rent_due"), players, Zone.Mode.parse(row.getString("mode")), row.getDouble("pass_price"),
+                row.getInt("pass_days") <= 0 ? 7 : row.getInt("pass_days"), row.getBoolean("public_rent"));
     }
 }

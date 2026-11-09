@@ -9,6 +9,7 @@ import fr.eternom.eterClan.module.ranking.LeagueStore;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterLib.EterLib;
 import fr.eternom.eterLib.helper.economy.Money;
+import fr.eternom.eterClan.module.clan.Journal;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.gui.Sounds;
 import fr.eternom.eterLib.helper.task.Tasks;
@@ -36,10 +37,13 @@ public class BankService {
     private final double maxInterest;
     private final ClanLeague league;
     private final GiveGate giveGate;
+    /** Les mouvements de la réserve, dans le journal du clan (1.7.0). */
+    private final Journal journal;
 
     public BankService(JavaPlugin plugin, ClanRepository clans, ClanSync sync, ClanService clanService, Messages messages,
-                       ClanLeague league) {
+                       ClanLeague league, Journal journal) {
         this.league = league;
+        this.journal = journal;
         this.giveGate = new GiveGate(plugin.getConfig().getDouble("bank.min-give-playtime-hours", 5));
         this.plugin = plugin;
         this.clans = clans;
@@ -85,6 +89,7 @@ public class BankService {
                     return "bank.not-enough";
                 }
                 clans.addReserve(clan.id(), sum);
+                journal.add(clan.id(), Journal.Category.BANK, player.getName(), "bank-given", Money.format(sum));
                 league.add(clan.id(), LeagueStore.Stat.TREASURY, Math.round(sum * 100));
                 return "bank.reserve-given";
             });
@@ -107,6 +112,7 @@ public class BankService {
                 return "bank.reserve-not-enough";
             }
             league.add(clan.id(), LeagueStore.Stat.TREASURY, -Math.round(sum * 100)); // repris : ne compte plus au trésor
+            journal.add(clan.id(), Journal.Category.BANK, player.getName(), "bank-taken", Money.format(sum));
             economy.deposit(player.getUniqueId(), sum, "EterClan · banque");
             return "bank.reserve-taken";
         }));

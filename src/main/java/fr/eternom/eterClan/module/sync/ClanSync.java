@@ -178,6 +178,10 @@ public class ClanSync {
         return server;
     }
 
+    public Messages messages() {
+        return messages;
+    }
+
     public NetworkBus bus() {
         return bus;
     }

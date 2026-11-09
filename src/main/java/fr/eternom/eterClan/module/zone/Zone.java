@@ -11,7 +11,28 @@ import java.util.UUID;
  * locataire et ceux qu'il a choisis (trusted) y construisent et ouvrent les coffres. rentDue : date du prochain loyer.
  */
 public record Zone(long id, long clanId, String server, String world, int minX, int minZ, int maxX, int maxZ,
-                   String name, double rent, UUID tenant, String tenantName, long rentDue, Set<UUID> trusted) {
+                   String name, double rent, UUID tenant, String tenantName, long rentDue, Set<UUID> trusted,
+                   Mode mode, double passPrice, int passDays, boolean publicRent) {
+
+    /**
+     * Qui entre et agit dans la parcelle (1.7.0) : INHERIT, comme le reste du terrain ; RESERVED, seuls ceux qu'elle a
+     * choisis (trusted) y agissent (un coffre d'officiers) ; CLOSED, personne d'autre n'y entre ; PASS, il faut un pass
+     * pour y entrer (vendu passPrice pour passDays jours, aux joueurs hors du clan aussi).
+     */
+    public enum Mode { INHERIT, RESERVED, CLOSED, PASS;
+
+        public static Mode parse(String value) {
+            try {
+                return value == null ? INHERIT : valueOf(value.toUpperCase(java.util.Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                return INHERIT;
+            }
+        }
+
+        public Mode next() {
+            return values()[(ordinal() + 1) % values().length];
+        }
+    }
 
     public boolean contains(Location location) {
         return location.getWorld().getName().equals(world)

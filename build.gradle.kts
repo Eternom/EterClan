@@ -27,6 +27,16 @@ dependencies {
     compileOnly("com.github.Eternom:EterLib:1.20.1")
     // Argent : l'API d'EterEconomy (chaque mouvement avec sa source)
     compileOnly("com.github.Eternom:EterEconomy:2.2.2")
+
+    // Tests : la forme du terrain et les prix (gradlew test)
+    testImplementation("io.papermc.paper:paper-api:26.2.build.129-stable")
+    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 java {
