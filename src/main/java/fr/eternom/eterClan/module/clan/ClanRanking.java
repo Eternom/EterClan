@@ -9,7 +9,7 @@ import java.util.UUID;
 
 /**
  * Le classement des clans du mois (ClanLeague : activité, travail, trésor, expansion), offert aux autres plugins par
- * EterLib : EterReward l'affiche dans /classement. Une ligne porte le chef du clan ; son nom affiché est celui du clan.
+ * EterLib : EterReward l'affiche dans /ranking. Une ligne porte le chef du clan ; son nom affiché est celui du clan.
  * Valeur : le score en dixièmes (875 = 87,5 points).
  */
 public class ClanRanking implements RankingSource {

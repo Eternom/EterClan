@@ -83,7 +83,7 @@ zones:
 
 # Menu /clan : bouton en bas. Avec une commande (sans le /), il la lance pour le joueur et relie les menus
 # entre eux ; vide, il ferme le menu.
-# Classement des clans du mois (/classement d'EterReward et menu du clan) : activité et travail des membres (EterReward),
+# Classement des clans du mois (/ranking d'EterReward et menu du clan) : activité et travail des membres (EterReward),
 # trésor (versé moins repris dans la réserve), expansion (chunks pris moins rendus ou perdus). Calculé sur le serveur
 # qui a du terrain (land.enabled), toutes les 5 minutes. Le mois change à minuit dans time-zone.
 ranking:

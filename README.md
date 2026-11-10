@@ -85,7 +85,7 @@ chaque chunk et chaque parcelle restent sur le serveur et le monde où ils ont �
   pris moins rendus ou perdus. En net : donner puis reprendre, ou prendre puis rendre des chunks gratuits, ne rapporte
   rien. Calculé toutes les 5 min là où `land.enabled` (la survie), photographié dans `eterclan_league`, lu partout ; le
   mois fini, le top 3 reçoit `ranking.rewards` dans sa réserve, une seule fois (`eterclan_league_rewards`), et ses
-  membres sont prévenus. Offert à `/classement` d'EterReward (source `clans`, « Clans du mois »).
+  membres sont prévenus. Offert à `/ranking` d'EterReward (source `clans`, « Clans du mois »).
 - **`menu`** : **tout se fait dans l'interface** (`/clan` est la seule commande). Sans clan : expliquer, créer (fenêtre
   avec nom, tag et prix affiché avant de payer), accepter une invitation. Avec : un accueil (moi, le clan, sa place du
   mois) et des sous-menus : **banque** (le don à la réserve affiche le temps de jeu qui manque), **membres** (inviter,
@@ -121,7 +121,7 @@ Guerre et points entre clans (les terrains resteront hors d'atteinte) : pas enco
 - `isClaimed(position)`, `canBuild(joueur, position)`, `canHome(joueur, position)` (1.4.0, permission `homes` : EterHome refuse un
   home sur le terrain d'un autre clan) : la protection du terrain, en mémoire (thread principal) ;
 - `openMenu(joueur)` : le menu `/clan` ;
-- source de classement `clans` (EterLib `RankingSource`) : les clans par territoire, pour `/classement` d'EterReward.
+- source de classement `clans` (EterLib `RankingSource`) : les clans par territoire, pour `/ranking` d'EterReward.
 
 L'argent passe par l'API d'EterEconomy, avec sa source : « EterClan · clan » (création, comptes rendus), « · banque »,
 « · loyer ».
