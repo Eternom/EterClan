@@ -96,6 +96,6 @@ class MembersMenu implements Menu {
         inventory.setItem(INVITE, Items.item(canInvite ? Material.WRITABLE_BOOK : Material.GRAY_DYE,
                 messages.get(viewer, "members.invite.name"),
                 List.of(messages.get(viewer, canInvite ? "members.invite.lore" : "menu.locked"))));
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "menu.back-to-clan"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "menu.back-to-clan"), List.of()));
     }
 }

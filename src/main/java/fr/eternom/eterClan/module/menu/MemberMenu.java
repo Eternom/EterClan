@@ -134,7 +134,7 @@ class MemberMenu implements Menu {
                         List.of(messages.get(viewer, "member.transfer.lore"))));
             }
         }
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "member.back"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "member.back"), List.of()));
     }
 
     private ItemStack button(Material icon, String key, ClanPermission permission) {

@@ -81,6 +81,6 @@ class TrustMenu implements Menu {
         }
         inventory.setItem(ADD, Items.item(Material.WRITABLE_BOOK, messages.get(viewer, "trust.add.name"),
                 List.of(messages.get(viewer, "trust.add.lore"))));
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "zone-menu.back-zone"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "zone-menu.back-zone"), List.of()));
     }
 }

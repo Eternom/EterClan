@@ -113,7 +113,7 @@ class ZoneMenu implements Menu {
             add(next, Material.SHEARS, "zone-menu.evict", () -> gui.confirm(viewer, "zone-evict",
                     () -> gui.zones().end(viewer, zone, reopen), reopen, "zone", zone.name(), "tenant", zone.tenantName()));
         }
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "zone-menu.back"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "zone-menu.back"), List.of()));
     }
 
     /** Pose le bouton key à la prochaine case libre ; renvoie l'index suivant. */

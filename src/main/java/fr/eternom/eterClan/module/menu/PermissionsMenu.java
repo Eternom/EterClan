@@ -75,6 +75,6 @@ class PermissionsMenu implements Menu {
         }
         inventory.setItem(31, Items.item(Material.BOOK, messages.get(viewer, "permissions.note.name"),
                 List.of(messages.get(viewer, "permissions.note.lore"))));
-        inventory.setItem(BACK, Items.item(Material.ARROW, messages.get(viewer, "permissions.back"), List.of()));
+        inventory.setItem(BACK, Items.item(Material.OAK_DOOR, messages.get(viewer, "permissions.back"), List.of()));
     }
 }
