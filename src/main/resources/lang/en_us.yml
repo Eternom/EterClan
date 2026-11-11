@@ -201,7 +201,7 @@ dialogs:
     body: "The player won't enter anywhere on the land. The same name removes them."
     label: "Name"
   confirm: "Confirm"
-  amount: "Amount"
+  amount: "Amount (e.g. 500)"
   deposit:
     title: "<primary>Store money"
     body: "Money on your clan account is safe from death. Every week, the clan interest sends part of it to the reserve."

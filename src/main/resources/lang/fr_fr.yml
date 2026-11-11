@@ -201,7 +201,7 @@ dialogs:
     body: "Le joueur n'entrera plus nulle part sur le terrain. Le même pseudo l'en retire."
     label: "Pseudo"
   confirm: "Valider"
-  amount: "Montant"
+  amount: "Montant (ex : 500)"
   deposit:
     title: "<primary>Ranger de l'argent"
     body: "Ton argent sur ton compte du clan est à l'abri de la mort. Chaque semaine, l'intérêt du clan en reverse une part à la réserve."
