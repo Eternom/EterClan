@@ -275,6 +275,10 @@ confirm:
     title: "<primary>Céder le clan"
     body: "<player> deviendra le chef du clan, avec toutes les permissions. Tu redeviens un membre."
     button: "Céder"
+  pass-buy:
+    title: "<primary>Pass · <zone>"
+    body: "<price> pour <days> jour(s) d'accès au terrain de <clan> (un pass en cours est prolongé). L'argent va à la réserve du clan."
+    button: "Acheter (<price>)"
   zone-take:
     title: "<primary>Louer <zone>"
     body: "<rent> tout de suite, puis chaque semaine (versés à la réserve). Toi seul y construiras, avec ceux que tu choisis."

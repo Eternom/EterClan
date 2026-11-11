@@ -275,6 +275,10 @@ confirm:
     title: "<primary>Give the clan away"
     body: "<player> will become the clan leader, with every permission. You become a member."
     button: "Give away"
+  pass-buy:
+    title: "<primary>Pass · <zone>"
+    body: "<price> for <days> day(s) of access to <clan>'s land (a running pass is extended). The money goes to the clan reserve."
+    button: "Buy (<price>)"
   zone-take:
     title: "<primary>Rent <zone>"
     body: "<rent> now, then every week (paid to the reserve). Only you will build there, with whoever you choose."

@@ -14,12 +14,16 @@ import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterClan.module.zone.ZoneRepository;
 import fr.eternom.eterEconomy.api.EconomyApi;
 import fr.eternom.eterLib.helper.economy.Money;
+import fr.eternom.eterLib.helper.gui.Dialogs;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import fr.eternom.eterLib.helper.message.Messages;
 import fr.eternom.eterLib.helper.task.Tasks;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -114,8 +118,12 @@ public class AccessService {
 
     // ---------- Passes ----------
 
-    /** Acheter le pass du terrain (zone null) ou d'une parcelle à pass ; un pass en cours est prolongé. */
+    /** Acheter le pass du terrain (zone null) ou d'une parcelle à pass ; un pass en cours est prolongé. Demande d'abord confirmation. */
     public void buy(Player player, Clan clan, Zone zone, Runnable after) {
+        buy(player, clan, zone, after, false);
+    }
+
+    private void buy(Player player, Clan clan, Zone zone, Runnable after, boolean confirmed) {
         Land land = clan.land();
         double price = zone == null ? land.offer().price() : zone.passPrice();
         int days = zone == null ? land.offer().days() : zone.passDays();
@@ -131,6 +139,16 @@ public class AccessService {
         }
         if (land.banned().contains(player.getUniqueId())) {
             messages.send(player, "access.banned");
+            return;
+        }
+        if (!confirmed) {
+            // Panneau ou bouton du chat : un clic par erreur ne doit pas faire payer (confirmation commune, Dialogs)
+            String[] values = {"clan", clan.name(), "zone", zone == null ? clan.name() : zone.name(), "price", Money.format(price),
+                    "days", String.valueOf(days)};
+            DialogBase dialog = DialogBase.builder(messages.get(player, "confirm.pass-buy.title", values))
+                    .body(List.of(DialogBody.plainMessage(messages.get(player, "confirm.pass-buy.body", values)))).build();
+            Dialogs.show(plugin, player, dialog, messages.get(player, "confirm.pass-buy.button", values),
+                    messages.get(player, "dialog.cancel"), response -> buy(player, clan, zone, after, true), after);
             return;
         }
         EconomyApi economy = EconomyApi.get().orElse(null);

@@ -6,6 +6,11 @@ import fr.eternom.eterClan.module.clan.ClanPermission;
 import fr.eternom.eterClan.module.sync.ClanSync;
 import fr.eternom.eterClan.module.zone.Zone;
 import fr.eternom.eterLib.helper.economy.Money;
+import fr.eternom.eterLib.helper.gui.Dialogs;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import org.bukkit.plugin.java.JavaPlugin;
+import java.util.List;
 import fr.eternom.eterLib.helper.message.Messages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -227,7 +232,14 @@ public class LandListener implements Listener {
         if (first.equalsIgnoreCase(rentTitle)) {
             sync.zones().at(block.getLocation()).ifPresent(zone -> {
                 event.setCancelled(true);
-                zoneService.take(event.getPlayer(), zone, () -> { });
+                // Même confirmation que le menu des parcelles : un clic droit par erreur ne loue pas
+                Player player = event.getPlayer();
+                String[] values = {"zone", zone.name(), "rent", Money.format(zone.rent())};
+                DialogBase dialog = DialogBase.builder(messages.get(player, "confirm.zone-take.title", values))
+                        .body(List.of(DialogBody.plainMessage(messages.get(player, "confirm.zone-take.body", values)))).build();
+                Dialogs.show(JavaPlugin.getProvidingPlugin(LandListener.class), player, dialog,
+                        messages.get(player, "confirm.zone-take.button", values), messages.get(player, "dialog.cancel"),
+                        response -> zoneService.take(player, zone, () -> { }), () -> { });
             });
             return;
         }
