@@ -357,6 +357,9 @@ menu:
   rules:
     name: "<accent>Land rules"
     lore: "<info>What you can do on the clan land and in its plots"
+  challenges:
+    name: "<accent>Clan challenge"
+    lore: "<info>The weekly challenge the whole clan takes on together, and your share"
   league:
     name: "<accent>Monthly ranking"
     place: "<dark_gray>▸ <info>Place: <accent><place></accent> <info>of <accent><count>"

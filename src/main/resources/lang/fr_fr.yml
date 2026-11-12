@@ -357,6 +357,9 @@ menu:
   rules:
     name: "<accent>Règles du territoire"
     lore: "<info>Ce que tu peux faire sur le terrain du clan et dans ses parcelles"
+  challenges:
+    name: "<accent>Défi de clan"
+    lore: "<info>Le défi de la semaine que tout le clan relève ensemble, et ta part"
   league:
     name: "<accent>Classement du mois"
     place: "<dark_gray>▸ <info>Place : <accent><place></accent> <info>sur <accent><count>"

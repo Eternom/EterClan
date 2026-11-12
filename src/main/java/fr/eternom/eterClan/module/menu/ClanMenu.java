@@ -31,7 +31,7 @@ import java.util.Optional;
  *  ▣ ▣ ▢ ▢ ▢ ▢ ▢ ▣ ▣
  *  ▣ ☺ · · ⚑ · · ♛ ▣     ☺ = moi (mon compte ; clic : grade ou tag) · ⚑ = le clan (clic : couleur du tag) · ♛ = classement du mois
  *  ▢ · $ · ♟ · ▦ · ▢     $ = banque · ♟ = membres · ▦ = terrain et parcelles
- *  ▣ · · · ✎ · · · ▣     ✎ = règles du territoire (ce que chacun peut y faire)
+ *  ▣ · ⚔ · ✎ · · · ▣     ⚔ = défi de clan de la semaine (EterReward, /challenges) · ✎ = règles du territoire
  *  ✖ ▣ ▢ ▢ ← ▢ ▢ ▣ ▣     ✖ = quitter (ou dissoudre pour le chef)
  * </pre>
  */
@@ -44,6 +44,7 @@ class ClanMenu implements Menu {
     private static final int MEMBERS = 22;
     private static final int LAND = 24;
     private static final int RULES = 31;
+    private static final int CHALLENGES = 29;
     private static final int LEAVE = 36;
     private static final int BACK = 40;
 
@@ -83,6 +84,11 @@ class ClanMenu implements Menu {
                 }
             }
             case RULES -> page(player, () -> gui.openRules(player));
+            case CHALLENGES -> {
+                if (Bukkit.getPluginCommand("challenges") != null) {
+                    page(player, () -> player.performCommand("challenges"));
+                }
+            }
             case LEAVE -> {
                 Runnable reopen = () -> gui.open(player);
                 if (clan.isOwner(player.getUniqueId())) {
@@ -144,6 +150,10 @@ class ClanMenu implements Menu {
         }
         inventory.setItem(RULES, Items.item(Material.WRITABLE_BOOK, text("menu.rules.name"),
                 List.of(text("menu.rules.lore"), Component.empty(), text("menu.open"))));
+        if (Bukkit.getPluginCommand("challenges") != null) {
+            inventory.setItem(CHALLENGES, Items.item(Material.TARGET, text("menu.challenges.name"),
+                    List.of(text("menu.challenges.lore"), Component.empty(), text("menu.open"))));
+        }
         inventory.setItem(LEAVE, Items.item(Material.RED_BANNER,
                 text(clan.isOwner(viewer.getUniqueId()) ? "menu.disband.name" : "menu.leave.name"),
                 List.of(text(clan.isOwner(viewer.getUniqueId()) ? "menu.disband.lore" : "menu.leave.lore"))));
