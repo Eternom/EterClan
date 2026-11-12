@@ -25,6 +25,7 @@ import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,10 @@ public class ClanGui {
     public void open(Player player) {
         sync.cache().of(player.getUniqueId()).ifPresentOrElse(
                 clan -> player.openInventory(new ClanMenu(this, player, clan).getInventory()),
-                () -> player.openInventory(new NoClanMenu(this, player).getInventory()));
+                // Sans clan : la liste des clans qui recrutent, lue en base hors du thread principal
+                () -> Tasks.async(plugin, player, () -> clans.recruiting(14),
+                        list -> player.openInventory(new NoClanMenu(this, player, list).getInventory()),
+                        () -> player.openInventory(new NoClanMenu(this, player, List.of()).getInventory())));
     }
 
     /** La banque : le temps de jeu qui manque pour donner à la réserve est lu d'abord (affiché sur le bouton). */
@@ -147,7 +151,14 @@ public class ClanGui {
     }
 
     void openMembers(Player player) {
-        clans.clanOf(player).ifPresent(clan -> player.openInventory(new MembersMenu(this, player, clan).getInventory()));
+        // Qui est en ligne, et où : une lecture de l'annuaire du réseau, hors du thread principal
+        clans.clanOf(player).ifPresent(clan -> Tasks.async(plugin, player, () -> {
+            Map<UUID, String> online = new HashMap<>();
+            EterLib.get().getPlayers().listOnline().stream().filter(other -> clan.isMember(other.uuid()))
+                    .forEach(other -> online.put(other.uuid(), other.server()));
+            return online;
+        }, online -> player.openInventory(new MembersMenu(this, player, clan, online).getInventory()),
+                () -> player.openInventory(new MembersMenu(this, player, clan, Map.of()).getInventory())));
     }
 
     void openMember(Player player, UUID member) {
@@ -224,11 +235,15 @@ public class ClanGui {
 
     /** Saisie d'un texte (nom, pseudo) : dialogs.<key>.title / .body / .label. */
     void askText(Player player, String key, String initial, Consumer<String> action, Runnable onCancel) {
+        askText(player, key, initial, action, onCancel, 32);
+    }
+
+    void askText(Player player, String key, String initial, Consumer<String> action, Runnable onCancel, int maxLength) {
         player.closeInventory();
         DialogBase base = DialogBase.builder(messages.get(player, "dialogs." + key + ".title"))
                 .body(List.of(DialogBody.plainMessage(messages.get(player, "dialogs." + key + ".body"))))
                 .inputs(List.of(DialogInput.text("value", messages.get(player, "dialogs." + key + ".label"))
-                        .initial(initial).maxLength(32).build()))
+                        .initial(initial).maxLength(maxLength).build()))
                 .build();
         Dialogs.show(plugin, player, base, messages.get(player, "dialogs.confirm"), messages.get(player, "dialog.cancel"),
                 response -> action.accept(text(response.getText("value"))), onCancel);
@@ -274,7 +289,7 @@ public class ClanGui {
         return accessService;
     }
 
-    ClanService clans() {
+    public ClanService clans() {
         return clans;
     }
 

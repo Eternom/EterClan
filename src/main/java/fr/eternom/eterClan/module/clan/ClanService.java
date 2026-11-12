@@ -17,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.Duration;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -169,11 +170,61 @@ public class ClanService {
             }
             sync.clanChanged(clanId);
             return clans.byId(clanId);
-        }, joined -> joined.ifPresentOrElse(clan -> {
-            messages.send(player, "clan.joined", "clan", clan.name());
-            clan.members().stream().filter(member -> !member.uuid().equals(uuid))
-                    .forEach(member -> sync.bus().notify(member.uuid(), "clan.member-joined", false, "player", player.getName()));
-        }, () -> messages.send(player, "clan.no-invite")), () -> messages.send(player, "error.generic"));
+        }, joined -> joined.ifPresentOrElse(clan -> welcome(player, clan), () -> messages.send(player, "clan.no-invite")),
+                () -> messages.send(player, "error.generic"));
+    }
+
+    /** Bloquant (base) : les clans qui recrutent, les plus grands d'abord. */
+    public List<ClanRepository.Recruiting> recruiting(int limit) {
+        return clans.recruiting(limit);
+    }
+
+    /** Rejoindre un clan qui recrute (liste des joueurs sans clan) : comme une invitation acceptée. */
+    public void joinRecruiting(Player player, long clanId) {
+        UUID uuid = player.getUniqueId();
+        Tasks.async(plugin, player, () -> {
+            Optional<Clan> clan = clans.byId(clanId);
+            if (clan.isEmpty() || !clan.get().recruiting()
+                    || !clans.addMember(clanId, uuid, player.getName(), defaultPermissions, System.currentTimeMillis())) {
+                return Optional.<Clan>empty();
+            }
+            sync.clanChanged(clanId);
+            return clans.byId(clanId);
+        }, joined -> joined.ifPresentOrElse(clan -> welcome(player, clan), () -> messages.send(player, "recruit.closed-now")),
+                () -> messages.send(player, "error.generic"));
+    }
+
+    /** Annonce de recrutement (INVITE) : vide, le clan ne recrute plus. 60 caractères au plus. */
+    public void setRecruit(Player player, Clan clan, String text, Runnable after) {
+        if (!clan.can(player.getUniqueId(), ClanPermission.INVITE)) {
+            messages.send(player, "clan.no-permission");
+            return;
+        }
+        String ad = text.strip().length() > 60 ? text.strip().substring(0, 60) : text.strip();
+        Tasks.async(plugin, player, () -> {
+            clans.setRecruit(clan.id(), ad);
+            sync.clanChanged(clan.id());
+            return true;
+        }, done -> {
+            messages.send(player, ad.isEmpty() ? "recruit.stopped" : "recruit.set");
+            after.run();
+        }, () -> messages.send(player, "error.generic"));
+    }
+
+    private void welcome(Player player, Clan clan) {
+        messages.send(player, "clan.joined", "clan", clan.name());
+        clan.members().stream().filter(member -> !member.uuid().equals(player.getUniqueId()))
+                .forEach(member -> sync.bus().notify(member.uuid(), "clan.member-joined", false, "player", player.getName()));
+    }
+
+    /** Refuser l'invitation en cours (bouton du message d'invitation). */
+    public void deny(Player player) {
+        UUID uuid = player.getUniqueId();
+        Tasks.async(plugin, player, () -> {
+            boolean had = redis.get(inviteKey(uuid)).isPresent();
+            redis.delete(inviteKey(uuid));
+            return had;
+        }, had -> messages.send(player, had ? "clan.invite-denied" : "clan.no-invite"), () -> messages.send(player, "error.generic"));
     }
 
     public void leave(Player player) {

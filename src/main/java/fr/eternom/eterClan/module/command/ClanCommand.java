@@ -66,6 +66,8 @@ public class ClanCommand implements TabExecutor {
         switch (sub) {
             case "home" -> land.home(player);
             case "sethome" -> land.setHome(player);
+            case "accept" -> gui.clans().accept(player);
+            case "deny" -> gui.clans().deny(player);
             case "pass" -> buyPass(player, args);
             case "admin" -> admin(player, args);
             default -> gui.open(player);
@@ -160,7 +162,7 @@ public class ClanCommand implements TabExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
-            List<String> subs = sender.hasPermission(ADMIN) ? List.of("home", "sethome", "admin") : List.of("home", "sethome");
+            List<String> subs = sender.hasPermission(ADMIN) ? List.of("home", "sethome", "accept", "deny", "admin") : List.of("home", "sethome", "accept", "deny");
             return subs.stream().filter(sub -> sub.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin") && sender.hasPermission(ADMIN)) {

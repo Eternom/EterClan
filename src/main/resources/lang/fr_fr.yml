@@ -19,8 +19,9 @@ clan:
   no-permission: "<error>Ton clan ne t'a pas donné cette permission."
   target-in-clan: "<error><accent><player></accent> est déjà dans un clan."
   invite-sent: "<info>Invitation envoyée à <accent><player></accent> (5 minutes pour accepter)."
-  invited: "<info><accent><player></accent> t'invite dans le clan <accent><clan></accent> : ouvre <accent><click:run_command:'/clan'>/clan</click></accent> pour accepter."
+  invited: "<info><accent><player></accent> t'invite dans le clan <accent><clan></accent> (5 min) : <success><click:run_command:'/clan accept'><hover:show_text:'<info>Rejoindre le clan'><bold>[Accepter]</bold></hover></click></success> <error><click:run_command:'/clan deny'><hover:show_text:'<info>Refuser cette invitation'><bold>[Refuser]</bold></hover></click></error>"
   no-invite: "<error>Tu n'as pas d'invitation en cours (ou elle a expiré)."
+  invite-denied: "<info>Invitation refusée."
   joined: "<success>Tu as rejoint le clan <accent><clan></accent> !"
   member-joined: "<info><accent><player></accent> a rejoint ton clan."
   owner-cannot-leave: "<error>Le chef ne peut pas partir : cède d'abord le clan à un membre, ou dissous-le."
@@ -183,6 +184,10 @@ permission-lore:
 
 # Fenêtres de saisie
 dialogs:
+  recruit:
+    title: "<primary>Recrutement"
+    body: "Une phrase pour les joueurs sans clan (60 caractères) : ils voient ton clan dans leur /clan et le rejoignent en un clic. Vide : le clan ne recrute plus (invitations seulement)."
+    label: "Annonce"
   pass-price:
     title: "<primary>Prix du pass"
     body: "Le prix en Heloks (0 : pas de pass à vendre)."
@@ -235,6 +240,10 @@ dialogs:
 
 # Confirmations : titre, texte, bouton
 confirm:
+  join:
+    title: "<primary>Rejoindre <clan>"
+    body: "Tu entres dans le clan tout de suite, comme avec une invitation. Tu pourras le quitter quand tu veux."
+    button: "Rejoindre"
   claim-many:
     title: "<primary>Prendre <count> chunk(s)"
     body: "Payés <price> par la réserve du clan. Chaque chunk payant ajoute aussi à l'entretien de la semaine."
@@ -304,7 +313,19 @@ create:
   tag: "Tag (2 à 5 lettres)"
   confirm: "Créer (<price>)"
 
+recruit:
+  set: "<success>Annonce publiée :</success> <info>les joueurs sans clan peuvent rejoindre ton clan depuis /clan."
+  stopped: "<info>Le clan ne recrute plus : on n'y entre que sur invitation."
+  closed-now: "<error>Ce clan ne recrute plus, ou tu es déjà dans un clan."
+
 no-clan:
+  recruit:
+    none: "<info>Aucun clan ne recrute"
+    none-lore: "<dark_gray>Crée le tien, ou attends une invitation."
+    name: "<tag> <accent><clan>"
+    ad: "<white>« <text> »"
+    members: "<dark_gray>▸ <info><count> membre(s)"
+    click: "<accent>Clic</accent> <info>: rejoindre"
   title: "<primary>Clans"
   info:
     name: "<accent>Un clan, c'est quoi ?"
@@ -321,6 +342,12 @@ no-clan:
     lore: "<info>Rejoindre le clan qui t'a invité (5 minutes)"
 
 menu:
+  recruit:
+    name: "<accent>Recrutement"
+    on: "<success>● <info>Annonce : <white>« <text> »"
+    off: "<error>● <info>Le clan ne recrute pas"
+    how: "<dark_gray>Les joueurs sans clan voient l'annonce dans /clan et rejoignent en un clic."
+    click: "<accent>Clic</accent> <info>: écrire l'annonce (vide : arrêter)"
   map:
     name: "<accent>Carte du terrain"
     lore: "<info>Les chunks autour de toi ; en prendre plusieurs d'un coup."
@@ -428,6 +455,8 @@ menu:
 members:
   title: "<primary>Membres : <clan>"
   name: "<accent><player>"
+  online: "<success>● <info>En ligne <dark_gray>· <accent><server>"
+  offline: "<dark_gray>● Hors ligne"
   owner: "Chef"
   permissions: "<count> permission(s)"
   role: "<dark_gray>▸ <info><role>"

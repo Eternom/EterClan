@@ -23,7 +23,8 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 
 /**
- * Les membres (28 au plus affichés) : tête, chef ou nombre de permissions, compte en banque ; clic : sa fiche
+ * Les membres (28 au plus affichés) : tête, en ligne (et sur quel serveur) ou non, chef ou nombre de permissions,
+ * compte en banque ; clic : sa fiche
  * (permissions, exclure, céder le clan). Le chef d'abord, puis par date d'arrivée. Bouton : inviter (INVITE).
  */
 class MembersMenu implements Menu {
@@ -39,8 +40,11 @@ class MembersMenu implements Menu {
     private final Clan clan;
     private final Inventory inventory;
     private final Map<Integer, UUID> memberAt = new HashMap<>();
+    /** Les membres connectés au réseau (hors invisibles) et leur serveur. */
+    private final Map<UUID, String> online;
 
-    MembersMenu(ClanGui gui, Player viewer, Clan clan) {
+    MembersMenu(ClanGui gui, Player viewer, Clan clan, Map<UUID, String> online) {
+        this.online = online;
         this.gui = gui;
         this.messages = gui.messages();
         this.viewer = viewer;
@@ -88,6 +92,9 @@ class MembersMenu implements Menu {
                     : messages.plain(viewer, "members.permissions", "count", String.valueOf(member.permissions().size()));
             inventory.setItem(SLOTS.get(i), Items.head(Bukkit.createProfile(member.uuid(), member.name()),
                     messages.get(viewer, "members.name", "player", member.name()), List.of(
+                            online.containsKey(member.uuid())
+                                    ? messages.get(viewer, "members.online", "server", online.get(member.uuid()))
+                                    : messages.get(viewer, "members.offline"),
                             messages.get(viewer, "members.role", "role", role),
                             messages.get(viewer, "members.account", "amount", Money.format(member.account())),
                             messages.get(viewer, "members.click"))));

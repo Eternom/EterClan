@@ -81,6 +81,8 @@ public class ClanRepository {
         database.addColumn(CLANS, Column.of("pass_price", Column.Type.DOUBLE));
         database.addColumn(CLANS, Column.of("pass_days", Column.Type.INT));
         database.addColumn(CLANS, Column.of("pass_rights", Column.Type.STRING).length(128));
+        // 1.10.0 : l'annonce de recrutement (vide : le clan ne recrute pas)
+        database.addColumn(CLANS, Column.of("recruit", Column.Type.STRING).length(64));
         database.createTable(PASSES,
                 Column.of("id", Column.Type.LONG).autoIncrement(),
                 Column.of("clan_id", Column.Type.LONG).notNull(),
@@ -188,6 +190,24 @@ public class ClanRepository {
         database.update(CLANS, Map.of("owner", owner), Map.of("id", clanId));
     }
 
+    public void setRecruit(long clanId, String text) {
+        database.update(CLANS, Map.of("recruit", text), Map.of("id", clanId));
+    }
+
+    /** Un clan qui recrute, tel que le voit un joueur sans clan. */
+    public record Recruiting(long id, String name, String tag, TagColor color, String text, int members) {
+    }
+
+    /** Les clans qui recrutent, les plus grands d'abord. */
+    public List<Recruiting> recruiting(int limit) {
+        return database.query("SELECT c.id, c.name, c.tag, c.tag_color, c.recruit, (SELECT COUNT(*) FROM " + database.table(MEMBERS)
+                        + " m WHERE m.clan_id = c.id) AS size FROM " + database.table(CLANS) + " c"
+                        + " WHERE c.recruit IS NOT NULL AND c.recruit <> '' ORDER BY size DESC LIMIT " + limit).stream()
+                .map(row -> new Recruiting(row.getLong("id"), row.getString("name"), row.getString("tag"),
+                        TagColor.parse(row.getString("tag_color")), row.getString("recruit"), row.getInt("size")))
+                .toList();
+    }
+
     public void setTagColor(long clanId, TagColor color) {
         database.update(CLANS, Map.of("tag_color", color.id()), Map.of("id", clanId));
     }
@@ -258,7 +278,8 @@ public class ClanRepository {
                 claim.getString("world"), claim.getInt("x"), claim.getInt("z"))));
         return new Clan(id, row.getString("name"), row.getString("tag"), row.getUUID("owner"), row.getDouble("reserve"),
                 row.getDouble("interest"), row.getLong("next_cycle"), plots.size(), members, ClanRule.parse(row.getString("rules")),
-                TagColor.parse(row.getString("tag_color")), land(id, row, Set.copyOf(plots)));
+                TagColor.parse(row.getString("tag_color")), land(id, row, Set.copyOf(plots)),
+                row.getString("recruit") == null ? "" : row.getString("recruit"));
     }
 
     private Land land(long id, Row row, Set<Plot> plots) {

@@ -31,7 +31,7 @@ import java.util.Optional;
  *  ▣ ▣ ▢ ▢ ▢ ▢ ▢ ▣ ▣
  *  ▣ ☺ · · ⚑ · · ♛ ▣     ☺ = moi (mon compte ; clic : grade ou tag) · ⚑ = le clan (clic : couleur du tag) · ♛ = classement du mois
  *  ▢ · $ · ♟ · ▦ · ▢     $ = banque · ♟ = membres · ▦ = terrain et parcelles
- *  ▣ · ⚔ · ✎ · · · ▣     ⚔ = défi de clan de la semaine (EterReward, /challenges) · ✎ = règles du territoire
+ *  ▣ · ⚔ · ✎ · ✆ · ▣     ⚔ = défi de clan (EterReward, /challenges) · ✎ = règles du territoire · ✆ = recrutement
  *  ✖ ▣ ▢ ▢ ← ▢ ▢ ▣ ▣     ✖ = quitter (ou dissoudre pour le chef)
  * </pre>
  */
@@ -45,6 +45,7 @@ class ClanMenu implements Menu {
     private static final int LAND = 24;
     private static final int RULES = 31;
     private static final int CHALLENGES = 29;
+    private static final int RECRUIT = 33;
     private static final int LEAVE = 36;
     private static final int BACK = 40;
 
@@ -84,6 +85,15 @@ class ClanMenu implements Menu {
                 }
             }
             case RULES -> page(player, () -> gui.openRules(player));
+            case RECRUIT -> {
+                if (!clan.can(player.getUniqueId(), ClanPermission.INVITE)) {
+                    messages.send(player, "clan.no-permission");
+                    return;
+                }
+                Sounds.click(player);
+                gui.askText(player, "recruit", clan.recruit(), text -> gui.clans().setRecruit(player, clan, text, () -> gui.open(player)),
+                        () -> gui.open(player), 60);
+            }
             case CHALLENGES -> {
                 if (Bukkit.getPluginCommand("challenges") != null) {
                     page(player, () -> player.performCommand("challenges"));
@@ -150,6 +160,10 @@ class ClanMenu implements Menu {
         }
         inventory.setItem(RULES, Items.item(Material.WRITABLE_BOOK, text("menu.rules.name"),
                 List.of(text("menu.rules.lore"), Component.empty(), text("menu.open"))));
+        inventory.setItem(RECRUIT, Items.item(clan.recruiting() ? Material.BELL : Material.GRAY_DYE, text("menu.recruit.name"), List.of(
+                clan.recruiting() ? text("menu.recruit.on", "text", clan.recruit()) : text("menu.recruit.off"),
+                text("menu.recruit.how"), Component.empty(),
+                text(clan.can(viewer.getUniqueId(), ClanPermission.INVITE) ? "menu.recruit.click" : "menu.locked"))));
         if (Bukkit.getPluginCommand("challenges") != null) {
             inventory.setItem(CHALLENGES, Items.item(Material.TARGET, text("menu.challenges.name"),
                     List.of(text("menu.challenges.lore"), Component.empty(), text("menu.open"))));

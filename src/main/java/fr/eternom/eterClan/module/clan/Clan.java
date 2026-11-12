@@ -13,7 +13,12 @@ import java.util.UUID;
  * (combat, explosions, feu ; protégé sinon). color : la couleur du tag.
  */
 public record Clan(long id, String name, String tag, UUID owner, double reserve, double interest, long nextCycle,
-                   int chunks, List<Member> members, Set<ClanRule> rules, TagColor color, Land land) {
+                   int chunks, List<Member> members, Set<ClanRule> rules, TagColor color, Land land, String recruit) {
+
+    /** Le clan a une annonce de recrutement : un joueur sans clan peut le rejoindre en un clic. */
+    public boolean recruiting() {
+        return recruit != null && !recruit.isBlank();
+    }
 
     /** Membre du clan (le chef compris). */
     public boolean isMember(UUID player) {

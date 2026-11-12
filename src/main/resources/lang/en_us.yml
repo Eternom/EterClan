@@ -19,8 +19,9 @@ clan:
   no-permission: "<error>Your clan didn't give you this permission."
   target-in-clan: "<error><accent><player></accent> is already in a clan."
   invite-sent: "<info>Invite sent to <accent><player></accent> (5 minutes to accept)."
-  invited: "<info><accent><player></accent> invites you to the clan <accent><clan></accent>: open <accent><click:run_command:'/clan'>/clan</click></accent> to accept."
+  invited: "<info><accent><player></accent> invites you to the clan <accent><clan></accent> (5 min): <success><click:run_command:'/clan accept'><hover:show_text:'<info>Join the clan'><bold>[Accept]</bold></hover></click></success> <error><click:run_command:'/clan deny'><hover:show_text:'<info>Decline the invite'><bold>[Decline]</bold></hover></click></error>"
   no-invite: "<error>You have no pending invite (or it expired)."
+  invite-denied: "<info>Invite declined."
   joined: "<success>You joined the clan <accent><clan></accent>!"
   member-joined: "<info><accent><player></accent> joined your clan."
   owner-cannot-leave: "<error>The leader can't leave: give the clan to a member first, or disband it."
@@ -183,6 +184,10 @@ permission-lore:
 
 # Input windows
 dialogs:
+  recruit:
+    title: "<primary>Recruiting"
+    body: "One sentence for players without a clan (60 characters): they see your clan in their /clan and join in one click. Empty: the clan stops recruiting (invites only)."
+    label: "Ad"
   pass-price:
     title: "<primary>Pass price"
     body: "The price in Heloks (0: no pass for sale)."
@@ -235,6 +240,10 @@ dialogs:
 
 # Confirmations: title, text, button
 confirm:
+  join:
+    title: "<primary>Join <clan>"
+    body: "You join the clan right away, just like with an invite. You can leave whenever you want."
+    button: "Join"
   claim-many:
     title: "<primary>Claim <count> chunk(s)"
     body: "Paid <price> by the clan reserve. Each paid chunk also adds to the weekly upkeep."
@@ -304,7 +313,19 @@ create:
   tag: "Tag (2 to 5 letters)"
   confirm: "Create (<price>)"
 
+recruit:
+  set: "<success>Ad published:</success> <info>players without a clan can join your clan from /clan."
+  stopped: "<info>The clan stopped recruiting: invites only."
+  closed-now: "<error>This clan isn't recruiting anymore, or you're already in a clan."
+
 no-clan:
+  recruit:
+    none: "<info>No clan is recruiting"
+    none-lore: "<dark_gray>Create your own, or wait for an invite."
+    name: "<tag> <accent><clan>"
+    ad: "<white>“<text>”"
+    members: "<dark_gray>▸ <info><count> member(s)"
+    click: "<accent>Click</accent> <info>: join"
   title: "<primary>Clans"
   info:
     name: "<accent>What is a clan?"
@@ -321,6 +342,12 @@ no-clan:
     lore: "<info>Join the clan that invited you (5 minutes)"
 
 menu:
+  recruit:
+    name: "<accent>Recruiting"
+    on: "<success>● <info>Ad: <white>“<text>”"
+    off: "<error>● <info>The clan isn't recruiting"
+    how: "<dark_gray>Players without a clan see the ad in /clan and join in one click."
+    click: "<accent>Click</accent> <info>: write the ad (empty: stop)"
   map:
     name: "<accent>Land map"
     lore: "<info>The chunks around you; claim several at once."
@@ -428,6 +455,8 @@ menu:
 members:
   title: "<primary>Members: <clan>"
   name: "<accent><player>"
+  online: "<success>● <info>Online <dark_gray>· <accent><server>"
+  offline: "<dark_gray>● Offline"
   owner: "Leader"
   permissions: "<count> permission(s)"
   role: "<dark_gray>▸ <info><role>"
